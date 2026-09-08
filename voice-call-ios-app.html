@@ -1,0 +1,4232 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voice Call iOS App Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #06080b;
+      --ink: #f8fafc;
+      --muted: #8f9aa8;
+      --line: rgba(255,255,255,.11);
+      --panel: #11151b;
+      --panel-2: #191f27;
+      --panel-3: #222a34;
+      --blue: #0a84ff;
+      --green: #30d158;
+      --red: #ff453a;
+      --amber: #ffd60a;
+      --cyan: #64d2ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      background:
+        radial-gradient(circle at 8% 12%, rgba(100,210,255,.2), transparent 28rem),
+        radial-gradient(circle at 90% 88%, rgba(48,209,88,.13), transparent 24rem),
+        #0a0d12;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100vw, 1100px);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 420px minmax(320px, 1fr);
+      gap: 50px;
+      align-items: start;
+      padding: 32px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #333b46, #07080a 34%, #39424f);
+      box-shadow: 0 30px 80px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.16);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background:
+        linear-gradient(180deg, rgba(10,132,255,.12), transparent 34%),
+        var(--bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .island {
+      position: absolute;
+      top: 11px;
+      left: 50%;
+      z-index: 10;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+
+    .status {
+      height: 58px;
+      padding: 12px 26px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .signal {
+      display: flex;
+      gap: 2px;
+      height: 12px;
+      align-items: end;
+    }
+
+    .signal i {
+      width: 3px;
+      border-radius: 2px;
+      background: #fff;
+      display: block;
+    }
+
+    .signal i:nth-child(1) { height: 4px; }
+    .signal i:nth-child(2) { height: 7px; }
+    .signal i:nth-child(3) { height: 9px; }
+    .signal i:nth-child(4) { height: 12px; }
+
+    .battery {
+      width: 24px;
+      height: 12px;
+      border: 1.6px solid #fff;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      background: #fff;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      inset: 2px 5px 2px 2px;
+      border-radius: 2px;
+      background: #fff;
+    }
+
+    .app {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 84px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+      min-height: 62px;
+      padding-top: 8px;
+      position: relative;
+      z-index: 20;
+    }
+
+    .avatar {
+      width: 52px;
+      height: 52px;
+      min-width: 52px;
+      border-radius: 14px;
+      border: 0;
+      color: #061018;
+      background: linear-gradient(135deg, #fff, #c7efff 48%, var(--cyan));
+      font-weight: 900;
+      padding: 0;
+      max-width: 52px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+      position: relative;
+      z-index: 21;
+    }
+
+    .icon-button,
+    .round-action,
+    .call-button {
+      border: 0;
+      color: var(--ink);
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, opacity .18s ease;
+    }
+
+    .icon-button {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--panel-2);
+    }
+
+    .icon-button:hover,
+    .round-action:hover,
+    .call-button:hover { transform: translateY(-1px); }
+
+    .glyph {
+      width: 18px;
+      height: 18px;
+      display: block;
+      position: relative;
+    }
+
+    .search::before {
+      content: "";
+      position: absolute;
+      left: 1px;
+      top: 1px;
+      width: 10px;
+      height: 10px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+    }
+
+    .search::after {
+      content: "";
+      position: absolute;
+      right: 1px;
+      bottom: 2px;
+      width: 7px;
+      height: 2px;
+      border-radius: 2px;
+      background: currentColor;
+      transform: rotate(45deg);
+    }
+
+    .plus::before,
+    .plus::after {
+      content: "";
+      position: absolute;
+      inset: 8px 2px auto;
+      height: 2px;
+      border-radius: 2px;
+      background: currentColor;
+    }
+
+    .plus::after { transform: rotate(90deg); }
+
+    h1 {
+      margin: -32px 0 6px;
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .app.locked {
+      padding-bottom: 18px;
+    }
+
+    .app.locked .app-main {
+      display: none;
+    }
+
+    .registration-screen {
+      display: none;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding: 12px 2px 14px 0;
+    }
+
+    .app.locked .registration-screen {
+      display: block;
+    }
+
+    .registration-screen::-webkit-scrollbar { width: 0; }
+
+    .registration-card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background:
+        linear-gradient(145deg, rgba(100,210,255,.16), transparent 48%),
+        var(--panel);
+    }
+
+    .registration-card .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 2px;
+    }
+
+    .registration-card .label-row strong {
+      font-size: 15px;
+    }
+
+    .registration-card .label-row span {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .registration-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .registration-grid input {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-radius: 16px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    .registration-field {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .gender-row,
+    .verification-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .gender-option,
+    .text-button,
+    .register-button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .gender-option.active {
+      color: #061018;
+      background: var(--cyan);
+      border-color: transparent;
+    }
+
+    .register-button {
+      color: #061018;
+      background: var(--green);
+      border-color: transparent;
+    }
+
+    .register-button:disabled {
+      color: rgba(255,255,255,.48);
+      background: var(--panel-3);
+      cursor: not-allowed;
+    }
+
+    .code-hint {
+      margin: -2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .terms-box {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.045);
+    }
+
+    .terms-panel {
+      display: none;
+      max-height: 148px;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: 14px;
+      color: #e8f6ff;
+      background: var(--panel-2);
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+
+    .terms-panel.show {
+      display: block;
+    }
+
+    .terms-consent {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .terms-consent input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--green);
+    }
+
+    .registration-summary {
+      display: none;
+      padding: 11px;
+      border-radius: 16px;
+      color: #e8f6ff;
+      background: var(--panel-2);
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+
+    .registration-summary.show {
+      display: block;
+    }
+
+    .screen.theme-teal {
+      --bg: #06201d;
+      --panel: #102520;
+      --panel-2: #18342d;
+      --panel-3: #24483e;
+      --blue: #5de4c7;
+      --cyan: #82f2d8;
+    }
+
+    .screen.theme-rose {
+      --bg: #1d1018;
+      --panel: #261721;
+      --panel-2: #382231;
+      --panel-3: #4b2e41;
+      --blue: #ff7a90;
+      --cyan: #ffb3c1;
+    }
+
+    .screen.font-small,
+    .screen.font-small button,
+    .screen.font-small input,
+    .screen.font-small select,
+    .screen.font-small textarea,
+    .screen.font-small label,
+    .screen.font-small p,
+    .screen.font-small span,
+    .screen.font-small strong { font-size: 12px; }
+
+    .screen.font-large,
+    .screen.font-large button,
+    .screen.font-large input,
+    .screen.font-large select,
+    .screen.font-large textarea,
+    .screen.font-large label,
+    .screen.font-large p,
+    .screen.font-large span,
+    .screen.font-large strong { font-size: 15px; }
+
+    .screen.font-small h1 { font-size: 31px; }
+    .screen.font-large h1 { font-size: 37px; }
+    .screen.font-small .subline,
+    .screen.font-small .contact-meta,
+    .screen.font-small .nearby-copy span,
+    .screen.font-small .registration-field,
+    .screen.font-small .setting-field,
+    .screen.font-small .profile-field { font-size: 11px; }
+    .screen.font-large .subline,
+    .screen.font-large .contact-meta,
+    .screen.font-large .nearby-copy span,
+    .screen.font-large .registration-field,
+    .screen.font-large .setting-field,
+    .screen.font-large .profile-field { font-size: 13px; }
+    .screen.font-small .contact-name { font-size: 15px; }
+    .screen.font-large .contact-name { font-size: 18px; }
+    .screen.font-small button,
+    .screen.font-small input,
+    .screen.font-small select { font-size: 12px; }
+    .screen.font-large button,
+    .screen.font-large input,
+    .screen.font-large select,
+    .screen.font-large textarea { font-size: 15px; }
+
+    .call-panel {
+      display: none;
+      margin-top: 8px;
+      margin-bottom: 10px;
+      padding: 16px;
+      min-height: 218px;
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      background:
+        linear-gradient(145deg, rgba(100,210,255,.18), transparent 44%),
+        linear-gradient(315deg, rgba(48,209,88,.13), transparent 48%),
+        #10151b;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .call-panel.show {
+      display: grid;
+      align-content: start;
+    }
+
+    .call-panel::after {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      right: -56px;
+      top: -58px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.14);
+      opacity: .8;
+    }
+
+    .call-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .caller {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .call-panel .caller .photo {
+      display: none;
+    }
+
+    .photo {
+      width: 58px;
+      height: 58px;
+      border-radius: 21px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      color: #061018;
+      font-weight: 950;
+      font-size: 19px;
+      background: linear-gradient(135deg, #fff, #bdefff 45%, #0a84ff);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.35);
+    }
+
+    .photo.green { background: linear-gradient(135deg, #fff, #baf5c8 44%, #30d158); }
+    .photo.amber { background: linear-gradient(135deg, #fff, #fff0a3 44%, #ffd60a); }
+    .photo.red { background: linear-gradient(135deg, #fff, #ffc3be 44%, #ff453a); }
+
+    .photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .caller strong {
+      display: block;
+      font-size: 19px;
+      line-height: 1.08;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+
+    .caller span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .timer {
+      min-width: 66px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(48,209,88,.16);
+      color: var(--green);
+      text-align: center;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .wave {
+      position: relative;
+      z-index: 1;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 16px 0 18px;
+    }
+
+    .wave i {
+      display: block;
+      flex: 1;
+      max-width: 9px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--cyan), var(--green));
+      opacity: .9;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    .wave i:nth-child(1) { height: 16px; animation-delay: -.2s; }
+    .wave i:nth-child(2) { height: 34px; animation-delay: -.45s; }
+    .wave i:nth-child(3) { height: 24px; animation-delay: -.1s; }
+    .wave i:nth-child(4) { height: 48px; animation-delay: -.3s; }
+    .wave i:nth-child(5) { height: 30px; animation-delay: -.6s; }
+    .wave i:nth-child(6) { height: 42px; animation-delay: -.2s; }
+    .wave i:nth-child(7) { height: 22px; animation-delay: -.4s; }
+    .wave i:nth-child(8) { height: 50px; animation-delay: -.7s; }
+    .wave i:nth-child(9) { height: 28px; animation-delay: -.15s; }
+    .wave i:nth-child(10) { height: 38px; animation-delay: -.5s; }
+    .wave i:nth-child(11) { height: 18px; animation-delay: -.22s; }
+    .wave i:nth-child(12) { height: 44px; animation-delay: -.35s; }
+    .wave i:nth-child(13) { height: 26px; animation-delay: -.55s; }
+    .wave i:nth-child(14) { height: 36px; animation-delay: -.1s; }
+    .wave i:nth-child(15) { height: 20px; animation-delay: -.66s; }
+
+    @keyframes pulse {
+      0%, 100% { transform: scaleY(.62); opacity: .58; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    .call-actions {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .round-action {
+      height: 56px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.1);
+      display: grid;
+      place-items: center;
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .round-action.active {
+      background: #f7fbff;
+      color: #061018;
+    }
+
+    .round-action.end {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .incoming-actions {
+      position: relative;
+      z-index: 1;
+      display: none;
+      gap: 14px;
+      margin-top: 10px;
+    }
+
+    .call-panel.incoming .call-head,
+    .call-panel.incoming .wave,
+    .call-panel.incoming .call-actions {
+      display: none;
+    }
+
+    .call-panel.incoming .incoming-actions {
+      display: grid;
+    }
+
+    .incoming-card {
+      display: grid;
+      justify-items: center;
+      gap: 9px;
+      text-align: center;
+    }
+
+    .incoming-card .photo {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      font-size: 22px;
+    }
+
+    .incoming-card strong {
+      font-size: 20px;
+      line-height: 1.1;
+    }
+
+    .incoming-controls {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 54px;
+      gap: 10px;
+      align-items: center;
+      margin-top: 2px;
+    }
+
+    .slide-answer {
+      display: grid;
+      gap: 5px;
+      padding: 8px 12px;
+      border-radius: 20px;
+      color: #061018;
+      background: rgba(48,209,88,.92);
+      font-weight: 950;
+    }
+
+    .slide-answer span {
+      font-size: 13px;
+    }
+
+    .slide-answer input {
+      width: 100%;
+      accent-color: #061018;
+    }
+
+    .incoming-actions button {
+      min-height: 50px;
+      border: 0;
+      border-radius: 50%;
+      color: #061018;
+      font-size: 24px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .reject-call {
+      color: #fff !important;
+      background: var(--red);
+    }
+
+    .accept-call {
+      background: var(--green);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin: 14px 0 12px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+    }
+
+    .segmented button {
+      border: 0;
+      border-radius: 12px;
+      min-height: 32px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .segmented button.active {
+      color: #061018;
+      background: var(--ink);
+    }
+
+    .segmented.hidden {
+      display: none;
+    }
+
+    .content {
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-right: 2px;
+    }
+
+    .content::-webkit-scrollbar { width: 0; }
+
+    .pane { display: none; }
+    .pane.active { display: block; }
+
+    .page-tracker {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .page-tracker.hidden {
+      display: none;
+    }
+
+    .page-tracker button {
+      min-height: 26px;
+      border: 0;
+      color: var(--cyan);
+      background: transparent;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .create-group-button {
+      min-height: 38px;
+      border: 0;
+      border-radius: 15px;
+      color: #061018;
+      background: var(--cyan);
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .page-tracker button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .nearby-scan {
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      margin-bottom: 4px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 24% 50%, rgba(100,210,255,.18), transparent 5rem),
+        var(--panel);
+    }
+
+    .radar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      background: rgba(10,132,255,.14);
+      border: 1px solid rgba(100,210,255,.32);
+    }
+
+    .radar::before,
+    .radar::after {
+      content: "";
+      position: absolute;
+      inset: 11px;
+      border-radius: 50%;
+      border: 1px solid rgba(100,210,255,.36);
+    }
+
+    .radar::after {
+      inset: 23px;
+      background: var(--cyan);
+      box-shadow: 0 0 18px rgba(100,210,255,.8);
+    }
+
+    .sweep {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 50%;
+      height: 2px;
+      transform-origin: left center;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+      animation: sweep 2.1s linear infinite;
+    }
+
+    @keyframes sweep {
+      to { transform: rotate(360deg); }
+    }
+
+    .nearby-copy strong {
+      display: block;
+      font-size: 15px;
+      line-height: 1.2;
+    }
+
+    .nearby-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .range-control {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 8px;
+      padding-top: 3px;
+    }
+
+    .range-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .range-head strong {
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .range-control input[type="range"] {
+      width: 100%;
+      accent-color: var(--cyan);
+    }
+
+    .range-scale {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .empty-nearby {
+      margin: 10px 0 2px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .contact,
+    .history-item {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .contact > span:nth-child(2),
+    .history-item > span:nth-child(2) {
+      min-width: 0;
+    }
+
+    .contact:last-child,
+    .history-item:last-child { border-bottom: 0; }
+
+    .contact:focus,
+    .history-item:focus { outline: none; }
+
+    .contact:focus-visible,
+    .history-item:focus-visible {
+      border-radius: 18px;
+      box-shadow: inset 0 0 0 2px rgba(100,210,255,.5);
+    }
+
+    .contact-name {
+      display: block;
+      font-size: 16px;
+      font-weight: 850;
+      line-height: 1.1;
+    }
+
+    .contact-meta {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 165px;
+    }
+
+    .contact.offline {
+      opacity: .58;
+    }
+
+    .contact.blocked,
+    .friend-card.blocked {
+      opacity: .52;
+    }
+
+    .contact,
+    .history-item {
+      transition: transform .2s ease, background .2s ease, border-radius .2s ease;
+      touch-action: pan-y;
+    }
+
+    .contact.swiped,
+    .history-item.swiped {
+      transform: translateX(-18px);
+      border-radius: 18px;
+      background: rgba(100,210,255,.08);
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .swipe-actions {
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: -2px 0 8px 60px;
+    }
+
+    .swipe-actions.show {
+      display: grid;
+    }
+
+    .screen.hidden-mode .swipe-actions {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .screen.hidden-mode .swipe-call {
+      display: none;
+    }
+
+    .screen.hidden-mode .friend-actions {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .screen.hidden-mode .call-friend,
+    .screen.hidden-mode .group-call {
+      display: none;
+    }
+
+    .swipe-actions button {
+      min-height: 34px;
+      border: 0;
+      border-radius: 14px;
+      color: #061018;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .swipe-actions button:disabled,
+    .friend-actions button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .swipe-call { background: var(--green); }
+    .swipe-message { background: var(--amber); }
+    .swipe-block {
+      color: #fff !important;
+      background: var(--red);
+    }
+    .swipe-delete {
+      color: #fff !important;
+      background: rgba(142,142,147,.85);
+    }
+
+    .call-button {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(48,209,88,.17);
+      color: var(--green);
+      font-size: 20px;
+    }
+
+    .distance {
+      display: grid;
+      justify-items: end;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .distance::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(48,209,88,.8);
+    }
+
+    .status-pill {
+      justify-self: end;
+      display: inline-grid;
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 5px;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 850;
+      color: #061018;
+      background: var(--green);
+      white-space: nowrap;
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: .72;
+    }
+
+    .status-pill.calling {
+      background: var(--amber);
+    }
+
+    .status-pill.offline {
+      color: #c4cbd4;
+      background: rgba(255,255,255,.12);
+    }
+
+    .status-pill.blocked {
+      color: #fff;
+      background: rgba(255,69,58,.72);
+    }
+
+    .friend-compose {
+      display: grid;
+      grid-template-columns: 1fr 78px;
+      gap: 8px;
+      padding: 10px;
+      margin-bottom: 6px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--panel);
+    }
+
+    .friend-compose input {
+      min-width: 0;
+      height: 40px;
+      border: 0;
+      border-radius: 14px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    .search-card,
+    .group-card,
+    .group-form,
+    .settings-card,
+    .profile-card {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--panel);
+    }
+
+    .search-card input,
+    .group-form input,
+    .profile-card input,
+    .profile-card select,
+    .settings-card select {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-radius: 16px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    .profile-avatar-editor {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 18px;
+      background: var(--panel-2);
+    }
+
+    .profile-avatar-preview {
+      width: 68px;
+      height: 68px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: #061018;
+      background: linear-gradient(135deg, #fff, #c7efff 48%, var(--cyan));
+      font-weight: 950;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .profile-avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-avatar-tools {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .profile-avatar-tools input {
+      min-height: auto;
+      padding: 9px;
+      font-size: 12px;
+    }
+
+    .avatar-file-input {
+      display: none;
+    }
+
+    .search-actions,
+    .profile-actions,
+    .group-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .search-card > button,
+    .group-form button,
+    .profile-card button,
+    .settings-card button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 16px;
+      color: #061018;
+      background: var(--cyan);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .setting-field,
+    .group-field,
+    .profile-field {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .profile-gender-row,
+    .group-member-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .profile-gender-row {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .profile-gender-option {
+      min-height: 42px;
+      border: 0;
+      border-radius: 16px;
+      color: var(--muted) !important;
+      background: var(--panel-2) !important;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+    }
+
+    .profile-gender-option.active {
+      color: #061018 !important;
+      background: var(--cyan) !important;
+      box-shadow: none;
+    }
+
+    .profile-gender-option:not(.active) {
+      opacity: .72;
+    }
+
+    .avatar-crop-controls {
+      grid-column: 1 / -1;
+      display: none;
+      gap: 8px;
+      padding-top: 4px;
+    }
+
+    .avatar-crop-controls.show {
+      display: grid;
+    }
+
+    .avatar-crop-controls label {
+      display: grid;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .avatar-crop-controls input {
+      width: 100%;
+      accent-color: var(--cyan);
+    }
+
+    .friend-compose button,
+    .friend-actions button {
+      border: 0;
+      border-radius: 14px;
+      color: #061018;
+      background: var(--cyan);
+      font-size: 13px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .friend-card {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      transition: transform .2s ease, background .2s ease, border-radius .2s ease, padding .2s ease;
+      touch-action: pan-y;
+    }
+
+    .friend-card.swiped {
+      transform: translateX(-18px);
+      border-radius: 18px;
+      background: rgba(100,210,255,.08);
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .group-card {
+      grid-template-columns: 48px minmax(0, 1fr);
+      align-items: center;
+      padding: 12px;
+      margin-top: 8px;
+      transition: transform .2s ease, background .2s ease;
+      touch-action: pan-y;
+    }
+
+    .group-card.swiped {
+      transform: translateX(-18px);
+      background: rgba(100,210,255,.08);
+    }
+
+    .group-meta {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .group-form.hidden {
+      display: none;
+    }
+
+    .group-member-list label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 13px;
+      background: var(--panel-2);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .group-swipe-actions {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 0 0 8px 60px;
+    }
+
+    .screen.hidden-mode .group-swipe-actions {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .group-swipe-actions.show {
+      display: grid;
+    }
+
+    .group-swipe-actions button {
+      min-height: 34px;
+      border: 0;
+      border-radius: 14px;
+      color: #061018;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .group-call { background: var(--green); }
+    .group-edit { background: var(--cyan); }
+    .group-delete {
+      color: #fff !important;
+      background: var(--red);
+    }
+
+    .friend-card:last-child { border-bottom: 0; }
+
+    .friend-body {
+      min-width: 0;
+    }
+
+    .friend-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .friend-top strong {
+      display: block;
+      font-size: 16px;
+      line-height: 1.1;
+    }
+
+    .friend-note {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .friend-actions {
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .friend-card.swiped .friend-actions {
+      display: grid;
+    }
+
+    .friend-actions button {
+      min-height: 34px;
+      background: rgba(100,210,255,.92);
+    }
+
+    .friend-actions button:disabled {
+      opacity: .45;
+      cursor: default;
+    }
+
+    .friend-actions .remove-friend {
+      color: #fff;
+      background: rgba(255,69,58,.8);
+    }
+
+    .friend-actions .call-friend {
+      background: var(--green);
+    }
+
+    .friend-actions .block-friend {
+      color: #fff;
+      background: rgba(142,142,147,.85);
+    }
+
+    .confirm-modal {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0,0,0,.54);
+    }
+
+    .confirm-modal.hidden {
+      display: none;
+    }
+
+    .confirm-card {
+      display: grid;
+      gap: 12px;
+      width: 100%;
+      max-width: 292px;
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: 0 24px 70px rgba(0,0,0,.45);
+    }
+
+    .confirm-card strong {
+      font-size: 17px;
+      line-height: 1.25;
+    }
+
+    .confirm-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .report-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .report-form label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .report-form input,
+    .report-form textarea {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    .report-form textarea {
+      min-height: 92px;
+      resize: none;
+      line-height: 1.45;
+    }
+
+    .confirm-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .confirm-actions button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 16px;
+      color: #061018;
+      background: var(--cyan);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .confirm-actions .danger {
+      color: #fff;
+      background: var(--red);
+    }
+
+    .message-modal {
+      place-items: end center;
+      padding-bottom: 26px;
+    }
+
+    .message-card {
+      max-width: 320px;
+    }
+
+    .message-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .message-history {
+      display: grid;
+      gap: 8px;
+      max-height: 152px;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.045);
+    }
+
+    .message-history.empty {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .message-bubble {
+      display: grid;
+      gap: 3px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: var(--panel-2);
+    }
+
+    .message-bubble.outgoing {
+      background: rgba(100,210,255,.16);
+      border: 1px solid rgba(100,210,255,.22);
+    }
+
+    .message-bubble span {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 850;
+    }
+
+    .message-bubble strong {
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .message-form textarea {
+      width: 100%;
+      min-height: 100px;
+      border: 0;
+      border-radius: 16px;
+      padding: 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      line-height: 1.45;
+      resize: none;
+      outline: none;
+    }
+
+    .message-actions {
+      display: grid;
+      grid-template-columns: 46px 1fr 1fr;
+      gap: 8px;
+    }
+
+    .message-actions button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 16px;
+      color: #061018;
+      background: var(--cyan);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .message-actions .voice-input.active {
+      color: #fff;
+      background: var(--red);
+    }
+
+    .history-state {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      text-align: right;
+    }
+
+    .missed { color: var(--red); }
+
+    .dial-display {
+      height: 76px;
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+      font-weight: 750;
+      letter-spacing: 1px;
+      color: var(--ink);
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .key {
+      height: 64px;
+      border: 0;
+      border-radius: 24px;
+      background: var(--panel-2);
+      color: var(--ink);
+      font-size: 25px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .key span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 850;
+      letter-spacing: 1px;
+    }
+
+    .dial-actions {
+      display: grid;
+      grid-template-columns: 1fr 74px 1fr;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .dial-call {
+      width: 72px;
+      height: 56px;
+      border: 0;
+      border-radius: 24px;
+      background: var(--green);
+      color: #061018;
+      font-size: 25px;
+      cursor: pointer;
+    }
+
+    .delete {
+      justify-self: start;
+      width: 52px;
+      height: 44px;
+      border: 0;
+      border-radius: 18px;
+      background: var(--panel-2);
+      color: var(--muted);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 5;
+      height: 74px;
+      padding-bottom: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line);
+      background: rgba(14,17,21,.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav.locked {
+      display: none;
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 780;
+      cursor: pointer;
+    }
+
+    .nav button.active { color: var(--blue); }
+
+    .nav-symbol {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .brief {
+      max-width: 520px;
+    }
+
+    .brief h2 {
+      margin: 0 0 16px;
+      font-size: clamp(30px, 4vw, 54px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .brief p {
+      margin: 0 0 22px;
+      color: #b6c0cc;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .spec {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .spec b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .spec span {
+      color: #a9b3bf;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 860px) {
+      body { place-items: start center; }
+
+      .stage {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 24px;
+        padding: 18px 14px 28px;
+      }
+
+      .phone {
+        width: min(390px, calc(100vw - 28px));
+        height: min(844px, calc(100vh - 28px));
+        min-height: 720px;
+      }
+
+      .brief {
+        width: min(390px, calc(100vw - 28px));
+      }
+
+      .specs { grid-template-columns: 1fr; }
+    }
+    body.portfolio-watermark::after {
+      content: "Crovantix";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      z-index: 9999;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      color: rgba(85, 215, 255, .1);
+      font-size: clamp(64px, 18vw, 168px);
+      font-weight: 950;
+      letter-spacing: 0;
+      white-space: nowrap;
+      text-shadow: 0 0 34px rgba(85, 215, 255, .18);
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="iPhone voice call app prototype">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status">
+          <span>9:41</span>
+          <span class="status-icons" aria-hidden="true">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span>5G</span>
+            <span class="battery"></span>
+          </span>
+        </div>
+
+        <div class="app locked" id="appRoot">
+          <div class="toolbar">
+            <button class="avatar" id="accountButton" title="使用者名稱">Clay Tseng</button>
+          </div>
+
+          <h1>Voice</h1>
+          <p class="subline" id="statusText">通話（通話中）</p>
+
+          <section class="registration-screen" id="registrationScreen">
+            <div class="registration-card">
+              <div class="label-row">
+                <strong>首次註冊</strong>
+                <span id="registerStatus">尚未完成</span>
+              </div>
+              <div class="registration-grid">
+                <div class="profile-avatar-editor">
+                  <div class="profile-avatar-preview" id="registerAvatarPreview">CT</div>
+                  <label class="registration-field">選擇頭像
+                    <input class="avatar-file-input" id="registerAvatarInput" type="file" accept="image/*">
+                  </label>
+                  <div class="avatar-crop-controls" id="registerAvatarCropControls">
+                    <label>縮放 <input class="avatar-crop" data-crop="zoom" type="range" min="1" max="2" step="0.05" value="1"></label>
+                    <label>水平 <input class="avatar-crop" data-crop="x" type="range" min="0" max="100" value="50"></label>
+                    <label>垂直 <input class="avatar-crop" data-crop="y" type="range" min="0" max="100" value="50"></label>
+                  </div>
+                </div>
+                <input id="registerName" value="Clay Tseng" aria-label="姓名" placeholder="姓名">
+                <input id="registerPhone" value="0912-345-678" aria-label="電話" placeholder="電話" inputmode="tel">
+                <input id="registerEmail" value="clay.tseng@example.com" aria-label="Email" placeholder="Email" inputmode="email">
+                <div class="gender-row" aria-label="性別">
+                  <button class="gender-option active" type="button" data-gender="男">男</button>
+                  <button class="gender-option" type="button" data-gender="女">女</button>
+                </div>
+                <label class="registration-field" for="registerAge">年齡
+                  <input id="registerAge" value="32" aria-label="年齡" placeholder="請輸入年齡" inputmode="numeric">
+                </label>
+                <div class="verification-row">
+                  <input id="verificationCodeInput" maxlength="4" aria-label="手機驗證碼" placeholder="輸入 4 位數驗證碼" inputmode="numeric">
+                  <button class="text-button" id="resendCodeButton" type="button">重發</button>
+                </div>
+                <p class="code-hint" id="verificationHint">已發送 4 位數驗證碼到手機。</p>
+                <div class="terms-box">
+                  <button class="text-button" id="toggleTermsButton" type="button">展開使用條款、隱私權政策與免責聲明</button>
+                  <div class="terms-panel" id="termsPanel">附近語音通話 App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「附近語音通話 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供附近使用者之語音通話、即時互動、聊天交流、配對及相關社交功能服務，所有內容僅供一般社交與互動用途。
+
+二、使用風險與免責聲明
+
+本 App 僅提供使用者之間語音通話與互動平台服務，本公司並非任何交友、交易、約會或其他私人行為之參與者或保證人。
+
+本公司無法保證使用者身分之真實性、通話內容之安全性、合法性、完整性或可靠性，使用者應自行判斷並承擔與其他使用者互動、交友或通話所產生之一切風險與責任。
+
+使用者因交友、通話、線下見面、金錢往來、資料提供、交易或其他私人行為所產生之任何損害、糾紛、詐騙或法律責任，均與本公司無涉，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+三、通話品質聲明
+
+本 App 之語音通話品質、延遲、中斷、雜音或連線異常等情形，可能受雙方裝置效能、網路環境、電信服務、地理位置或第三方系統影響。
+
+本公司不保證語音服務之穩定性、即時性、持續性或完全無錯誤。
+
+四、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+* 使用者帳號資訊
+* Email
+* 裝置資訊
+* IP 位址
+* 使用紀錄
+* 語音互動相關資料
+* 地理位置資訊
+* 崩潰紀錄與分析資料
+
+五、資料用途
+
+蒐集資料主要用於：
+
+* 提供語音通話服務
+* 使用者配對功能
+* 改善使用體驗
+* 系統安全維護
+* 客服支援
+* 防止詐騙、濫用或違法行為
+* 提升語音與連線品質
+
+六、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+* OpenAI
+* Firebase
+* Google Analytics
+* 語音通話服務
+* 雲端儲存服務
+* 地理定位服務
+
+部分資料可能因服務需求而傳輸至第三方服務供應商。
+
+七、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、語音通話或儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及個人資訊，避免向他人提供敏感資料。
+
+八、使用者責任
+
+使用者不得利用本 App 從事任何違法、騷擾、詐騙、散布不當內容、侵犯他人權益或其他不法行為。
+
+若因使用者違法或不當行為導致任何損害或法律責任，應由使用者自行負責。
+
+九、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、資料及相關內容，均屬本公司或合法授權人所有。
+
+未經授權不得重製、修改、散布、反向工程、破解或用於商業用途。
+
+十、使用者權利
+
+使用者得依法請求查詢、更正或刪除其個人資料。
+
+十一、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利，修改後內容將公布於本 App，使用者繼續使用即視為同意修改內容。</div>
+                  <label class="terms-consent">
+                    <input id="agreeTerms" type="checkbox">
+                    我已打開並同意使用條款、隱私權政策與免責聲明
+                  </label>
+                </div>
+                <button class="register-button" id="completeRegistration" type="button" disabled>完成註冊</button>
+                <div class="registration-summary" id="registrationSummary"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="call-panel app-main" aria-label="active call">
+            <div class="call-head">
+              <div class="caller">
+                <span class="photo" id="activePhoto">JL</span>
+                <span>
+                  <strong id="activeName">Jamie Lin</strong>
+                  <span id="activeMeta">Mobile · Taipei</span>
+                </span>
+              </div>
+              <span class="timer" id="timer">03:18</span>
+            </div>
+            <div class="wave" aria-label="voice activity">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div class="call-actions">
+              <button class="round-action" data-toggle="record" title="錄音">● 錄音</button>
+              <button class="round-action end" id="endCall" title="掛話">☎</button>
+            </div>
+            <div class="incoming-actions">
+              <div class="incoming-card">
+                <span class="photo" id="incomingPhoto">NH</span>
+                <strong id="incomingName">Nora Hsu</strong>
+                <div class="incoming-controls">
+                  <label class="slide-answer">
+                    <span>☎ 滑動接聽</span>
+                    <input id="acceptCallSlider" type="range" min="0" max="100" value="0" aria-label="滑動接聽">
+                  </label>
+                  <button class="reject-call" id="rejectCall" type="button" title="拒絕接聽">☎</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div class="segmented app-main" role="tablist" aria-label="call sections">
+            <button class="active" data-pane="contacts">附近</button>
+            <button data-pane="recent">最近</button>
+            <button data-pane="dial">收尋</button>
+          </div>
+
+          <div class="page-tracker app-main hidden" id="pageTracker">
+            <button id="prevPageButton" type="button">上一頁&lt;</button>
+            <button id="nextPageButton" type="button">下一頁&gt;</button>
+          </div>
+
+          <section class="content app-main">
+            <div class="pane active" id="contacts">
+              <div class="nearby-scan" aria-label="nearby scan status">
+                <span class="radar"><span class="sweep"></span></span>
+                <span class="nearby-copy">
+                  <strong>搜尋附近已安裝 Voice 的人</strong>
+                  <span>100 km 範圍搜尋中 · 線上 4 · 通話 2 · 離線 2</span>
+                </span>
+                <label class="range-control">
+                  <span class="range-head"><span>搜尋距離</span><strong id="nearbyRangeValue">100 km</strong></span>
+                  <input id="nearbyRange" type="range" min="100" max="100000" step="100" value="100000">
+                  <span class="range-scale"><span>100 m</span><span>100 km</span></span>
+                </label>
+              </div>
+              <div id="nearbyList">
+                <button class="contact" data-name="Mina Chen" data-meta="1.2 km · 女 · 線上（已開啟app）" data-initials="MC" data-tone="green" data-presence="online" data-gender="女">
+                  <span class="photo green">MC</span>
+                  <span><span class="contact-name">Mina Chen</span><span class="contact-meta">1.2 km · 女 · 線上（已開啟app）</span></span>
+                  <span class="status-pill online">線上</span>
+                </button>
+                <button class="contact" data-name="Oliver Wang" data-meta="3.8 km · 男 · 通話（通話中）" data-initials="OW" data-tone="amber" data-presence="calling" data-gender="男">
+                  <span class="photo amber">OW</span>
+                  <span><span class="contact-name">Oliver Wang</span><span class="contact-meta">3.8 km · 男 · 通話（通話中）</span></span>
+                  <span class="status-pill calling">通話</span>
+                </button>
+                <button class="contact offline" data-name="Avery Liu" data-meta="6.4 km · 女 · 離線（未開啟app）" data-initials="AL" data-tone="red" data-presence="offline" data-gender="女">
+                  <span class="photo red">AL</span>
+                  <span><span class="contact-name">Avery Liu</span><span class="contact-meta">6.4 km · 女 · 離線（未開啟app）</span></span>
+                  <span class="status-pill offline">離線</span>
+                </button>
+                <button class="contact" data-name="Jamie Lin" data-meta="9.7 km · 男 · 線上（已開啟app）" data-initials="JL" data-tone="" data-presence="online" data-gender="男">
+                  <span class="photo">JL</span>
+                  <span><span class="contact-name">Jamie Lin</span><span class="contact-meta">9.7 km · 男 · 線上（已開啟app）</span></span>
+                  <span class="status-pill online">線上</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="pane" id="recent">
+              <button class="history-item" data-name="Nora Hsu" data-meta="女 · Incoming · 8 min ago" data-initials="NH" data-tone="green" data-presence="incoming" data-gender="女">
+                <span class="photo green">NH</span>
+                <span><span class="contact-name">Nora Hsu</span><span class="contact-meta">女 · Incoming · 8 min ago</span></span>
+                <span class="history-state">12:42</span>
+              </button>
+              <button class="history-item" data-name="Sam Wu" data-meta="男 · Missed · Yesterday" data-initials="SW" data-tone="red" data-gender="男">
+                <span class="photo red">SW</span>
+                <span><span class="contact-name">Sam Wu</span><span class="contact-meta missed">男 · Missed · Yesterday</span></span>
+                <span class="history-state missed">未接</span>
+              </button>
+              <button class="history-item" data-name="Team Room" data-meta="Conference · Monday" data-initials="TR" data-tone="amber">
+                <span class="photo amber">TR</span>
+                <span><span class="contact-name">Team Room</span><span class="contact-meta">Conference · Monday</span></span>
+                <span class="history-state">31:09</span>
+              </button>
+            </div>
+
+            <div class="pane" id="dial">
+              <div class="search-card">
+                <label class="profile-field">收尋對方姓名
+                  <input id="searchNameInput" type="text" value="Mina Chen" placeholder="輸入姓名收尋">
+                </label>
+                <button id="searchUserButton" type="button">搜尋</button>
+                <div id="searchResults"></div>
+              </div>
+            </div>
+
+            <div class="pane" id="friends">
+              <div class="friend-compose">
+                <input id="friendNameInput" type="text" placeholder="輸入好友名稱">
+                <button id="addFriend" type="button">加入</button>
+              </div>
+              <div id="friendList">
+                <article class="friend-card" data-friend="Mina Chen">
+                  <span class="photo green">MC</span>
+                  <span class="friend-body">
+                    <span class="friend-top"><strong>Mina Chen</strong><span class="status-pill online">線上</span></span>
+                    <span class="friend-note">留言：等一下打給你</span>
+                    <span class="friend-actions">
+                      <button type="button" class="call-friend">通話</button>
+                      <button type="button" class="message-friend">留言</button>
+                      <button type="button" class="block-friend">封鎖</button>
+                      <button type="button" class="remove-friend">刪除</button>
+                    </span>
+                  </span>
+                </article>
+                <article class="friend-card" data-friend="Oliver Wang">
+                  <span class="photo amber">OW</span>
+                  <span class="friend-body">
+                    <span class="friend-top"><strong>Oliver Wang</strong><span class="status-pill calling">通話</span></span>
+                    <span class="friend-note">留言：會議後回電</span>
+                    <span class="friend-actions">
+                      <button type="button" class="call-friend">通話</button>
+                      <button type="button" class="message-friend">留言</button>
+                      <button type="button" class="block-friend">封鎖</button>
+                      <button type="button" class="remove-friend">刪除</button>
+                    </span>
+                  </span>
+                </article>
+              </div>
+            </div>
+
+            <div class="pane" id="groups">
+              <button class="create-group-button" id="openGroupForm" type="button">＋ 建立群組</button>
+              <div class="group-form hidden" id="groupForm">
+                <label class="group-field">群組名稱
+                  <input id="groupNameInput" type="text" value="Weekend Call" placeholder="輸入群組名稱">
+                </label>
+                <div class="profile-avatar-editor">
+                  <div class="profile-avatar-preview" id="groupAvatarPreview">WC</div>
+                  <label class="group-field">群組頭像
+                    <input class="avatar-file-input" id="groupAvatarInput" type="file" accept="image/*">
+                  </label>
+                </div>
+                <div class="group-field">挑選好友為群組成員
+                  <div class="group-member-list" id="groupMemberList"></div>
+                </div>
+                <div class="group-actions">
+                  <button id="createGroupButton" type="button">建立</button>
+                  <button id="cancelGroupButton" type="button">取消</button>
+                </div>
+              </div>
+              <div id="groupList">
+                <article class="group-card" data-group="Design Team" data-members="Mina Chen, Oliver Wang" data-avatar="DT">
+                  <span class="photo green">DT</span>
+                  <span>
+                    <strong>Design Team</strong>
+                    <span class="group-meta">Mina Chen, Oliver Wang</span>
+                  </span>
+                </article>
+              </div>
+            </div>
+
+            <div class="pane" id="profile">
+              <div class="profile-card">
+                <div class="profile-avatar-editor">
+                  <div class="profile-avatar-preview" id="profileAvatarPreview">CT</div>
+                  <label class="profile-field">編輯頭像
+                    <input class="avatar-file-input" id="profileAvatarInput" type="file" accept="image/*">
+                  </label>
+                  <div class="avatar-crop-controls" id="profileAvatarCropControls">
+                    <label>縮放 <input class="avatar-crop" data-crop="zoom" type="range" min="1" max="2" step="0.05" value="1"></label>
+                    <label>水平 <input class="avatar-crop" data-crop="x" type="range" min="0" max="100" value="50"></label>
+                    <label>垂直 <input class="avatar-crop" data-crop="y" type="range" min="0" max="100" value="50"></label>
+                  </div>
+                </div>
+                <label class="profile-field">使用者姓名
+                  <input id="profileNameInput" type="text" value="Clay Tseng">
+                </label>
+                <label class="profile-field">電話
+                  <input id="profilePhoneInput" type="tel" value="0912-345-678">
+                </label>
+                <label class="profile-field">Email
+                  <input id="profileEmailInput" type="email" value="clay.tseng@example.com">
+                </label>
+                <div class="profile-field">性別
+                  <div class="profile-gender-row" aria-label="個人資料性別">
+                    <button class="profile-gender-option active" type="button" data-profile-gender="男">男</button>
+                    <button class="profile-gender-option" type="button" data-profile-gender="女">女</button>
+                  </div>
+                </div>
+                <label class="profile-field">年齡
+                  <input id="profileAgeInput" type="number" min="1" value="32" placeholder="請輸入年齡">
+                </label>
+                <label class="profile-field">使用者狀態
+                  <select id="visibilitySelect">
+                    <option value="visible">顯示在線</option>
+                    <option value="hidden">隱藏（顯示離線，只接收留言）</option>
+                  </select>
+                </label>
+                <div class="profile-actions">
+                  <button id="saveProfileButton" type="button">儲存資料</button>
+                  <button id="backToContactsButton" type="button">返回通話</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="pane" id="settings">
+              <div class="settings-card">
+                <label class="setting-field">App 背景顏色
+                  <select id="themeSelect">
+                    <option value="dark">深色</option>
+                    <option value="teal">青綠</option>
+                    <option value="rose">柔粉</option>
+                  </select>
+                </label>
+                <label class="setting-field">字體大小
+                  <select id="fontSizeSelect">
+                    <option value="small">小</option>
+                    <option value="normal" selected>中</option>
+                    <option value="large">大</option>
+                  </select>
+                </label>
+                <label class="setting-field">語言
+                  <select id="languageSelect">
+                    <option value="zh-Hant">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                </label>
+              </div>
+              <div class="settings-card">
+                <label class="setting-field">聯繫客服
+                  <span>問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。</span>
+                </label>
+                <label class="setting-field">Email
+                  <input value="support@app-service.example" readonly>
+                </label>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <nav class="nav locked" id="mainNav" aria-label="main navigation">
+          <button class="active" data-nav-pane="contacts"><span class="nav-symbol">☎</span>通話</button>
+          <button data-nav-pane="friends"><span class="nav-symbol">♡</span>好友</button>
+          <button data-nav-pane="groups"><span class="nav-symbol">◎</span>群組</button>
+          <button data-nav-pane="settings"><span class="nav-symbol">⚙</span>設定</button>
+        </nav>
+
+        <div class="confirm-modal hidden" id="confirmModal" role="dialog" aria-modal="true" aria-label="確認視窗">
+          <div class="confirm-card">
+            <strong id="confirmTitle">確認操作</strong>
+            <p id="confirmMessage">請確認是否繼續。</p>
+            <div class="confirm-actions">
+              <button id="confirmCancel" type="button">取消</button>
+              <button class="danger" id="confirmOk" type="button">確認</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="confirm-modal hidden" id="reportModal" role="dialog" aria-modal="true" aria-label="檢舉視窗">
+          <div class="confirm-card">
+            <strong id="reportTitle">檢舉使用者</strong>
+            <p id="reportIntro">請填寫檢舉原因，客服會協助後續處理。</p>
+            <div class="report-form">
+              <label>使用者 Email
+                <input id="reportUserEmail" type="email" readonly>
+              </label>
+              <label>客服 Email
+                <input id="reportSupportEmail" type="email" value="support@voice-call.app" readonly>
+              </label>
+              <label>檢舉原因
+                <textarea id="reportReason" placeholder="請輸入檢舉原因"></textarea>
+              </label>
+              <div class="confirm-actions">
+                <button id="reportCancel" type="button">取消</button>
+                <button class="danger" id="reportSend" type="button">送出</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="confirm-modal message-modal hidden" id="messageModal" role="dialog" aria-modal="true" aria-label="留言視窗">
+          <div class="confirm-card message-card">
+            <strong id="messageTitle">留言</strong>
+            <p id="messageIntro">輸入要傳送給對方的留言。</p>
+            <div class="message-form">
+              <div class="message-history empty" id="messageHistory">尚無留言歷史</div>
+              <textarea id="messageText" placeholder="請輸入留言"></textarea>
+              <div class="message-actions">
+                <button class="voice-input" id="messageVoiceButton" type="button" title="語音輸入">🎙</button>
+                <button id="messageCancel" type="button">取消</button>
+                <button id="messageSend" type="button">送出</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="brief">
+      <h2>iOS 語音通話 App 設計稿</h2>
+      <p>一個手機優先的通話工具原型，第一屏直接呈現通話狀態、音訊控制、附近已安裝 app 的使用者與姓名輸入搜尋，適合延伸成近距離語音、活動現場、校園或辦公室通話 app。</p>
+      <div class="specs">
+        <div class="spec"><b>主流程</b><span>目前通話、附近使用者搜尋、一鍵撥出、最近通話、姓名輸入搜尋。</span></div>
+        <div class="spec"><b>操作狀態</b><span>靜音、擴音、保留、結束通話都有可視化切換。</span></div>
+        <div class="spec"><b>iOS 風格</b><span>深色介面、Dynamic Island 外觀、底部導覽與大型觸控目標。</span></div>
+        <div class="spec"><b>可擴充</b><span>可接 Nearby Interaction、藍牙、區域網路探索、WebRTC 或 CallKit。</span></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const appRoot = document.querySelector("#appRoot");
+    const mainNav = document.querySelector("#mainNav");
+    const registerAvatarPreview = document.querySelector("#registerAvatarPreview");
+    const registerAvatarInput = document.querySelector("#registerAvatarInput");
+    const registerAvatarCropControls = document.querySelector("#registerAvatarCropControls");
+    const registerName = document.querySelector("#registerName");
+    const registerPhone = document.querySelector("#registerPhone");
+    const registerEmail = document.querySelector("#registerEmail");
+    const registerAge = document.querySelector("#registerAge");
+    const registerStatus = document.querySelector("#registerStatus");
+    const genderOptions = [...document.querySelectorAll(".gender-option")];
+    const verificationCodeInput = document.querySelector("#verificationCodeInput");
+    const verificationHint = document.querySelector("#verificationHint");
+    const resendCodeButton = document.querySelector("#resendCodeButton");
+    const toggleTermsButton = document.querySelector("#toggleTermsButton");
+    const termsPanel = document.querySelector("#termsPanel");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const completeRegistration = document.querySelector("#completeRegistration");
+    const registrationSummary = document.querySelector("#registrationSummary");
+    const historyItems = [...document.querySelectorAll(".history-item")];
+    const nearbyList = document.querySelector("#nearbyList");
+    const nearbyRange = document.querySelector("#nearbyRange");
+    const nearbyRangeValue = document.querySelector("#nearbyRangeValue");
+    const segmented = document.querySelector(".segmented");
+    const paneButtons = [...document.querySelectorAll(".segmented button")];
+    const navButtons = [...document.querySelectorAll(".nav button[data-nav-pane]")];
+    const panes = [...document.querySelectorAll(".pane")];
+    const actionButtons = [...document.querySelectorAll(".round-action[data-toggle]")];
+    const callPanel = document.querySelector(".call-panel");
+    const activePhoto = document.querySelector("#activePhoto");
+    const activeName = document.querySelector("#activeName");
+    const activeMeta = document.querySelector("#activeMeta");
+    const statusText = document.querySelector("#statusText");
+    const timer = document.querySelector("#timer");
+    const endCall = document.querySelector("#endCall");
+    const rejectCall = document.querySelector("#rejectCall");
+    const acceptCallSlider = document.querySelector("#acceptCallSlider");
+    const incomingPhoto = document.querySelector("#incomingPhoto");
+    const incomingName = document.querySelector("#incomingName");
+    const accountButton = document.querySelector("#accountButton");
+    const searchNameInput = document.querySelector("#searchNameInput");
+    const searchUserButton = document.querySelector("#searchUserButton");
+    const searchResults = document.querySelector("#searchResults");
+    const friendList = document.querySelector("#friendList");
+    const friendNameInput = document.querySelector("#friendNameInput");
+    const pageTracker = document.querySelector("#pageTracker");
+    const prevPageButton = document.querySelector("#prevPageButton");
+    const nextPageButton = document.querySelector("#nextPageButton");
+    const profileGenderOptions = [...document.querySelectorAll(".profile-gender-option")];
+    const profileAvatarPreview = document.querySelector("#profileAvatarPreview");
+    const profileAvatarInput = document.querySelector("#profileAvatarInput");
+    const profileAvatarCropControls = document.querySelector("#profileAvatarCropControls");
+    const profileNameInput = document.querySelector("#profileNameInput");
+    const profilePhoneInput = document.querySelector("#profilePhoneInput");
+    const profileEmailInput = document.querySelector("#profileEmailInput");
+    const profileAgeInput = document.querySelector("#profileAgeInput");
+    const saveProfileButton = document.querySelector("#saveProfileButton");
+    const backToContactsButton = document.querySelector("#backToContactsButton");
+    const openGroupForm = document.querySelector("#openGroupForm");
+    const groupForm = document.querySelector("#groupForm");
+    const groupNameInput = document.querySelector("#groupNameInput");
+    const groupAvatarPreview = document.querySelector("#groupAvatarPreview");
+    const groupAvatarInput = document.querySelector("#groupAvatarInput");
+    const groupMemberList = document.querySelector("#groupMemberList");
+    const createGroupButton = document.querySelector("#createGroupButton");
+    const cancelGroupButton = document.querySelector("#cancelGroupButton");
+    const groupList = document.querySelector("#groupList");
+    const confirmModal = document.querySelector("#confirmModal");
+    const confirmTitle = document.querySelector("#confirmTitle");
+    const confirmMessage = document.querySelector("#confirmMessage");
+    const confirmCancel = document.querySelector("#confirmCancel");
+    const confirmOk = document.querySelector("#confirmOk");
+    const reportModal = document.querySelector("#reportModal");
+    const reportTitle = document.querySelector("#reportTitle");
+    const reportIntro = document.querySelector("#reportIntro");
+    const reportUserEmail = document.querySelector("#reportUserEmail");
+    const reportSupportEmail = document.querySelector("#reportSupportEmail");
+    const reportReason = document.querySelector("#reportReason");
+    const reportCancel = document.querySelector("#reportCancel");
+    const reportSend = document.querySelector("#reportSend");
+    const messageModal = document.querySelector("#messageModal");
+    const messageTitle = document.querySelector("#messageTitle");
+    const messageIntro = document.querySelector("#messageIntro");
+    const messageHistoryPanel = document.querySelector("#messageHistory");
+    const messageText = document.querySelector("#messageText");
+    const messageVoiceButton = document.querySelector("#messageVoiceButton");
+    const messageCancel = document.querySelector("#messageCancel");
+    const messageSend = document.querySelector("#messageSend");
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSizeSelect = document.querySelector("#fontSizeSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const visibilitySelect = document.querySelector("#visibilitySelect");
+    const screen = document.querySelector(".screen");
+    let selectedGender = "男";
+    let verificationCode = "";
+    let termsOpened = false;
+    let pendingIncomingCall = null;
+    let callTimerId = null;
+    let selectedProfileGender = "男";
+    let confirmCallback = null;
+    let pendingMessageTarget = null;
+    const messageHistory = {
+      "Mina Chen": [{ from: "Mina Chen", text: "等一下打給你", time: "昨天 18:20" }],
+      "Oliver Wang": [{ from: "Oliver Wang", text: "會議後回電", time: "今天 09:10" }]
+    };
+    let messageVoiceActive = false;
+    let recognition = null;
+    let micStream = null;
+    let callRecorder = null;
+    let callRecordStream = null;
+    let callRecordChunks = [];
+    let recordingStartedAt = 0;
+    let editingGroupCard = null;
+    let userHidden = false;
+    let profileAvatarDataUrl = "";
+    let profileAvatarCrop = { x: 50, y: 50, zoom: 1 };
+    let avatarAccent = "";
+    let groupAvatarDataUrl = "";
+    let paneHistory = ["contacts"];
+    let paneHistoryIndex = 0;
+    let currentLanguage = "zh-Hant";
+    const searchableUsers = [
+      { name: "Mina Chen", meta: "1.2 km · 女 · 線上（已開啟app）", initials: "MC", tone: "green", presence: "online", status: "線上", gender: "女", distanceMeters: 1200 },
+      { name: "Oliver Wang", meta: "3.8 km · 男 · 通話（通話中）", initials: "OW", tone: "amber", presence: "calling", status: "通話", gender: "男", distanceMeters: 3800 },
+      { name: "Avery Liu", meta: "6.4 km · 女 · 離線（未開啟app）", initials: "AL", tone: "red", presence: "offline", status: "離線", gender: "女", distanceMeters: 6400 },
+      { name: "Nora Hsu", meta: "8.8 km · 女 · 線上（已開啟app）", initials: "NH", tone: "green", presence: "online", status: "線上", gender: "女", distanceMeters: 8800 },
+      { name: "Jamie Lin", meta: "9.7 km · 男 · 線上（已開啟app）", initials: "JL", tone: "", presence: "online", status: "線上", gender: "男", distanceMeters: 9700 },
+      { name: "Sam Wu", meta: "18 km · 男 · 離線（未開啟app）", initials: "SW", tone: "red", presence: "offline", status: "離線", gender: "男", distanceMeters: 18000 },
+      { name: "Kelly Huang", meta: "42 km · 女 · 線上（已開啟app）", initials: "KH", tone: "", presence: "online", status: "線上", gender: "女", distanceMeters: 42000 },
+      { name: "Tony Lee", meta: "96 km · 男 · 通話（通話中）", initials: "TL", tone: "amber", presence: "calling", status: "通話", gender: "男", distanceMeters: 96000 }
+    ];
+    const avatarAccents = [
+      "linear-gradient(135deg, #fff, #c7efff 48%, #64d2ff)",
+      "linear-gradient(135deg, #fff, #baf5c8 44%, #30d158)",
+      "linear-gradient(135deg, #fff, #fff0a3 44%, #ffd60a)",
+      "linear-gradient(135deg, #fff, #ffc3be 44%, #ff453a)",
+      "linear-gradient(135deg, #fff, #e0c3ff 44%, #bf5af2)"
+    ];
+    const i18n = {
+      "zh-Hant": {
+        nav: ["通話", "好友", "群組", "設定"],
+        panes: ["附近", "最近", "收尋"],
+        prev: "上一頁<",
+        next: "下一頁>",
+        registerTitle: "首次註冊",
+        name: "使用者姓名",
+        phone: "電話",
+        email: "Email",
+        gender: "性別",
+        avatar: "編輯頭像",
+        age: "年齡",
+        save: "儲存資料",
+        backCall: "返回通話",
+        searchName: "收尋對方姓名",
+        searchPlaceholder: "輸入姓名收尋",
+        searchButton: "搜尋",
+        friendPlaceholder: "輸入好友名稱",
+        add: "加入",
+        block: "封鎖",
+        remove: "刪除",
+        message: "留言",
+        createGroup: "＋ 建立群組",
+        editGroup: "編輯群組",
+        groupName: "群組名稱",
+        groupAvatar: "群組頭像",
+        groupMembers: "挑選好友為群組成員",
+        create: "建立",
+        cancel: "取消",
+        appBackground: "App 背景顏色",
+        themeOptions: ["深色", "青綠", "柔粉"],
+        fontSize: "字體大小",
+        fontOptions: ["小", "中", "大"],
+        language: "語言",
+        userStatus: "使用者狀態",
+        visibilityOptions: ["顯示在線", "隱藏（顯示離線，只接收留言）"],
+        hiddenStatus: "隱藏模式 · 對外顯示離線，只接收留言",
+        hiddenBlocked: "隱藏模式中只可以接收留言",
+        nearbyTitle: "搜尋附近已安裝 Voice 的人",
+        distanceLabel: "搜尋距離",
+        nearbyEmpty: "目前距離內沒有找到其他使用者，請把搜尋距離拉遠一點。",
+        nearbySummary: radius => `${radius} 範圍搜尋中`,
+        reportUser: "檢舉使用者",
+        reportIntro: "請填寫檢舉原因，客服會協助後續處理。",
+        userEmail: "使用者 Email",
+        supportEmail: "客服 Email",
+        reportReason: "檢舉原因",
+        reportPlaceholder: "請輸入檢舉原因",
+        messageIntro: "輸入要傳送給對方的留言。",
+        messagePlaceholder: "請輸入留言",
+        voiceInput: "語音",
+        micUnavailable: "此瀏覽器無法啟動語音辨識，請確認麥克風權限。",
+        send: "送出",
+        confirm: "確認",
+        confirmTitle: "確認操作",
+        confirmMessage: "請確認是否繼續。",
+        reject: "拒絕通話",
+        accept: "接收通話",
+        record: "● 錄音",
+        hangup: "掛話",
+        updated: "語言已更新"
+      },
+      en: {
+        nav: ["Calls", "Friends", "Groups", "Settings"],
+        panes: ["Nearby", "Recent", "Search"],
+        prev: "Previous<",
+        next: "Next>",
+        registerTitle: "First registration",
+        name: "User name",
+        phone: "Phone",
+        email: "Email",
+        gender: "Gender",
+        avatar: "Edit avatar",
+        age: "Age",
+        save: "Save profile",
+        backCall: "Back to calls",
+        searchName: "Search by name",
+        searchPlaceholder: "Enter a name",
+        searchButton: "Search",
+        friendPlaceholder: "Enter friend name",
+        add: "Add",
+        block: "Block",
+        remove: "Delete",
+        message: "Message",
+        createGroup: "+ Create group",
+        editGroup: "Edit group",
+        groupName: "Group name",
+        groupAvatar: "Group avatar",
+        groupMembers: "Choose friends as members",
+        create: "Create",
+        cancel: "Cancel",
+        appBackground: "App background",
+        themeOptions: ["Dark", "Teal", "Rose"],
+        fontSize: "Font size",
+        fontOptions: ["Small", "Medium", "Large"],
+        language: "Language",
+        userStatus: "User status",
+        visibilityOptions: ["Visible online", "Hidden (offline, messages only)"],
+        hiddenStatus: "Hidden mode · Shown offline, messages only",
+        hiddenBlocked: "Hidden mode can only receive messages",
+        nearbyTitle: "Searching nearby Voice users",
+        distanceLabel: "Search distance",
+        nearbyEmpty: "No users found within this distance. Try increasing the range.",
+        nearbySummary: radius => `Searching within ${radius}`,
+        reportUser: "Report user",
+        reportIntro: "Describe the issue. Support will review it.",
+        userEmail: "User Email",
+        supportEmail: "Support Email",
+        reportReason: "Report reason",
+        reportPlaceholder: "Enter report reason",
+        messageIntro: "Enter the message you want to send.",
+        messagePlaceholder: "Enter message",
+        voiceInput: "Voice",
+        micUnavailable: "This browser cannot start speech recognition. Check microphone permission.",
+        send: "Send",
+        confirm: "Confirm",
+        confirmTitle: "Confirm action",
+        confirmMessage: "Please confirm before continuing.",
+        reject: "Reject",
+        accept: "Accept",
+        record: "● Record",
+        hangup: "End",
+        updated: "Language updated"
+      },
+      ja: {
+        nav: ["通話", "友達", "グループ", "設定"],
+        panes: ["近く", "履歴", "検索"],
+        prev: "前へ<",
+        next: "次へ>",
+        registerTitle: "初回登録",
+        name: "ユーザー名",
+        phone: "電話",
+        email: "Email",
+        gender: "性別",
+        avatar: "アバター編集",
+        age: "年齢",
+        save: "保存",
+        backCall: "通話へ戻る",
+        searchName: "相手の名前を検索",
+        searchPlaceholder: "名前を入力",
+        searchButton: "検索",
+        friendPlaceholder: "友達名を入力",
+        add: "追加",
+        block: "ブロック",
+        remove: "削除",
+        message: "メッセージ",
+        createGroup: "＋ グループ作成",
+        editGroup: "グループ編集",
+        groupName: "グループ名",
+        groupAvatar: "グループ画像",
+        groupMembers: "友達をメンバーに選択",
+        create: "作成",
+        cancel: "取消",
+        appBackground: "App 背景",
+        themeOptions: ["ダーク", "ティール", "ローズ"],
+        fontSize: "文字サイズ",
+        fontOptions: ["小", "中", "大"],
+        language: "言語",
+        userStatus: "ユーザー状態",
+        visibilityOptions: ["オンライン表示", "非表示（オフライン表示、メッセージのみ）"],
+        hiddenStatus: "非表示モード · オフライン表示、メッセージのみ",
+        hiddenBlocked: "非表示モードではメッセージ受信のみ可能です",
+        nearbyTitle: "近くの Voice ユーザーを検索",
+        distanceLabel: "検索距離",
+        nearbyEmpty: "この距離内にユーザーはいません。検索距離を広げてください。",
+        nearbySummary: radius => `${radius} 範囲で検索中`,
+        reportUser: "ユーザーを報告",
+        reportIntro: "報告理由を入力してください。サポートが確認します。",
+        userEmail: "ユーザー Email",
+        supportEmail: "サポート Email",
+        reportReason: "報告理由",
+        reportPlaceholder: "報告理由を入力",
+        messageIntro: "相手に送るメッセージを入力してください。",
+        messagePlaceholder: "メッセージを入力",
+        voiceInput: "音声",
+        micUnavailable: "このブラウザでは音声認識を開始できません。マイク権限を確認してください。",
+        send: "送信",
+        confirm: "確認",
+        confirmTitle: "確認",
+        confirmMessage: "続行する前に確認してください。",
+        reject: "拒否",
+        accept: "応答",
+        record: "● 録音",
+        hangup: "終了",
+        updated: "言語を更新しました"
+      }
+    };
+
+    function setLabelText(label, text) {
+      if (!label) return;
+      if (label.childNodes[0]?.nodeType === Node.TEXT_NODE) {
+        label.childNodes[0].nodeValue = `${text}\n                  `;
+      } else {
+        label.prepend(document.createTextNode(`${text}\n                  `));
+      }
+    }
+
+    function updateAccountButton() {
+      const name = profileNameInput.value.trim() || registerName.value.trim() || "Clay Tseng";
+      accountButton.title = userHidden ? `${name} · 隱藏` : name;
+      if (profileAvatarDataUrl) {
+        accountButton.textContent = "";
+        accountButton.style.backgroundImage = `url("${profileAvatarDataUrl}")`;
+        accountButton.style.backgroundSize = `${profileAvatarCrop.zoom * 100}%`;
+        accountButton.style.backgroundPosition = `${profileAvatarCrop.x}% ${profileAvatarCrop.y}%`;
+        accountButton.style.backgroundRepeat = "no-repeat";
+        accountButton.style.color = "transparent";
+      } else {
+        accountButton.textContent = userHidden ? "隱" : initialsFromName(name, "CT");
+        accountButton.style.background = avatarAccent || "";
+        accountButton.style.backgroundSize = "";
+        accountButton.style.backgroundPosition = "";
+        accountButton.style.backgroundRepeat = "";
+        accountButton.style.color = "";
+      }
+    }
+
+    function syncProfileGender() {
+      selectedProfileGender = ["男", "女"].includes(selectedProfileGender) ? selectedProfileGender : selectedGender || "男";
+      profileGenderOptions.forEach(item => {
+        item.classList.remove("active");
+        item.setAttribute("aria-pressed", "false");
+      });
+      profileGenderOptions.forEach(item => {
+        const isSelected = item.dataset.profileGender === selectedProfileGender;
+        item.classList.toggle("active", isSelected);
+        item.setAttribute("aria-pressed", isSelected ? "true" : "false");
+      });
+    }
+
+    function avatarImageStyle() {
+      return `object-position: ${profileAvatarCrop.x}% ${profileAvatarCrop.y}%; transform: scale(${profileAvatarCrop.zoom});`;
+    }
+
+    function renderAvatar(target, text, imageUrl = "") {
+      target.innerHTML = imageUrl ? `<img src="${imageUrl}" alt="頭像" style="${avatarImageStyle()}">` : escapeHtml(text);
+    }
+
+    function showAvatarCropControls() {
+      registerAvatarCropControls.classList.add("show");
+      profileAvatarCropControls.classList.add("show");
+      document.querySelectorAll(".avatar-crop").forEach(input => {
+        input.value = profileAvatarCrop[input.dataset.crop];
+      });
+    }
+
+    function applyAvatarCrop() {
+      if (!profileAvatarDataUrl) return;
+      renderAvatar(registerAvatarPreview, "CT", profileAvatarDataUrl);
+      renderAvatar(profileAvatarPreview, "CT", profileAvatarDataUrl);
+      updateAccountButton();
+    }
+
+    function initialsFromName(name, fallback = "VC") {
+      const trimmed = name.trim();
+      if (!trimmed) return fallback;
+      const chinese = trimmed.match(/[\u4e00-\u9fff]/);
+      if (chinese) return chinese[0];
+      return trimmed.split(/\s+/).map(part => part[0]).join("").slice(0, 2).toUpperCase() || fallback;
+    }
+
+    function renderDefaultUserAvatar() {
+      const initials = initialsFromName(registerName.value || profileNameInput.value || "Clay Tseng", "CT");
+      if (!profileAvatarDataUrl) {
+        renderAvatar(registerAvatarPreview, initials);
+        renderAvatar(profileAvatarPreview, initials);
+        registerAvatarPreview.style.background = avatarAccent;
+        profileAvatarPreview.style.background = avatarAccent;
+        updateAccountButton();
+      }
+    }
+
+    function applyLanguage(silent = false) {
+      const labels = i18n[currentLanguage];
+      mainNav.querySelectorAll("button").forEach((button, index) => {
+        const symbol = button.querySelector(".nav-symbol").outerHTML;
+        button.innerHTML = `${symbol}${labels.nav[index]}`;
+      });
+      paneButtons.forEach((button, index) => {
+        button.textContent = labels.panes[index];
+      });
+      prevPageButton.textContent = labels.prev;
+      nextPageButton.textContent = labels.next;
+      document.querySelector(".registration-card .label-row strong").textContent = labels.registerTitle;
+      setLabelText(registerAvatarInput.closest("label"), labels.avatar);
+      setLabelText(profileNameInput.closest("label"), labels.name);
+      setLabelText(profilePhoneInput.closest("label"), labels.phone);
+      setLabelText(profileEmailInput.closest("label"), labels.email);
+      setLabelText(profileAvatarInput.closest("label"), labels.avatar);
+      document.querySelector(".profile-gender-row").closest(".profile-field").childNodes[0].nodeValue = `${labels.gender}\n                  `;
+      setLabelText(profileAgeInput.closest("label"), labels.age);
+      saveProfileButton.textContent = labels.save;
+      backToContactsButton.textContent = labels.backCall;
+      setLabelText(searchNameInput.closest("label"), labels.searchName);
+      searchNameInput.placeholder = labels.searchPlaceholder;
+      searchUserButton.textContent = labels.searchButton;
+      friendNameInput.placeholder = labels.friendPlaceholder;
+      document.querySelector("#addFriend").textContent = labels.add;
+      document.querySelectorAll(".swipe-call").forEach(button => button.textContent = labels.nav[0]);
+      document.querySelectorAll(".message-friend").forEach(button => button.textContent = labels.message);
+      document.querySelectorAll(".swipe-message").forEach(button => button.textContent = labels.message);
+      document.querySelectorAll(".swipe-block").forEach(button => button.textContent = labels.block);
+      document.querySelectorAll(".swipe-delete").forEach(button => button.textContent = labels.remove);
+      document.querySelectorAll(".call-friend").forEach(button => button.textContent = labels.nav[0]);
+      document.querySelectorAll(".block-friend").forEach(button => button.textContent = labels.block);
+      document.querySelectorAll(".remove-friend").forEach(button => button.textContent = labels.remove);
+      openGroupForm.textContent = labels.createGroup;
+      setLabelText(groupNameInput.closest("label"), labels.groupName);
+      setLabelText(groupAvatarInput.closest("label"), labels.groupAvatar);
+      groupMemberList.closest(".group-field").childNodes[0].nodeValue = labels.groupMembers;
+      createGroupButton.textContent = labels.create;
+      cancelGroupButton.textContent = labels.cancel;
+      setLabelText(themeSelect.closest("label"), labels.appBackground);
+      themeSelect.options[0].textContent = labels.themeOptions[0];
+      themeSelect.options[1].textContent = labels.themeOptions[1];
+      themeSelect.options[2].textContent = labels.themeOptions[2];
+      setLabelText(fontSizeSelect.closest("label"), labels.fontSize);
+      fontSizeSelect.options[0].textContent = labels.fontOptions[0];
+      fontSizeSelect.options[1].textContent = labels.fontOptions[1];
+      fontSizeSelect.options[2].textContent = labels.fontOptions[2];
+      setLabelText(languageSelect.closest("label"), labels.language);
+      const supportCopy = {
+        "zh-Hant": ["聯繫客服", "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。", "Email"],
+        en: ["Contact Support", "For issue reports or partnership inquiries, contact us by Email.", "Email"],
+        ja: ["サポート連絡", "問題報告、提携相談は Email でお問い合わせください。", "Email"]
+      }[currentLanguage];
+      const supportCard = document.querySelector("#settings .settings-card:nth-of-type(2)");
+      if (supportCard && supportCopy) {
+        const labels = supportCard.querySelectorAll(".setting-field");
+        setLabelText(labels[0], supportCopy[0]);
+        labels[0].querySelector("span").textContent = supportCopy[1];
+        setLabelText(labels[1], supportCopy[2]);
+      }
+      setLabelText(visibilitySelect.closest("label"), labels.userStatus);
+      visibilitySelect.options[0].textContent = labels.visibilityOptions[0];
+      visibilitySelect.options[1].textContent = labels.visibilityOptions[1];
+      document.querySelector(".nearby-copy strong").textContent = labels.nearbyTitle;
+      document.querySelector(".range-head span").textContent = labels.distanceLabel;
+      confirmTitle.textContent = labels.confirmTitle;
+      confirmMessage.textContent = labels.confirmMessage;
+      confirmCancel.textContent = labels.cancel;
+      confirmOk.textContent = labels.confirm;
+      reportTitle.textContent = labels.reportUser;
+      reportIntro.textContent = labels.reportIntro;
+      setLabelText(reportUserEmail.closest("label"), labels.userEmail);
+      setLabelText(reportSupportEmail.closest("label"), labels.supportEmail);
+      setLabelText(reportReason.closest("label"), labels.reportReason);
+      reportReason.placeholder = labels.reportPlaceholder;
+      reportCancel.textContent = labels.cancel;
+      reportSend.textContent = labels.send;
+      messageTitle.textContent = labels.message;
+      messageIntro.textContent = labels.messageIntro;
+      messageText.placeholder = labels.messagePlaceholder;
+      messageVoiceButton.title = labels.voiceInput;
+      messageCancel.textContent = labels.cancel;
+      messageSend.textContent = labels.send;
+      rejectCall.textContent = "☎";
+      document.querySelector("[data-toggle='record']").textContent = labels.record;
+      endCall.textContent = "☎";
+      document.querySelectorAll(".group-call").forEach(button => button.textContent = currentLanguage === "en" ? "Group call" : currentLanguage === "ja" ? "グループ通話" : "群組通話");
+      document.querySelectorAll(".group-edit").forEach(button => button.textContent = labels.editGroup);
+      document.querySelectorAll(".group-delete").forEach(button => button.textContent = currentLanguage === "en" ? "Delete group" : currentLanguage === "ja" ? "グループ削除" : "刪除群組");
+      if (editingGroupCard) createGroupButton.textContent = labels.editGroup;
+      if (userHidden) {
+        statusText.textContent = labels.hiddenStatus;
+        updateNearbyStatus();
+      }
+      if (!silent && !userHidden) statusText.textContent = labels.updated;
+      if (!userHidden) updateNearbyStatus();
+    }
+
+    function generateVerificationCode() {
+      verificationCode = String(Math.floor(1000 + Math.random() * 9000));
+      verificationHint.textContent = `已發送 4 位數驗證碼到手機 ${registerPhone.value.trim() || "使用者手機"}。原型示範碼：${verificationCode}`;
+      verificationCodeInput.value = "";
+      validateRegistration();
+    }
+
+    function validateRegistration() {
+      const hasProfile = registerName.value.trim()
+        && registerPhone.value.trim()
+        && registerEmail.value.trim()
+        && registerAge.value.trim()
+        && Number(registerAge.value) > 0;
+      const emailLooksOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerEmail.value.trim());
+      const codeEntered = verificationCodeInput.value.trim().length === 4;
+      const termsOk = termsOpened && agreeTerms.checked;
+      const ready = Boolean(hasProfile && emailLooksOk && codeEntered && termsOk);
+      completeRegistration.disabled = !ready;
+
+      if (!termsOpened) {
+        registerStatus.textContent = "請先打開條文";
+      } else if (!agreeTerms.checked) {
+        registerStatus.textContent = "請勾選同意";
+      } else if (!hasProfile || !emailLooksOk) {
+        registerStatus.textContent = "請完成資料";
+      } else if (!codeEntered) {
+        registerStatus.textContent = "請輸入簡訊碼";
+      } else {
+        registerStatus.textContent = "可送出";
+      }
+    }
+
+    function updatePageTracker(paneId) {
+      const isHome = paneId === "contacts";
+      pageTracker.classList.toggle("hidden", isHome);
+      prevPageButton.disabled = paneHistoryIndex <= 0;
+      nextPageButton.disabled = paneHistoryIndex >= paneHistory.length - 1;
+    }
+
+    function showPane(paneId, track = true) {
+      if (track && paneHistory[paneHistoryIndex] !== paneId) {
+        paneHistory = paneHistory.slice(0, paneHistoryIndex + 1);
+        paneHistory.push(paneId);
+        paneHistoryIndex = paneHistory.length - 1;
+      }
+      segmented.classList.toggle("hidden", paneId !== "contacts" && paneId !== "recent" && paneId !== "dial");
+      panes.forEach(pane => pane.classList.toggle("active", pane.id === paneId));
+      paneButtons.forEach(item => item.classList.toggle("active", item.dataset.pane === paneId));
+      navButtons.forEach(item => item.classList.toggle("active", item.dataset.navPane === paneId || (paneId === "recent" || paneId === "dial") && item.dataset.navPane === "contacts"));
+      updatePageTracker(paneId);
+    }
+
+    function createFriendCard(name, initials, tone = "") {
+      const safeName = escapeHtml(name);
+      const safeInitials = escapeHtml(initials);
+      const card = document.createElement("article");
+      card.className = "friend-card";
+      card.dataset.friend = name;
+      card.innerHTML = `
+        <span class="photo ${tone}">${safeInitials}</span>
+        <span class="friend-body">
+          <span class="friend-top"><strong>${safeName}</strong><span class="status-pill online">線上</span></span>
+          <span class="friend-note">留言：尚無留言</span>
+          <span class="friend-actions">
+            <button type="button" class="call-friend">通話</button>
+            <button type="button" class="message-friend">留言</button>
+            <button type="button" class="block-friend">封鎖</button>
+            <button type="button" class="remove-friend">刪除</button>
+          </span>
+        </span>
+      `;
+      friendList.prepend(card);
+      wireFriendCard(card);
+      applyLanguage(true);
+      return card;
+    }
+
+    function renderSearchResults() {
+      const keyword = searchNameInput.value.trim().toLowerCase();
+      const results = searchableUsers.filter(user => !keyword || user.name.toLowerCase().includes(keyword));
+      searchResults.innerHTML = results.length ? results.map(user => `
+        <button class="contact search-contact" data-name="${escapeHtml(user.name)}" data-meta="${escapeHtml(user.meta)}" data-initials="${escapeHtml(user.initials)}" data-tone="${escapeHtml(user.tone)}" data-presence="${escapeHtml(user.presence)}" data-gender="${escapeHtml(user.gender)}">
+          <span class="photo ${escapeHtml(user.tone)}">${escapeHtml(user.initials)}</span>
+          <span>
+            <span class="contact-name">${escapeHtml(user.name)}</span>
+            <span class="contact-meta">${escapeHtml(user.meta)}</span>
+          </span>
+          <span class="status-pill ${escapeHtml(user.presence)}">${escapeHtml(user.status)}</span>
+        </button>
+      `).join("") : `<div class="registration-summary show">找不到符合的使用者。</div>`;
+
+      searchResults.querySelectorAll(".search-contact").forEach(card => {
+        card.addEventListener("click", () => startCall(card.dataset));
+        addSwipeActions(card);
+        addReportLongPress(card);
+      });
+    }
+
+    function formatDistance(meters) {
+      if (meters < 1000) return `${meters} m`;
+      const km = meters / 1000;
+      return `${Number.isInteger(km) ? km : km.toFixed(1)} km`;
+    }
+
+    function updateNearbyStatus(filteredUsers = null) {
+      const labels = i18n[currentLanguage];
+      const users = filteredUsers || searchableUsers.filter(user => user.distanceMeters <= Number(nearbyRange.value));
+      const online = users.filter(user => user.presence === "online").length;
+      const calling = users.filter(user => user.presence === "calling").length;
+      const offline = users.filter(user => user.presence === "offline").length;
+      const hiddenPrefix = userHidden ? "隱藏模式 · " : "";
+      document.querySelector(".nearby-copy span").textContent = `${hiddenPrefix}${labels.nearbySummary(formatDistance(Number(nearbyRange.value)))} · 線上 ${online} · 通話 ${calling} · 離線 ${offline}`;
+      nearbyRangeValue.textContent = formatDistance(Number(nearbyRange.value));
+    }
+
+    function wireContact(contact) {
+      contact.addEventListener("click", () => startCall(contact.dataset));
+      addSwipeActions(contact);
+      addReportLongPress(contact);
+    }
+
+    function renderNearbyContacts() {
+      const maxDistance = Number(nearbyRange.value);
+      const nearbyUsers = searchableUsers.filter(user => user.distanceMeters <= maxDistance);
+      nearbyList.innerHTML = nearbyUsers.length ? nearbyUsers.map(user => `
+        <button class="contact ${user.presence === "offline" ? "offline" : ""}" data-name="${escapeHtml(user.name)}" data-meta="${escapeHtml(user.meta)}" data-initials="${escapeHtml(user.initials)}" data-tone="${escapeHtml(user.tone)}" data-presence="${escapeHtml(user.presence)}" data-gender="${escapeHtml(user.gender)}">
+          <span class="photo ${escapeHtml(user.tone)}">${escapeHtml(user.initials)}</span>
+          <span>
+            <span class="contact-name">${escapeHtml(user.name)}</span>
+            <span class="contact-meta">${escapeHtml(user.meta)}</span>
+          </span>
+          <span class="status-pill ${escapeHtml(user.presence)}">${escapeHtml(user.status)}</span>
+        </button>
+      `).join("") : `<div class="empty-nearby">${escapeHtml(i18n[currentLanguage].nearbyEmpty)}</div>`;
+      nearbyList.querySelectorAll(".contact").forEach(wireContact);
+      updateNearbyStatus(nearbyUsers);
+    }
+
+    function isBlockedName(name) {
+      return [...document.querySelectorAll(".contact.blocked, .friend-card.blocked")]
+        .some(item => item.dataset.name === name || item.dataset.friend === name);
+    }
+
+    function showCallPanel(mode = "active") {
+      callPanel.classList.add("show");
+      callPanel.classList.toggle("incoming", mode === "incoming");
+    }
+
+    function stopCallTimer() {
+      if (callTimerId) {
+        clearInterval(callTimerId);
+        callTimerId = null;
+      }
+    }
+
+    function startCallTimer() {
+      stopCallTimer();
+      const startedAt = Date.now();
+      timer.textContent = "00:00";
+      callTimerId = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        const minutes = String(Math.floor(elapsed / 60)).padStart(2, "0");
+        const seconds = String(elapsed % 60).padStart(2, "0");
+        timer.textContent = `${minutes}:${seconds}`;
+      }, 1000);
+    }
+
+    function hideCallPanel() {
+      stopCallTimer();
+      if (callRecorder?.state === "recording") stopCallRecording();
+      callPanel.classList.remove("show", "incoming");
+      timer.textContent = "--:--";
+      if (acceptCallSlider) acceptCallSlider.value = "0";
+    }
+
+    function downloadRecording(blob) {
+      const url = URL.createObjectURL(blob);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `voice-call-recording-${timestamp}.webm`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1200);
+    }
+
+    async function startCallRecording(button) {
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+        statusText.textContent = "此瀏覽器無法啟動錄音，請確認麥克風權限。";
+        return;
+      }
+      try {
+        callRecordStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        callRecordChunks = [];
+        callRecorder = new MediaRecorder(callRecordStream);
+        recordingStartedAt = Date.now();
+        callRecorder.addEventListener("dataavailable", event => {
+          if (event.data?.size) callRecordChunks.push(event.data);
+        });
+        callRecorder.addEventListener("stop", () => {
+          const blob = new Blob(callRecordChunks, { type: callRecorder.mimeType || "audio/webm" });
+          callRecordStream?.getTracks().forEach(track => track.stop());
+          callRecordStream = null;
+          callRecorder = null;
+          callRecordChunks = [];
+          button.classList.remove("active");
+          button.textContent = "● 錄音";
+          if (blob.size) {
+            downloadRecording(blob);
+            statusText.textContent = "錄音已儲存到手機";
+          } else {
+            statusText.textContent = "錄音沒有取得音訊";
+          }
+        });
+        callRecorder.start();
+        button.classList.add("active");
+        button.textContent = "■ 儲存";
+        statusText.textContent = "錄音中 · 再按一次儲存";
+      } catch (error) {
+        callRecordStream?.getTracks().forEach(track => track.stop());
+        callRecordStream = null;
+        statusText.textContent = "無法啟動錄音，請允許麥克風權限。";
+      }
+    }
+
+    function stopCallRecording() {
+      if (callRecorder?.state === "recording") {
+        callRecorder.stop();
+      }
+    }
+
+    function applyUserVisibility() {
+      userHidden = visibilitySelect.value === "hidden";
+      screen.classList.toggle("hidden-mode", userHidden);
+      if (userHidden) {
+        hideCallPanel();
+        updateAccountButton();
+        statusText.textContent = i18n[currentLanguage].hiddenStatus;
+        renderNearbyContacts();
+        renderSearchResults();
+        return;
+      }
+      updateAccountButton();
+      statusText.textContent = "顯示在線 · 可搜尋與通話";
+      renderNearbyContacts();
+      renderSearchResults();
+    }
+
+    function closeSwipeActions(exceptContact) {
+      document.querySelectorAll(".contact.swiped, .history-item.swiped").forEach(contact => {
+        if (contact !== exceptContact) contact.classList.remove("swiped");
+      });
+      document.querySelectorAll(".swipe-actions.show").forEach(actions => {
+        if (actions.previousElementSibling !== exceptContact) actions.classList.remove("show");
+      });
+      document.querySelectorAll(".group-card.swiped").forEach(group => {
+        if (group !== exceptContact) group.classList.remove("swiped");
+      });
+      document.querySelectorAll(".group-swipe-actions.show").forEach(actions => {
+        if (actions.previousElementSibling !== exceptContact) actions.classList.remove("show");
+      });
+      document.querySelectorAll(".friend-card.swiped").forEach(card => {
+        if (card !== exceptContact) card.classList.remove("swiped");
+      });
+    }
+
+    function confirmAction(title, message, onConfirm) {
+      confirmTitle.textContent = title;
+      confirmMessage.textContent = message;
+      confirmCallback = onConfirm;
+      confirmModal.classList.remove("hidden");
+    }
+
+    function getCurrentUserEmail() {
+      return profileEmailInput.value.trim() || registerEmail.value.trim() || "user@example.com";
+    }
+
+    function openReportModal(userName) {
+      const labels = i18n[currentLanguage];
+      reportTitle.textContent = currentLanguage === "en" ? `Report ${userName}` : currentLanguage === "ja" ? `${userName} を報告` : `檢舉 ${userName}`;
+      reportIntro.textContent = currentLanguage === "en"
+        ? "User Email and Support Email have been filled in automatically."
+        : currentLanguage === "ja"
+          ? "ユーザー Email とサポート Email は自動入力されています。"
+          : "系統已自動填入使用者 Email 與客服 Email。";
+      reportUserEmail.value = getCurrentUserEmail();
+      reportSupportEmail.value = "support@voice-call.app";
+      reportReason.value = "";
+      reportReason.placeholder = labels.reportPlaceholder;
+      reportSend.disabled = false;
+      reportSend.textContent = labels.send;
+      reportModal.classList.remove("hidden");
+      reportReason.focus();
+    }
+
+    function renderMessageHistory(name) {
+      const history = messageHistory[name] || [];
+      if (!history.length) {
+        messageHistoryPanel.className = "message-history empty";
+        messageHistoryPanel.textContent = currentLanguage === "en"
+          ? "No message history yet"
+          : currentLanguage === "ja"
+            ? "メッセージ履歴はまだありません"
+            : "尚無留言歷史";
+        return;
+      }
+      messageHistoryPanel.className = "message-history";
+      messageHistoryPanel.innerHTML = history.map(item => `
+        <div class="message-bubble ${item.from === "我" ? "outgoing" : ""}">
+          <span>${escapeHtml(item.from)} · ${escapeHtml(item.time)}</span>
+          <strong>${escapeHtml(item.text)}</strong>
+        </div>
+      `).join("");
+      messageHistoryPanel.scrollTop = messageHistoryPanel.scrollHeight;
+    }
+
+    function openMessageModal(name, noteElement = null) {
+      if (isBlockedName(name)) {
+        statusText.textContent = currentLanguage === "en"
+          ? `Blocked · Cannot message ${name}`
+          : currentLanguage === "ja"
+            ? `ブロック済み · ${name} にメッセージできません`
+            : `已封鎖 · 無法傳送訊息給 ${name}`;
+        return;
+      }
+      const labels = i18n[currentLanguage];
+      pendingMessageTarget = { name, noteElement };
+      messageVoiceActive = false;
+      messageVoiceButton.classList.remove("active");
+      messageTitle.textContent = currentLanguage === "en" ? `Message ${name}` : currentLanguage === "ja" ? `${name} にメッセージ` : `留言給 ${name}`;
+      messageIntro.textContent = labels.messageIntro;
+      renderMessageHistory(name);
+      messageText.value = "";
+      messageText.placeholder = labels.messagePlaceholder;
+      messageModal.classList.remove("hidden");
+      messageText.focus();
+    }
+
+    function stopMessageVoice() {
+      recognition?.stop();
+      micStream?.getTracks().forEach(track => track.stop());
+      messageVoiceActive = false;
+      messageVoiceButton.classList.remove("active");
+      messageText.placeholder = i18n[currentLanguage].messagePlaceholder;
+    }
+
+    function addReportLongPress(contact) {
+      if (!contact.dataset.gender) return;
+      let pressTimer = null;
+      let longPressed = false;
+      const startPress = () => {
+        longPressed = false;
+        clearTimeout(pressTimer);
+        pressTimer = setTimeout(() => {
+          longPressed = true;
+          const labels = i18n[currentLanguage];
+          const title = labels.reportUser;
+          const message = currentLanguage === "en"
+            ? `Report "${contact.dataset.name}"?`
+            : currentLanguage === "ja"
+              ? `「${contact.dataset.name}」を報告しますか？`
+              : `確定要檢舉「${contact.dataset.name}」嗎？`;
+          confirmAction(title, message, () => openReportModal(contact.dataset.name));
+        }, 700);
+      };
+      const cancelPress = () => clearTimeout(pressTimer);
+
+      contact.addEventListener("click", event => {
+        if (!longPressed) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        longPressed = false;
+      }, true);
+      contact.addEventListener("touchstart", startPress, { passive: true });
+      contact.addEventListener("touchend", cancelPress);
+      contact.addEventListener("touchmove", cancelPress, { passive: true });
+      contact.addEventListener("mousedown", startPress);
+      contact.addEventListener("mouseup", cancelPress);
+      contact.addEventListener("mouseleave", cancelPress);
+    }
+
+    function createGroupCard(name, avatar, members, avatarImage = "") {
+      const card = document.createElement("article");
+      card.className = "group-card";
+      card.dataset.group = name;
+      card.dataset.members = members.join(", ");
+      card.dataset.avatar = avatar;
+      card.dataset.avatarImage = avatarImage;
+      card.innerHTML = `
+        <span class="photo green">${avatarImage ? `<img src="${avatarImage}" alt="群組頭像">` : escapeHtml(avatar)}</span>
+        <span>
+          <strong>${escapeHtml(name)}</strong>
+          <span class="group-meta">${escapeHtml(members.join(", "))}</span>
+        </span>
+      `;
+      groupList.prepend(card);
+      addGroupSwipeActions(card);
+      return card;
+    }
+
+    function renderGroupMembers(selectedMembers = []) {
+      const friendCards = [...document.querySelectorAll(".friend-card")];
+      groupMemberList.innerHTML = friendCards.length ? friendCards.map(card => {
+        const name = card.dataset.friend;
+        const checked = !selectedMembers.length || selectedMembers.includes(name) ? "checked" : "";
+        return `<label><input type="checkbox" value="${escapeHtml(name)}" ${checked}> ${escapeHtml(name)}</label>`;
+      }).join("") : `<label><input type="checkbox" value="Mina Chen" checked> Mina Chen</label>`;
+    }
+
+    function addGroupSwipeActions(card) {
+      if (card.nextElementSibling?.classList.contains("group-swipe-actions")) return;
+      const actions = document.createElement("div");
+      actions.className = "group-swipe-actions";
+      actions.innerHTML = `
+        <button type="button" class="group-call">群組通話</button>
+        <button type="button" class="group-edit">編輯群組</button>
+        <button type="button" class="group-delete">刪除群組</button>
+      `;
+      card.insertAdjacentElement("afterend", actions);
+      applyLanguage(true);
+
+      actions.querySelector(".group-call").addEventListener("click", () => {
+        if (userHidden) {
+          statusText.textContent = i18n[currentLanguage].hiddenBlocked;
+          closeSwipeActions();
+          return;
+        }
+        showCallPanel("active");
+        activeName.textContent = card.dataset.group;
+        activeMeta.textContent = `群組通話 · ${card.dataset.members}`;
+        activePhoto.innerHTML = card.dataset.avatarImage ? `<img src="${card.dataset.avatarImage}" alt="群組頭像">` : escapeHtml(card.dataset.avatar);
+        activePhoto.className = "photo green";
+        statusText.textContent = `群組通話中 · ${card.dataset.group}`;
+        startCallTimer();
+        closeSwipeActions();
+      });
+
+      actions.querySelector(".group-edit").addEventListener("click", () => {
+        editingGroupCard = card;
+        groupNameInput.value = card.dataset.group;
+        groupAvatarDataUrl = card.dataset.avatarImage || "";
+        groupAvatarInput.value = "";
+        renderAvatar(groupAvatarPreview, card.dataset.avatar, groupAvatarDataUrl);
+        renderGroupMembers(card.dataset.members.split(",").map(item => item.trim()));
+        groupForm.classList.remove("hidden");
+        createGroupButton.textContent = i18n[currentLanguage].editGroup;
+        statusText.textContent = i18n[currentLanguage].editGroup;
+        closeSwipeActions();
+      });
+
+      actions.querySelector(".group-delete").addEventListener("click", () => {
+        confirmAction("刪除群組", `確定要刪除「${card.dataset.group}」嗎？`, () => {
+          actions.remove();
+          card.remove();
+          statusText.textContent = `已刪除群組 · ${card.dataset.group}`;
+        });
+      });
+
+      let startX = 0;
+      let startY = 0;
+      let tracking = false;
+
+      const beginSwipe = event => {
+        const point = event.touches ? event.touches[0] : event;
+        startX = point.clientX;
+        startY = point.clientY;
+        tracking = true;
+      };
+
+      const moveSwipe = event => {
+        if (!tracking) return;
+        const point = event.touches ? event.touches[0] : event;
+        const dx = point.clientX - startX;
+        const dy = point.clientY - startY;
+        if (dx < -46 && Math.abs(dy) < 32) {
+          closeSwipeActions(card);
+          card.classList.add("swiped");
+          actions.classList.add("show");
+          statusText.textContent = `已開啟 ${card.dataset.group} 的操作`;
+          tracking = false;
+        }
+      };
+
+      const endSwipe = () => {
+        tracking = false;
+      };
+
+      card.addEventListener("touchstart", beginSwipe, { passive: true });
+      card.addEventListener("touchmove", moveSwipe, { passive: true });
+      card.addEventListener("touchend", endSwipe);
+      card.addEventListener("mousedown", beginSwipe);
+      card.addEventListener("mousemove", moveSwipe);
+      card.addEventListener("mouseup", endSwipe);
+      card.addEventListener("mouseleave", endSwipe);
+    }
+
+    function addSwipeActions(contact) {
+      if (contact.nextElementSibling?.classList.contains("swipe-actions")) return;
+      const actions = document.createElement("div");
+      actions.className = "swipe-actions";
+      actions.innerHTML = `
+        <button type="button" class="swipe-call">通話</button>
+        <button type="button" class="swipe-message">留言</button>
+        <button type="button" class="swipe-block">封鎖</button>
+        <button type="button" class="swipe-delete">刪除</button>
+      `;
+      contact.insertAdjacentElement("afterend", actions);
+      applyLanguage(true);
+
+      actions.querySelector(".swipe-call").addEventListener("click", () => {
+        startCall(contact.dataset);
+        if (contact.dataset.presence !== "blocked" && !isBlockedName(contact.dataset.name)) {
+          statusText.textContent = `正在撥號 · ${contact.dataset.name}`;
+        }
+      });
+
+      actions.querySelector(".swipe-message").addEventListener("click", () => {
+        openMessageModal(contact.dataset.name);
+        contact.classList.remove("swiped");
+        actions.classList.remove("show");
+      });
+
+      actions.querySelector(".swipe-block").addEventListener("click", () => {
+        confirmAction("封鎖使用者", `確定要封鎖「${contact.dataset.name}」嗎？封鎖後對方無法撥打電話或傳送訊息。`, () => {
+          blockNearbyUser(contact.dataset.name);
+          statusText.textContent = `已封鎖使用者 · ${contact.dataset.name}`;
+          contact.classList.remove("swiped");
+          actions.classList.remove("show");
+        });
+      });
+
+      actions.querySelector(".swipe-delete").addEventListener("click", () => {
+        confirmAction("刪除使用者", `確定要刪除「${contact.dataset.name}」嗎？`, () => {
+          actions.remove();
+          contact.remove();
+          statusText.textContent = `已刪除使用者 · ${contact.dataset.name}`;
+        });
+      });
+
+      let startX = 0;
+      let startY = 0;
+      let tracking = false;
+
+      const beginSwipe = event => {
+        const point = event.touches ? event.touches[0] : event;
+        startX = point.clientX;
+        startY = point.clientY;
+        tracking = true;
+      };
+
+      const moveSwipe = event => {
+        if (!tracking) return;
+        const point = event.touches ? event.touches[0] : event;
+        const dx = point.clientX - startX;
+        const dy = point.clientY - startY;
+        if (dx < -46 && Math.abs(dy) < 32) {
+          closeSwipeActions(contact);
+          contact.classList.add("swiped");
+          actions.classList.add("show");
+          statusText.textContent = `已開啟 ${contact.dataset.name} 的操作`;
+          tracking = false;
+        }
+      };
+
+      const endSwipe = () => {
+        tracking = false;
+      };
+
+      contact.addEventListener("touchstart", beginSwipe, { passive: true });
+      contact.addEventListener("touchmove", moveSwipe, { passive: true });
+      contact.addEventListener("touchend", endSwipe);
+      contact.addEventListener("mousedown", beginSwipe);
+      contact.addEventListener("mousemove", moveSwipe);
+      contact.addEventListener("mouseup", endSwipe);
+      contact.addEventListener("mouseleave", endSwipe);
+    }
+
+    [registerName, registerPhone, registerEmail, registerAge, verificationCodeInput, agreeTerms].forEach(input => {
+      input.addEventListener("input", validateRegistration);
+      input.addEventListener("change", validateRegistration);
+    });
+
+    registerName.addEventListener("input", renderDefaultUserAvatar);
+
+    registerAvatarPreview.addEventListener("click", () => registerAvatarInput.click());
+    registerAvatarInput.addEventListener("change", () => {
+      const file = registerAvatarInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = event => {
+        profileAvatarDataUrl = event.target.result;
+        profileAvatarCrop = { x: 50, y: 50, zoom: 1 };
+        renderAvatar(registerAvatarPreview, "CT", profileAvatarDataUrl);
+        renderAvatar(profileAvatarPreview, "CT", profileAvatarDataUrl);
+        showAvatarCropControls();
+        updateAccountButton();
+        statusText.textContent = "頭像已更新";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    genderOptions.forEach(button => {
+      button.addEventListener("click", () => {
+        selectedGender = button.dataset.gender;
+        genderOptions.forEach(item => item.classList.toggle("active", item === button));
+        validateRegistration();
+      });
+    });
+
+    profileGenderOptions.forEach(button => {
+      button.addEventListener("click", () => {
+        selectedProfileGender = button.dataset.profileGender;
+        syncProfileGender();
+      });
+    });
+
+    profileAvatarInput.addEventListener("change", () => {
+      const file = profileAvatarInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = event => {
+        profileAvatarDataUrl = event.target.result;
+        profileAvatarCrop = { x: 50, y: 50, zoom: 1 };
+        renderAvatar(profileAvatarPreview, "CT", profileAvatarDataUrl);
+        renderAvatar(registerAvatarPreview, "CT", profileAvatarDataUrl);
+        showAvatarCropControls();
+        updateAccountButton();
+        statusText.textContent = "頭像已更新";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    profileAvatarPreview.addEventListener("click", () => profileAvatarInput.click());
+    groupAvatarPreview.addEventListener("click", () => groupAvatarInput.click());
+
+    document.querySelectorAll(".avatar-crop").forEach(input => {
+      input.addEventListener("input", () => {
+        profileAvatarCrop[input.dataset.crop] = Number(input.value);
+        document.querySelectorAll(`.avatar-crop[data-crop="${input.dataset.crop}"]`).forEach(peer => {
+          peer.value = input.value;
+        });
+        applyAvatarCrop();
+      });
+    });
+
+    groupAvatarInput.addEventListener("change", () => {
+      const file = groupAvatarInput.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = event => {
+        groupAvatarDataUrl = event.target.result;
+        renderAvatar(groupAvatarPreview, initialsFromName(groupNameInput.value || "Group", "GP"), groupAvatarDataUrl);
+        statusText.textContent = "群組頭像已更新";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    groupNameInput.addEventListener("input", () => {
+      if (!groupAvatarDataUrl) {
+        renderAvatar(groupAvatarPreview, initialsFromName(groupNameInput.value || "Group", "GP"));
+      }
+    });
+
+    resendCodeButton.addEventListener("click", generateVerificationCode);
+
+    toggleTermsButton.addEventListener("click", () => {
+      termsOpened = true;
+      termsPanel.classList.toggle("show");
+      toggleTermsButton.textContent = termsPanel.classList.contains("show")
+        ? "收合使用條款、隱私權政策與免責聲明"
+        : "展開使用條款、隱私權政策與免責聲明";
+      validateRegistration();
+    });
+
+    completeRegistration.addEventListener("click", () => {
+      if (completeRegistration.disabled) return;
+      if (verificationCodeInput.value.trim() !== verificationCode) {
+        registerStatus.textContent = "簡訊碼輸入錯誤";
+        registrationSummary.classList.add("show");
+        registrationSummary.textContent = "簡訊碼輸入錯誤，請確認手機收到的 4 位數驗證碼後再試一次。";
+        verificationCodeInput.focus();
+        return;
+      }
+
+      const name = registerName.value.trim() || "使用者";
+      appRoot.classList.remove("locked");
+      mainNav.classList.remove("locked");
+      profileNameInput.value = name;
+      profilePhoneInput.value = registerPhone.value.trim();
+      profileEmailInput.value = registerEmail.value.trim();
+      selectedProfileGender = selectedGender;
+      syncProfileGender();
+      profileAgeInput.value = registerAge.value.trim();
+      renderDefaultUserAvatar();
+      updateAccountButton();
+      registrationSummary.classList.add("show");
+      registrationSummary.textContent = `註冊成功\n姓名：${name}\n電話：${registerPhone.value.trim()}\nEmail：${registerEmail.value.trim()}\n性別：${selectedGender}\n年齡：${registerAge.value.trim()}`;
+      registerStatus.textContent = "註冊成功";
+      statusText.textContent = "註冊成功 · 正在搜尋附近使用者";
+    });
+
+    function startCall(data) {
+      if (userHidden) {
+        hideCallPanel();
+        statusText.textContent = i18n[currentLanguage].hiddenBlocked;
+        return;
+      }
+      if (data.presence === "blocked" || isBlockedName(data.name)) {
+        hideCallPanel();
+        statusText.textContent = "已封鎖 · 無法撥打電話或傳送訊息";
+        return;
+      }
+
+      if (data.presence === "offline") {
+        stopCallTimer();
+        showCallPanel("active");
+        activeName.textContent = data.name;
+        activeMeta.textContent = data.meta;
+        activePhoto.textContent = data.initials;
+        activePhoto.className = `photo ${data.tone || ""}`.trim();
+        statusText.textContent = "離線（未開啟app）";
+        timer.textContent = "--:--";
+        endCall.style.opacity = ".55";
+        return;
+      }
+
+      if (data.presence === "incoming") {
+        stopCallTimer();
+        pendingIncomingCall = data;
+        showCallPanel("incoming");
+        activeName.textContent = data.name;
+        activeMeta.textContent = "來電中";
+        activePhoto.textContent = data.initials;
+        activePhoto.className = `photo ${data.tone || ""}`.trim();
+        incomingName.textContent = data.name;
+        incomingPhoto.textContent = data.initials;
+        incomingPhoto.className = `photo ${data.tone || ""}`.trim();
+        acceptCallSlider.value = "0";
+        statusText.textContent = `來電 · ${data.name}`;
+        timer.textContent = "--:--";
+        return;
+      }
+
+      showCallPanel("active");
+      activeName.textContent = data.name;
+      activeMeta.textContent = data.meta;
+      activePhoto.textContent = data.initials;
+      activePhoto.className = `photo ${data.tone || ""}`.trim();
+      statusText.textContent = data.presence === "calling" ? "通話（通話中）" : "線上（已開啟app）";
+      startCallTimer();
+      endCall.style.opacity = "1";
+    }
+
+    historyItems.forEach(item => {
+      item.addEventListener("click", () => startCall(item.dataset));
+    });
+
+    document.querySelectorAll(".history-item[data-gender]").forEach(addSwipeActions);
+    historyItems.forEach(addReportLongPress);
+
+    document.addEventListener("click", event => {
+      if (!event.target.closest(".contact") && !event.target.closest(".history-item") && !event.target.closest(".swipe-actions") && !event.target.closest(".friend-card") && !event.target.closest(".group-card") && !event.target.closest(".group-swipe-actions")) {
+        closeSwipeActions();
+      }
+    });
+
+    prevPageButton.addEventListener("click", () => {
+      if (paneHistoryIndex <= 0) return;
+      paneHistoryIndex -= 1;
+      showPane(paneHistory[paneHistoryIndex], false);
+    });
+
+    nextPageButton.addEventListener("click", () => {
+      if (paneHistoryIndex >= paneHistory.length - 1) return;
+      paneHistoryIndex += 1;
+      showPane(paneHistory[paneHistoryIndex], false);
+    });
+
+    paneButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        showPane(button.dataset.pane);
+      });
+    });
+
+    confirmCancel.addEventListener("click", () => {
+      confirmModal.classList.add("hidden");
+      confirmCallback = null;
+    });
+
+    confirmOk.addEventListener("click", () => {
+      const callback = confirmCallback;
+      confirmModal.classList.add("hidden");
+      confirmCallback = null;
+      if (callback) callback();
+    });
+
+    confirmModal.addEventListener("click", event => {
+      if (event.target === confirmModal) {
+        confirmModal.classList.add("hidden");
+        confirmCallback = null;
+      }
+    });
+
+    reportCancel.addEventListener("click", () => {
+      reportModal.classList.add("hidden");
+      reportReason.value = "";
+    });
+
+    reportModal.addEventListener("click", event => {
+      if (event.target === reportModal) {
+        reportModal.classList.add("hidden");
+      }
+    });
+
+    reportSend.addEventListener("click", () => {
+      reportIntro.textContent = currentLanguage === "en"
+        ? "Thank you for your feedback. A specialist will review and handle it."
+        : currentLanguage === "ja"
+          ? "ご連絡ありがとうございます。担当者が確認し対応します。"
+          : "感謝您的反應, 後續會有專人進行處理, 謝謝";
+      reportReason.value = "";
+      reportReason.placeholder = currentLanguage === "en" ? "Sent" : currentLanguage === "ja" ? "送信済み" : "已送出";
+      reportSend.disabled = true;
+      reportSend.textContent = currentLanguage === "en" ? "Sent" : currentLanguage === "ja" ? "送信済み" : "已送出";
+      statusText.textContent = currentLanguage === "en" ? "Report sent" : currentLanguage === "ja" ? "報告を送信しました" : "檢舉已送出";
+    });
+
+    messageCancel.addEventListener("click", () => {
+      messageModal.classList.add("hidden");
+      pendingMessageTarget = null;
+      stopMessageVoice();
+    });
+
+    messageModal.addEventListener("click", event => {
+      if (event.target === messageModal) {
+        messageModal.classList.add("hidden");
+        pendingMessageTarget = null;
+        stopMessageVoice();
+      }
+    });
+
+    messageVoiceButton.addEventListener("click", async () => {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (messageVoiceActive) {
+        recognition?.stop();
+        micStream?.getTracks().forEach(track => track.stop());
+        messageVoiceActive = false;
+        messageVoiceButton.classList.remove("active");
+        messageText.placeholder = i18n[currentLanguage].messagePlaceholder;
+        return;
+      }
+
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (error) {
+        statusText.textContent = i18n[currentLanguage].micUnavailable;
+        return;
+      }
+
+      messageVoiceActive = true;
+      messageVoiceButton.classList.add("active");
+      messageText.placeholder = currentLanguage === "en"
+        ? "Listening... speak your message"
+        : currentLanguage === "ja"
+          ? "音声入力中..."
+          : "正在聽取語音留言...";
+
+      if (!SpeechRecognition) {
+        statusText.textContent = i18n[currentLanguage].micUnavailable;
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.lang = currentLanguage === "en" ? "en-US" : currentLanguage === "ja" ? "ja-JP" : "zh-TW";
+      recognition.interimResults = true;
+      recognition.continuous = false;
+      recognition.onresult = event => {
+        const transcript = [...event.results].map(result => result[0].transcript).join("");
+        messageText.value = transcript;
+      };
+      recognition.onend = () => {
+        micStream?.getTracks().forEach(track => track.stop());
+        messageVoiceActive = false;
+        messageVoiceButton.classList.remove("active");
+        messageText.placeholder = i18n[currentLanguage].messagePlaceholder;
+      };
+      recognition.onerror = () => {
+        statusText.textContent = i18n[currentLanguage].micUnavailable;
+      };
+      recognition.start();
+      messageText.focus();
+    });
+
+    messageSend.addEventListener("click", () => {
+      if (!pendingMessageTarget) return;
+      const text = messageText.value.trim() || (currentLanguage === "en" ? "Voice message" : currentLanguage === "ja" ? "音声メッセージ" : "語音留言");
+      const name = pendingMessageTarget.name;
+      if (!messageHistory[name]) messageHistory[name] = [];
+      messageHistory[name].push({
+        from: "我",
+        text,
+        time: new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })
+      });
+      if (pendingMessageTarget.noteElement) {
+        pendingMessageTarget.noteElement.textContent = currentLanguage === "en"
+          ? `Message: ${text}`
+          : currentLanguage === "ja"
+            ? `メッセージ：${text}`
+            : `留言：${text}`;
+      }
+      statusText.textContent = currentLanguage === "en"
+        ? `Message sent · ${name}`
+        : currentLanguage === "ja"
+          ? `メッセージ送信 · ${name}`
+          : `留言已送出 · ${name}`;
+      renderMessageHistory(name);
+      messageModal.classList.add("hidden");
+      pendingMessageTarget = null;
+      stopMessageVoice();
+    });
+
+    navButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        showPane(button.dataset.navPane);
+      });
+    });
+
+    actionButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        if (button.dataset.toggle === "record") {
+          if (callRecorder?.state === "recording") {
+            stopCallRecording();
+          } else {
+            startCallRecording(button);
+          }
+          return;
+        }
+        button.classList.toggle("active");
+      });
+    });
+
+    endCall.addEventListener("click", event => {
+      hideCallPanel();
+      statusText.textContent = "通話已結束";
+      event.currentTarget.style.opacity = ".55";
+    });
+
+    rejectCall.addEventListener("click", () => {
+      const name = pendingIncomingCall?.name || activeName.textContent;
+      hideCallPanel();
+      pendingIncomingCall = null;
+      statusText.textContent = `已拒絕通話 · ${name}`;
+    });
+
+    function acceptIncomingCall() {
+      if (!pendingIncomingCall) return;
+      const data = {
+        ...pendingIncomingCall,
+        presence: "online",
+        meta: pendingIncomingCall.meta || "來電已接聽"
+      };
+      pendingIncomingCall = null;
+      startCall(data);
+      statusText.textContent = `通話（通話中） · ${data.name}`;
+      acceptCallSlider.value = "0";
+    }
+
+    acceptCallSlider.addEventListener("input", () => {
+      if (Number(acceptCallSlider.value) >= 88) {
+        acceptIncomingCall();
+      }
+    });
+
+    searchUserButton.addEventListener("click", renderSearchResults);
+    searchNameInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") renderSearchResults();
+    });
+
+    function wireFriendCard(card) {
+      card.querySelector(".call-friend").addEventListener("click", () => {
+        const name = card.dataset.friend;
+        if (card.classList.contains("blocked") || isBlockedName(name)) {
+          statusText.textContent = `已封鎖 · 無法撥打給 ${name}`;
+          return;
+        }
+        const initials = card.querySelector(".photo")?.textContent.trim() || name.slice(0, 2).toUpperCase();
+        const tone = [...card.querySelector(".photo")?.classList || []].find(item => item !== "photo") || "";
+        startCall({
+          name,
+          meta: "好友 · 線上（已開啟app）",
+          initials,
+          tone,
+          presence: "online"
+        });
+        card.classList.remove("swiped");
+      });
+
+      card.querySelector(".message-friend").addEventListener("click", () => {
+        const name = card.dataset.friend;
+        if (card.classList.contains("blocked") || isBlockedName(name)) {
+          card.querySelector(".friend-note").textContent = "已封鎖：無法傳送訊息";
+          statusText.textContent = `已封鎖 · 無法傳送訊息給 ${name}`;
+          return;
+        }
+        openMessageModal(name, card.querySelector(".friend-note"));
+        card.classList.remove("swiped");
+      });
+
+      card.querySelector(".remove-friend").addEventListener("click", () => {
+        const name = card.dataset.friend;
+        confirmAction("刪除好友", `確定要刪除好友「${name}」嗎？`, () => {
+          card.remove();
+          statusText.textContent = `已刪除好友 · ${name}`;
+        });
+      });
+
+      card.querySelector(".block-friend").addEventListener("click", () => {
+        const name = card.dataset.friend;
+        confirmAction("封鎖使用者", `確定要封鎖「${name}」嗎？封鎖後對方無法撥打電話或傳送訊息。`, () => {
+          card.classList.add("blocked");
+          card.querySelector(".friend-note").textContent = "已封鎖：不接收來電與留言";
+          const pill = card.querySelector(".status-pill");
+          pill.className = "status-pill blocked";
+          pill.textContent = "已封鎖";
+          card.querySelector(".call-friend").disabled = true;
+          card.querySelector(".message-friend").disabled = true;
+          card.querySelector(".block-friend").disabled = true;
+          blockNearbyUser(name);
+          statusText.textContent = `已封鎖使用者 · ${name}`;
+        });
+      });
+
+      let startX = 0;
+      let startY = 0;
+      let tracking = false;
+
+      const beginSwipe = event => {
+        if (event.target.closest(".friend-actions")) return;
+        const point = event.touches ? event.touches[0] : event;
+        startX = point.clientX;
+        startY = point.clientY;
+        tracking = true;
+      };
+
+      const moveSwipe = event => {
+        if (!tracking) return;
+        const point = event.touches ? event.touches[0] : event;
+        const dx = point.clientX - startX;
+        const dy = point.clientY - startY;
+        if (dx < -46 && Math.abs(dy) < 32) {
+          closeSwipeActions(card);
+          card.classList.add("swiped");
+          statusText.textContent = `已開啟 ${card.dataset.friend} 的操作`;
+          tracking = false;
+        }
+      };
+
+      const endSwipe = () => {
+        tracking = false;
+      };
+
+      card.addEventListener("touchstart", beginSwipe, { passive: true });
+      card.addEventListener("touchmove", moveSwipe, { passive: true });
+      card.addEventListener("touchend", endSwipe);
+      card.addEventListener("mousedown", beginSwipe);
+      card.addEventListener("mousemove", moveSwipe);
+      card.addEventListener("mouseup", endSwipe);
+      card.addEventListener("mouseleave", endSwipe);
+    }
+
+    function blockNearbyUser(name) {
+      document.querySelectorAll(".contact").forEach(contact => {
+        if (contact.dataset.name !== name) return;
+        contact.classList.add("blocked");
+        contact.dataset.presence = "blocked";
+        contact.dataset.meta = "已封鎖使用者";
+        contact.querySelector(".contact-meta").textContent = "已封鎖使用者";
+        const pill = contact.querySelector(".status-pill");
+        pill.className = "status-pill blocked";
+        pill.textContent = "已封鎖";
+      });
+
+      document.querySelectorAll(".friend-card").forEach(card => {
+        if (card.dataset.friend !== name) return;
+        card.classList.add("blocked");
+        card.querySelector(".friend-note").textContent = "已封鎖：無法撥打電話與傳送訊息";
+        const pill = card.querySelector(".status-pill");
+        pill.className = "status-pill blocked";
+        pill.textContent = "已封鎖";
+        card.querySelector(".call-friend").disabled = true;
+        card.querySelector(".message-friend").disabled = true;
+        card.querySelector(".block-friend").disabled = true;
+      });
+    }
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    document.querySelectorAll(".friend-card").forEach(wireFriendCard);
+    document.querySelectorAll(".group-card").forEach(addGroupSwipeActions);
+
+    document.querySelector("#addFriend").addEventListener("click", () => {
+      const name = friendNameInput.value.trim() || "New Friend";
+      const initials = name.split(/\s+/).map(part => part[0]).join("").slice(0, 2).toUpperCase() || "NF";
+      createFriendCard(name, initials);
+      friendNameInput.value = "";
+      statusText.textContent = `已加入好友 · ${name}`;
+    });
+
+    openGroupForm.addEventListener("click", () => {
+      editingGroupCard = null;
+      groupAvatarDataUrl = "";
+      groupAvatarInput.value = "";
+      renderAvatar(groupAvatarPreview, initialsFromName(groupNameInput.value || "Group", "GP"));
+      renderGroupMembers();
+      groupForm.classList.remove("hidden");
+      createGroupButton.textContent = i18n[currentLanguage].create;
+      statusText.textContent = "建立群組";
+    });
+
+    cancelGroupButton.addEventListener("click", () => {
+      groupForm.classList.add("hidden");
+      editingGroupCard = null;
+      groupAvatarDataUrl = "";
+      groupAvatarInput.value = "";
+      createGroupButton.textContent = i18n[currentLanguage].create;
+      statusText.textContent = "群組";
+    });
+
+    createGroupButton.addEventListener("click", () => {
+      const name = groupNameInput.value.trim() || "新群組";
+      const avatar = initialsFromName(name, "GP");
+      const members = [...groupMemberList.querySelectorAll("input:checked")].map(input => input.value);
+      const finalMembers = members.length ? members : ["尚未選擇成員"];
+      if (editingGroupCard) {
+        editingGroupCard.dataset.group = name;
+        editingGroupCard.dataset.members = finalMembers.join(", ");
+        editingGroupCard.dataset.avatar = avatar;
+        editingGroupCard.dataset.avatarImage = groupAvatarDataUrl;
+        editingGroupCard.querySelector(".photo").innerHTML = groupAvatarDataUrl ? `<img src="${groupAvatarDataUrl}" alt="群組頭像">` : escapeHtml(avatar);
+        editingGroupCard.querySelector("strong").textContent = name;
+        editingGroupCard.querySelector(".group-meta").textContent = finalMembers.join(", ");
+        statusText.textContent = `已更新群組 · ${name}`;
+        editingGroupCard = null;
+      } else {
+        createGroupCard(name, avatar, finalMembers, groupAvatarDataUrl);
+        statusText.textContent = `已建立群組 · ${name}`;
+      }
+      groupForm.classList.add("hidden");
+      groupAvatarDataUrl = "";
+      groupAvatarInput.value = "";
+      createGroupButton.textContent = i18n[currentLanguage].create;
+    });
+
+    function openUserProfile(event) {
+      event?.preventDefault();
+      event?.stopPropagation();
+      appRoot.classList.remove("locked");
+      mainNav.classList.remove("locked");
+      selectedProfileGender = selectedGender || selectedProfileGender || "男";
+      syncProfileGender();
+      showPane("profile");
+      requestAnimationFrame(syncProfileGender);
+      statusText.textContent = "編輯使用者資料";
+    }
+
+    accountButton.addEventListener("click", openUserProfile);
+    accountButton.addEventListener("pointerup", openUserProfile);
+
+    saveProfileButton.addEventListener("click", () => {
+      const name = profileNameInput.value.trim() || "使用者";
+      registerName.value = name;
+      registerPhone.value = profilePhoneInput.value.trim();
+      registerEmail.value = profileEmailInput.value.trim();
+      selectedGender = selectedProfileGender;
+      registerAge.value = profileAgeInput.value.trim();
+      updateAccountButton();
+      statusText.textContent = "使用者資料已更新";
+    });
+
+    backToContactsButton.addEventListener("click", () => {
+      showPane("contacts");
+      statusText.textContent = "搜尋附近已安裝 Voice 的人";
+    });
+
+    themeSelect.addEventListener("change", () => {
+      screen.classList.remove("theme-teal", "theme-rose");
+      if (themeSelect.value !== "dark") screen.classList.add(`theme-${themeSelect.value}`);
+      statusText.textContent = "背景顏色已更新";
+    });
+
+    fontSizeSelect.addEventListener("change", () => {
+      screen.classList.remove("font-small", "font-large");
+      if (fontSizeSelect.value !== "normal") screen.classList.add(`font-${fontSizeSelect.value}`);
+      statusText.textContent = "字體大小已更新";
+    });
+
+    visibilitySelect.addEventListener("change", applyUserVisibility);
+
+    nearbyRange.addEventListener("input", () => {
+      renderNearbyContacts();
+      statusText.textContent = `附近搜尋距離 · ${formatDistance(Number(nearbyRange.value))}`;
+    });
+
+    languageSelect.addEventListener("change", () => {
+      currentLanguage = languageSelect.value;
+      applyLanguage();
+      renderNearbyContacts();
+    });
+
+    generateVerificationCode();
+    avatarAccent = avatarAccents[Math.floor(Math.random() * avatarAccents.length)];
+    renderDefaultUserAvatar();
+    renderNearbyContacts();
+    renderSearchResults();
+    applyLanguage(true);
+    if (new URLSearchParams(window.location.search).get("demo") === "home") {
+      appRoot.classList.remove("locked");
+      mainNav.classList.remove("locked");
+      updateAccountButton();
+      showPane("contacts");
+      statusText.textContent = "作品集展示模式：已進入附近語音通話首頁";
+      if (new URLSearchParams(window.location.search).get("preview") === "1") {
+        document.body.classList.add("portfolio-watermark");
+        accountButton.textContent = "Crovantix";
+        document.querySelectorAll("button, input, select, textarea").forEach(element => { element.disabled = true; });
+        document.querySelectorAll("a").forEach(element => { element.style.pointerEvents = "none"; });
+        const blockPreviewEvent = event => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        };
+        ["click", "submit", "change", "input", "keydown", "pointerdown", "pointerup"].forEach(type => document.addEventListener(type, blockPreviewEvent, true));
+        statusText.textContent = "作品集首頁樣板展示，互動功能已關閉。";
+      }
+    }
+    updatePageTracker("contacts");
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

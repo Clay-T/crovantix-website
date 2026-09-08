@@ -1,0 +1,3633 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>社群媒體助手 iOS App</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b12;
+      --panel: #121a27;
+      --panel-2: #192536;
+      --ink: #f8fbff;
+      --muted: #a9b7c7;
+      --line: rgba(255,255,255,.13);
+      --cyan: #58d7ff;
+      --pink: #ff7ab6;
+      --mint: #79f2c3;
+      --gold: #ffd166;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255,122,182,.28), transparent 34%),
+        radial-gradient(circle at 78% 8%, rgba(88,215,255,.22), transparent 30%),
+        linear-gradient(145deg, #070a11, #111827 58%, #080b12);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+    }
+
+    body[data-theme="ocean"] {
+      background:
+        radial-gradient(circle at 16% 12%, rgba(121,242,195,.24), transparent 32%),
+        radial-gradient(circle at 82% 8%, rgba(88,215,255,.28), transparent 34%),
+        linear-gradient(145deg, #04151c, #0d2433 60%, #061017);
+    }
+
+    body[data-theme="sunset"] {
+      background:
+        radial-gradient(circle at 16% 12%, rgba(255,122,182,.30), transparent 34%),
+        radial-gradient(circle at 82% 8%, rgba(255,209,102,.24), transparent 32%),
+        linear-gradient(145deg, #160812, #251929 58%, #0b0a12);
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .phone {
+      width: min(430px, 100%);
+      height: min(900px, calc(100vh - 28px));
+      min-height: 760px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 34px;
+      padding: 12px;
+      background: #05070c;
+      box-shadow: 0 28px 90px rgba(0,0,0,.48);
+    }
+
+    .screen {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 26px;
+      background: linear-gradient(180deg, #111927, #0b111a);
+    }
+
+    .island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 112px;
+      height: 28px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #03050a;
+      z-index: 4;
+    }
+
+    .status {
+      height: 46px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 22px 8px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .app {
+      height: calc(100% - 46px);
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 72px;
+      overflow: hidden;
+    }
+
+    .app.font-small { font-size: 14px; }
+    .app.font-normal { font-size: 16px; }
+    .app.font-large { font-size: 18px; }
+    .app.font-small h1 { font-size: 24px; }
+    .app.font-large h1 { font-size: 30px; }
+    .app.font-small label,
+    .app.font-small .hint,
+    .app.font-small .subline,
+    .app.font-small .tabbar button { font-size: 11px; }
+    .app.font-large label,
+    .app.font-large .hint,
+    .app.font-large .subline,
+    .app.font-large .tabbar button { font-size: 14px; }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .user-pill,
+    .credit-pill {
+      min-height: 34px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 12px;
+      color: #061018;
+      background: linear-gradient(135deg, #fff, var(--cyan));
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .credit-pill { background: linear-gradient(135deg, var(--gold), var(--pink)); }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 27px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      min-height: 34px;
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .content {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .page { display: none; }
+    .page.active { display: grid; gap: 12px; }
+
+    .card,
+    .login-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(18,26,39,.9);
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .label-row strong { font-size: 16px; }
+    .label-row span { color: var(--cyan); font-size: 12px; font-weight: 850; }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--ink);
+      background: #0d1622;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    input[type="file"] { padding: 9px; }
+
+    .form-grid { display: grid; gap: 10px; }
+
+    .code-row,
+    .button-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .primary,
+    .secondary,
+    .platform {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 14px;
+      color: #061018;
+      background: var(--cyan);
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: #243448;
+    }
+
+    .hint {
+      min-height: 20px;
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: pre-line;
+    }
+
+    .terms {
+      max-height: 190px;
+      overflow: auto;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: #0c1420;
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+
+    .check-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+    }
+
+    .preview {
+      position: relative;
+      min-height: 250px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(135deg, #28384c, #101827);
+    }
+
+    .preview.has-photo {
+      min-height: auto;
+      aspect-ratio: var(--photo-ratio, 1 / 1);
+      max-height: 430px;
+    }
+
+    .preview img {
+      width: 100%;
+      height: 100%;
+      max-height: none;
+      object-fit: contain;
+      display: block;
+      background: #05070c;
+    }
+
+    .preview video {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      display: block;
+      background: #05070c;
+    }
+
+    .camera-controls {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .camera-controls[hidden],
+    .tabbar[hidden] {
+      display: none !important;
+    }
+
+    .empty-preview {
+      display: grid;
+      gap: 8px;
+      place-items: center;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .style-grid,
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .style-option,
+    .platform {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #172233;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .style-option.active,
+    .platform.active {
+      color: #061018;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--cyan), var(--pink));
+    }
+
+    .photo-type-panel {
+      display: none;
+      gap: 10px;
+      border-color: rgba(82, 204, 255, .42);
+      background: linear-gradient(135deg, rgba(82, 204, 255, .12), rgba(255, 130, 170, .08));
+    }
+
+    .photo-type-panel.active {
+      display: grid;
+    }
+
+    .recommend-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .recommend-pill {
+      border: 1px solid rgba(82, 204, 255, .45);
+      border-radius: 999px;
+      padding: 8px 10px;
+      color: var(--cyan);
+      background: rgba(82, 204, 255, .08);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .platform.unavailable {
+      opacity: .45;
+      filter: grayscale(1);
+    }
+
+    .media-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .media-account-card {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0d1622;
+    }
+
+    .media-account-card strong {
+      color: var(--cyan);
+      font-size: 13px;
+    }
+
+    .filter-original img { filter: none; }
+    .filter-beauty img { filter: brightness(1.08) contrast(1.06) saturate(1.18); }
+    .filter-anime img { filter: saturate(1.65) contrast(1.28) brightness(1.08); }
+    .filter-cinematic img { filter: contrast(1.18) saturate(.82) sepia(.2); }
+    .filter-clean img { filter: brightness(1.12) saturate(.95); }
+    .filter-vintage img { filter: sepia(.36) saturate(.88) contrast(1.08); }
+    .filter-hd-beauty img { filter: brightness(1.16) contrast(1.12) saturate(1.25) drop-shadow(0 0 14px rgba(255,122,182,.18)); }
+    .filter-product img { filter: brightness(1.18) contrast(1.3) saturate(1.08); }
+    .filter-portrait img { filter: contrast(1.1) saturate(.98) sepia(.08) drop-shadow(0 12px 28px rgba(0,0,0,.22)); }
+    .filter-skin-tone img { filter: brightness(1.1) contrast(1.04) saturate(1.08) hue-rotate(-3deg); }
+    .filter-night-fix img { filter: brightness(1.28) contrast(1.18) saturate(1.2); }
+    .filter-food-pop img { filter: brightness(1.12) contrast(1.22) saturate(1.55); }
+    .filter-sky-blue img { filter: brightness(1.1) contrast(1.12) saturate(1.32) hue-rotate(8deg); }
+    .filter-bg-clean img { filter: brightness(1.16) contrast(1.18) saturate(.94); }
+    .filter-detail-sharp img { filter: contrast(1.34) saturate(1.12); }
+    .filter-webtoon img { filter: saturate(1.75) contrast(1.42) brightness(1.08); }
+    .filter-handdrawn-fantasy img { filter: saturate(1.12) contrast(1.04) sepia(.08) brightness(1.01); }
+    .filter-chinese-fantasy img { filter: saturate(1.22) contrast(1.08) sepia(.18) brightness(1.06); }
+    .filter-sketch img { filter: grayscale(1) contrast(1.22) brightness(1.08); }
+
+    .unlock-panel[hidden] {
+      display: none !important;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .tool-button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #172233;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .sticker {
+      position: absolute;
+      left: 42%;
+      top: 42%;
+      z-index: 3;
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+      font-size: 34px;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,.35));
+    }
+
+    .sticker.active {
+      outline: 2px dashed var(--cyan);
+      outline-offset: 6px;
+      border-radius: 8px;
+    }
+
+    .sticker-resize-handle {
+      position: absolute;
+      right: -17px;
+      bottom: -17px;
+      width: 24px;
+      height: 24px;
+      display: none;
+      border: 2px solid #061018;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--cyan), var(--mint));
+      box-shadow: 0 6px 16px rgba(0,0,0,.34);
+      cursor: nwse-resize;
+      touch-action: none;
+    }
+
+    .sticker.active .sticker-resize-handle {
+      display: block;
+    }
+
+    .sticker-resize-handle::before {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border-right: 2px solid rgba(6,16,24,.72);
+      border-bottom: 2px solid rgba(6,16,24,.72);
+    }
+
+    .sticker-control-panel {
+      display: none;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .sticker-control-panel.active {
+      display: grid;
+    }
+
+    .sticker-control-panel button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #172233;
+      color: var(--ink);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .caption-box {
+      border-left: 3px solid var(--pink);
+      padding: 12px;
+      border-radius: 8px;
+      background: #0d1622;
+      color: #eaf6ff;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .post-image-preview {
+      min-height: 150px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      margin-bottom: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0d1622;
+      color: var(--muted);
+      text-align: center;
+      aspect-ratio: var(--post-photo-ratio, 1 / 1);
+    }
+
+    .post-image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #05070c;
+    }
+
+    .upgrade-alert {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255,209,102,.44);
+      border-radius: 8px;
+      background: rgba(255,209,102,.12);
+    }
+
+    .upgrade-alert[hidden] {
+      display: none !important;
+    }
+
+    .plan-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .plan-card {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0d1622;
+    }
+
+    .plan-card strong {
+      color: var(--cyan);
+      font-size: 16px;
+    }
+
+    .feature-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .settings-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .setting-row {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0d1622;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .setting-choice {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #172233;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .setting-choice.active {
+      color: #061018;
+      border-color: transparent;
+      background: var(--cyan);
+    }
+
+    input[type="range"] {
+      accent-color: var(--cyan);
+    }
+
+    .tabbar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 6;
+      height: 66px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--line);
+      background: rgba(9,15,24,.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .tabbar button {
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 2px;
+      min-width: 0;
+      white-space: nowrap;
+      font-size: 10px;
+      font-weight: 780;
+      cursor: pointer;
+    }
+
+    .tabbar button.active {
+      color: var(--cyan);
+      background: transparent;
+    }
+
+    .tabbar button span:not(.nav-symbol) {
+      white-space: nowrap;
+    }
+
+    .nav-symbol {
+      width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 0; }
+      .phone {
+        width: 100%;
+        height: 100vh;
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+      }
+      .screen { border-radius: 0; }
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="phone">
+    <section class="screen" aria-label="社群媒體助手 iOS app prototype">
+      <div class="island" aria-hidden="true"></div>
+      <div class="status"><span>9:41</span><span>5G ◼</span></div>
+      <div class="app font-normal" id="appShell">
+        <div class="toolbar">
+          <button class="user-pill" id="userButton" type="button">尚未註冊</button>
+          <button class="credit-pill" id="creditButton" type="button">剩餘點數 10</button>
+        </div>
+        <h1 id="appTitle">社群媒體助手</h1>
+        <p class="subline" id="appStatus">登入後可選照片、套用風格、產生短文章並發送到社群平台。</p>
+        <div class="content">
+          <div class="upgrade-alert" id="creditEmptyAlert" hidden>
+            <strong id="creditEmptyTitle">點數已用完</strong>
+            <span id="creditEmptyBody">請點選升級取得更多點數。</span>
+            <button class="primary" id="creditUpgradeButton" type="button">升級</button>
+          </div>
+          <section class="page active" id="loginPage">
+            <section class="login-card">
+              <div class="label-row"><strong id="loginTitle">登入 / 註冊</strong><span id="loginBadge">首次使用</span></div>
+              <div class="form-grid">
+                <label><span id="nameLabel">使用者姓名</span><input id="loginName" value="Clay Tseng" autocomplete="name"></label>
+                <label><span id="phoneLabel">電話</span><input id="loginPhone" value="0912-345-678" inputmode="tel" autocomplete="tel"></label>
+                <label><span id="emailLabel">Email</span><input id="loginEmail" value="clay@example.com" inputmode="email" autocomplete="email"></label>
+                <section class="media-grid" id="loginMediaAccounts">
+                  <div class="label-row"><strong id="loginMediaTitle">Media 平台帳密</strong><span id="loginMediaBadge">可留空</span></div>
+                  <div class="media-account-card">
+                    <strong>Facebook</strong>
+                    <label>帳號<input id="loginFacebookAccount" placeholder="Facebook 帳號"></label>
+                    <label>密碼<input id="loginFacebookPassword" type="password" placeholder="Facebook 密碼"></label>
+                  </div>
+                  <div class="media-account-card">
+                    <strong>Instagram</strong>
+                    <label>帳號<input id="loginInstagramAccount" placeholder="Instagram 帳號"></label>
+                    <label>密碼<input id="loginInstagramPassword" type="password" placeholder="Instagram 密碼"></label>
+                  </div>
+                  <div class="media-account-card">
+                    <strong>Threads</strong>
+                    <label>帳號<input id="loginThreadsAccount" placeholder="Threads 帳號"></label>
+                    <label>密碼<input id="loginThreadsPassword" type="password" placeholder="Threads 密碼"></label>
+                  </div>
+                  <div class="media-account-card">
+                    <strong>LINE</strong>
+                    <label>帳號<input id="loginLINEAccount" placeholder="LINE 帳號"></label>
+                    <label>密碼<input id="loginLINEPassword" type="password" placeholder="LINE 密碼"></label>
+                  </div>
+                  <div class="media-account-card">
+                    <strong>X</strong>
+                    <label>帳號<input id="loginXAccount" placeholder="X 帳號"></label>
+                    <label>密碼<input id="loginXPassword" type="password" placeholder="X 密碼"></label>
+                  </div>
+                  <div class="media-account-card">
+                    <strong>Email</strong>
+                    <label>帳號<input id="loginEmailPlatformAccount" placeholder="Email 帳號"></label>
+                    <label>密碼<input id="loginEmailPlatformPassword" type="password" placeholder="Email 密碼"></label>
+                  </div>
+                </section>
+                <label><span id="codeLabel">簡訊驗證碼</span>
+                  <span class="code-row">
+                    <input id="loginCode" maxlength="4" inputmode="numeric" placeholder="輸入 4 位數">
+                    <button class="secondary" id="sendCode" type="button">發送驗證碼</button>
+                  </span>
+                  <span class="hint" id="codeHint"></span>
+                </label>
+                <details id="termsDetails">
+                  <summary id="termsSummary">展開使用條款、隱私權政策與免責聲明</summary>
+                  <div class="terms">
+                    <span id="termsText">社群媒體助手 App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「社群媒體助手 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供社群媒體內容創作、AI 文案生成、貼文排程、留言回覆建議、社群數據分析、圖片與影片內容輔助、語音互動及相關社群媒體管理服務，所有內容僅供一般資訊、創作及工作輔助用途。
+
+二、AI 內容聲明
+
+本 App 部分內容可能由 AI 系統自動生成，包括貼文內容、文案、標題、留言建議、Hashtag、圖片描述、影片腳本、語音回覆或其他互動內容。
+
+本公司不保證 AI 所生成內容之正確性、完整性、即時性、合法性、原創性、適用性或符合各社群平台規範。
+
+AI 產生之內容僅供使用者參考，使用者應自行審核、修改並確認其內容後再行發布。
+
+三、社群平台與第三方服務聲明
+
+本 App 可能串接第三方社群平台或服務，包括但不限於 Facebook、Instagram、Threads、X（Twitter）、YouTube、TikTok、LinkedIn 等。
+
+本公司並非上述社群平台之經營者，亦不保證第三方平台服務之可用性、穩定性或持續性。
+
+若因第三方平台政策變更、API 限制、帳號停權、內容下架或其他第三方因素導致服務受影響，本公司不負相關責任。
+
+四、使用風險與免責聲明
+
+使用者應自行判斷並承擔使用本 App 所產生之一切風險與責任。
+
+本 App 僅提供 AI 與社群媒體管理輔助服務，不保證：
+
+貼文觸及率
+粉絲成長
+廣告成效
+行銷成果
+商業收益
+社群演算法推薦
+社群平台審核結果
+
+使用者因依據本 App 提供之內容、AI 建議、數據分析、貼文排程或其他資訊所作之任何商業決策、廣告投放、內容發布或其他行為而產生之任何損失、損害或爭議，均由使用者自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+五、使用者內容
+
+使用者應確保其上傳、建立、發布或管理之內容符合相關法律及第三方平台規範。
+
+使用者不得利用本 App 製作、發布或散布任何違法、侵權、誹謗、詐騙、色情、暴力、仇恨、垃圾訊息或其他違反公共秩序善良風俗之內容。
+
+使用者應自行負擔其發布內容之一切法律責任。
+
+六、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+使用者帳號資訊
+Email
+裝置資訊
+IP 位址
+使用紀錄
+社群平台授權資訊
+AI 對話紀錄
+貼文內容
+排程資訊
+崩潰紀錄與分析資料
+
+七、資料用途
+
+蒐集資料主要用於：
+
+提供社群媒體管理服務
+AI 文案生成與內容分析
+社群排程與發布功能
+改善使用體驗
+系統安全維護
+客服支援
+防止詐騙、濫用或違法行為
+提升 AI 與系統服務品質
+
+八、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+OpenAI
+Firebase
+Google Analytics
+社群平台 API
+雲端儲存服務
+AI 模型服務
+
+部分資料可能因提供服務之需要而傳輸至第三方服務供應商。
+
+九、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、第三方平台介接或資料儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及第三方社群平台登入資訊，避免未經授權之存取。
+
+十、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、資料、AI 系統及相關內容，均屬本公司或合法授權人所有。
+
+未經本公司書面同意，不得重製、修改、散布、反向工程、破解或用於任何商業用途。
+
+使用者對其自行建立或上傳之內容仍保有其依法享有之智慧財產權，但使用者授權本公司於提供本 App 服務之必要範圍內處理、儲存及傳輸該等內容。
+
+十一、使用者權利
+
+使用者得依相關法律規定，就其個人資料行使查詢、閱覽、更正、補充、刪除或停止蒐集、處理及利用等權利。
+
+十二、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利。修改後內容將公布於本 App 或相關網站，自公告之日起生效。使用者於修改後繼續使用本 App，即視為已閱讀、了解並同意接受修訂後之內容。</span>
+                  </div>
+                </details>
+                <label class="check-row"><input id="agreeTerms" type="checkbox"><span id="agreeLabel">我已閱讀並同意使用條款、隱私權政策與免責聲明</span></label>
+                <button class="primary" id="finishLogin" type="button">完成登入</button>
+                <p class="hint" id="loginHint"></p>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="profilePage">
+            <section class="login-card">
+              <div class="label-row"><strong id="profileTitle">使用者資料</strong><span id="profileBadge">可修改</span></div>
+              <div class="form-grid">
+                <label><span id="profileNameLabel">使用者姓名</span><input id="profileName" value="Clay Tseng" autocomplete="name"></label>
+                <label><span id="profilePhoneLabel">電話</span><input id="profilePhone" value="0912-345-678" inputmode="tel" autocomplete="tel"></label>
+                <label><span id="profileEmailLabel">Email</span><input id="profileEmail" value="clay@example.com" inputmode="email" autocomplete="email"></label>
+                <label><span id="profileCodeLabel">修改驗證碼</span>
+                  <span class="code-row">
+                    <input id="profileCode" maxlength="4" inputmode="numeric" placeholder="輸入 4 位數">
+                    <button class="secondary" id="sendProfileCode" type="button">發送驗證碼</button>
+                  </span>
+                  <span class="hint" id="profileCodeHint">若修改電話或 Email，需重新驗證。</span>
+                </label>
+                <section class="media-grid" id="profileMediaAccounts">
+                  <div class="label-row"><strong id="profileMediaTitle">Media 平台帳密</strong><span id="profileMediaBadge">更新發文權限</span></div>
+                  <div class="media-account-card">
+                    <strong>Facebook</strong>
+                    <label>帳號<input id="profileFacebookAccount" placeholder="Facebook 帳號"></label>
+                    <label>密碼<input id="profileFacebookPassword" type="password" placeholder="Facebook 密碼"></label>
+                  </div>
+                  <div class="media-account-card">
+                    <strong>Instagram</strong>
+                    <label>帳號<input id="profileInstagramAccount" placeholder="Instagram 帳號"></label>
+                    <label>密碼<input id="profileInstagramPassword" type="password" placeholder="Instagram 密碼"></label>
+                  </div>
+                  <div class="media-account-card">
+                    <strong>Threads</strong>
+                    <label>帳號<input id="profileThreadsAccount" placeholder="Threads 帳號"></label>
+                    <label>密碼<input id="profileThreadsPassword" type="password" placeholder="Threads 密碼"></label>
+                  </div>
+                  <div class="media-account-card">
+                    <strong>LINE</strong>
+                    <label>帳號<input id="profileLINEAccount" placeholder="LINE 帳號"></label>
+                    <label>密碼<input id="profileLINEPassword" type="password" placeholder="LINE 密碼"></label>
+                  </div>
+                  <div class="media-account-card">
+                    <strong>X</strong>
+                    <label>帳號<input id="profileXAccount" placeholder="X 帳號"></label>
+                    <label>密碼<input id="profileXPassword" type="password" placeholder="X 密碼"></label>
+                  </div>
+                  <div class="media-account-card">
+                    <strong>Email</strong>
+                    <label>帳號<input id="profileEmailPlatformAccount" placeholder="Email 帳號"></label>
+                    <label>密碼<input id="profileEmailPlatformPassword" type="password" placeholder="Email 密碼"></label>
+                  </div>
+                </section>
+                <button class="primary" id="saveProfile" type="button">儲存使用者資料</button>
+                <p class="hint" id="profileHint"></p>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="editPage">
+            <section class="card">
+              <div class="label-row"><strong id="selectPhotoTitle">選擇照片</strong><span id="photoSourceLabel">相簿 / 相機</span></div>
+              <label><span id="albumLabel">從相簿挑選照片</span><input id="photoInput" type="file" accept="image/*"></label>
+              <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden>
+              <button class="secondary" id="cameraButton" type="button">使用相機</button>
+            </section>
+            <section class="preview filter-original" id="photoPreview">
+              <div class="empty-preview">
+                <strong id="emptyPhotoTitle">尚未選擇照片</strong>
+                <span id="emptyPhotoBody">請從相簿選取或使用相機拍照</span>
+              </div>
+            </section>
+            <div class="camera-controls" id="cameraControls" hidden>
+              <button class="secondary" id="switchCameraButton" type="button">切換鏡頭</button>
+              <button class="primary" id="captureButton" type="button">拍照</button>
+              <button class="secondary" id="closeCameraButton" type="button">關閉相機</button>
+            </div>
+            <section class="card photo-type-panel" id="photoTypePanel">
+              <div class="label-row"><strong id="photoTypeTitle">照片類型判斷</strong><span id="photoTypeBadge">自動分析</span></div>
+              <p class="hint" id="photoTypeDescription">選擇照片後，App 會判斷適合的人像、風景、商品或文件風格。</p>
+              <div class="recommend-grid" id="photoTypeRecommendations"></div>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong id="styleTitle">照片風格</strong><span id="styleLabel">原始</span></div>
+              <div class="style-grid" id="styleGrid">
+                <button class="style-option active" type="button" data-style="original">原始</button>
+                <button class="style-option" type="button" data-style="beauty">美顏</button>
+                <button class="style-option" type="button" data-style="anime">動漫</button>
+                <button class="style-option" type="button" data-style="cinematic">電影感</button>
+                <button class="style-option" type="button" data-style="clean">清透</button>
+                <button class="style-option" type="button" data-style="vintage">復古</button>
+              </div>
+            </section>
+            <section class="card unlock-panel" id="photoUpgradeTools" hidden>
+              <div class="label-row"><strong id="photoUpgradeToolsTitle">進階照片優化</strong><span id="photoUpgradeToolsBadge">已解鎖</span></div>
+              <div class="style-grid" id="advancedStyleGrid">
+                <button class="style-option" type="button" data-style="hd-beauty">高階美顏</button>
+                <button class="style-option" type="button" data-style="product">商品圖強化</button>
+                <button class="style-option" type="button" data-style="portrait">商業形象照</button>
+                <button class="style-option" type="button" data-style="skin-tone">膚色校正</button>
+                <button class="style-option" type="button" data-style="night-fix">夜拍修復</button>
+                <button class="style-option" type="button" data-style="food-pop">美食增色</button>
+                <button class="style-option" type="button" data-style="sky-blue">天空增藍</button>
+                <button class="style-option" type="button" data-style="bg-clean">背景淨化</button>
+                <button class="style-option" type="button" data-style="detail-sharp">細節銳化</button>
+                <button class="style-option" type="button" data-style="webtoon">威漫風格</button>
+                <button class="style-option" type="button" data-style="handdrawn-fantasy">日式奇幻動畫</button>
+                <button class="style-option" type="button" data-style="chinese-fantasy">中國風奇幻動畫</button>
+                <button class="style-option" type="button" data-style="sketch">素描風格</button>
+              </div>
+            </section>
+            <section class="card unlock-panel" id="photoEditTools" hidden>
+              <div class="label-row"><strong id="photoEditToolsTitle">照片編輯功能</strong><span id="photoEditToolsBadge">拖曳貼紙</span></div>
+              <div class="code-row">
+                <label>
+                  <span id="stickerSelectLabel">選擇點綴圖像</span>
+                  <select id="stickerSelect">
+                    <option value="⭐">⭐ 星星</option>
+                    <option value="🌟">🌟 亮星</option>
+                    <option value="✨">✨ 閃光</option>
+                    <option value="💫">💫 星旋</option>
+                    <option value="⚡">⚡ 閃電</option>
+                    <option value="🌠">🌠 流星</option>
+                    <option value="❇️">❇️ 亮點</option>
+                    <option value="🔆">🔆 高亮</option>
+                    <option value="🔅">🔅 柔光</option>
+                    <option value="😊">😊 微笑</option>
+                    <option value="😁">😁 開心</option>
+                    <option value="😄">😄 笑臉</option>
+                    <option value="🥰">🥰 喜歡</option>
+                    <option value="😍">😍 心動</option>
+                    <option value="🤩">🤩 驚喜</option>
+                    <option value="😎">😎 酷</option>
+                    <option value="🤗">🤗 擁抱</option>
+                    <option value="🫶">🫶 比心</option>
+                    <option value="🥳">🥳 慶祝</option>
+                    <option value="🤭">🤭 害羞</option>
+                    <option value="😉">😉 眨眼</option>
+                    <option value="😆">😆 大笑</option>
+                    <option value="❤️">❤️ 愛心</option>
+                    <option value="🩷">🩷 粉心</option>
+                    <option value="💜">💜 紫心</option>
+                    <option value="💙">💙 藍心</option>
+                    <option value="💚">💚 綠心</option>
+                    <option value="🧡">🧡 橘心</option>
+                    <option value="💛">💛 黃心</option>
+                    <option value="🤍">🤍 白心</option>
+                    <option value="🖤">🖤 黑心</option>
+                    <option value="💕">💕 雙心</option>
+                    <option value="💖">💖 閃心</option>
+                    <option value="💗">💗 愛心圈</option>
+                    <option value="💝">💝 禮物心</option>
+                    <option value="💞">💞 旋轉心</option>
+                    <option value="💓">💓 心跳</option>
+                    <option value="💘">💘 箭心</option>
+                    <option value="💟">💟 心框</option>
+                    <option value="🚀">🚀 火箭</option>
+                    <option value="🏆">🏆 獎盃</option>
+                    <option value="🥇">🥇 金牌</option>
+                    <option value="🎉">🎉 拉炮</option>
+                    <option value="🎊">🎊 彩帶</option>
+                    <option value="👏">👏 鼓掌</option>
+                    <option value="🙌">🙌 歡呼</option>
+                    <option value="🔥">🔥 火焰</option>
+                    <option value="🍀">🍀 幸運草</option>
+                    <option value="🌿">🌿 葉子</option>
+                    <option value="🌱">🌱 新芽</option>
+                    <option value="🌸">🌸 櫻花</option>
+                    <option value="🌼">🌼 小花</option>
+                    <option value="🌻">🌻 向日葵</option>
+                    <option value="🪴">🪴 盆栽</option>
+                    <option value="•">• 小點</option>
+                    <option value="●">● 實心點</option>
+                    <option value="○">○ 空心點</option>
+                    <option value="◉">◉ 圓點</option>
+                    <option value="◎">◎ 雙圈</option>
+                    <option value="✦">✦ 星芒</option>
+                    <option value="✧">✧ 細星</option>
+                    <option value="❉">❉ 花星</option>
+                    <option value="❋">❋ 雪花</option>
+                    <option value="❀">❀ 花朵</option>
+                    <option value="☁️">☁️ 雲朵</option>
+                    <option value="🌤️">🌤️ 晴雲</option>
+                    <option value="🌈">🌈 彩虹</option>
+                    <option value="🌙">🌙 月亮</option>
+                    <option value="☀️">☀️ 太陽</option>
+                    <option value="🎈">🎈 氣球</option>
+                    <option value="🎀">🎀 緞帶</option>
+                    <option value="🎁">🎁 禮物</option>
+                    <option value="🎂">🎂 蛋糕</option>
+                    <option value="🍭">🍭 糖果</option>
+                    <option value="🧸">🧸 玩偶</option>
+                    <option value="🎵">🎵 音符</option>
+                    <option value="🎶">🎶 旋律</option>
+                    <option value="🔊">🔊 音量</option>
+                    <option value="🎧">🎧 耳機</option>
+                    <option value="🎤">🎤 麥克風</option>
+                  </select>
+                </label>
+                <button class="tool-button" id="addStickerButton" type="button">加入點綴</button>
+              </div>
+              <div class="sticker-control-panel" id="stickerControlPanel">
+                <button id="stickerDeleteButton" type="button">刪除</button>
+              </div>
+              <p class="hint" id="stickerToolStatus"></p>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong id="captionTitle">AI 短文章</strong><span id="captionBadge">可修改</span></div>
+              <textarea id="captionText" placeholder="選好照片與風格後，可按下產生短文章。"></textarea>
+              <button class="primary" id="generateCaption" type="button">根據照片生成短文章</button>
+            </section>
+            <section class="card unlock-panel" id="articleUpgradeTools" hidden>
+              <div class="label-row"><strong id="articleUpgradeToolsTitle">文章生成優化</strong><span id="articleUpgradeToolsBadge">已解鎖</span></div>
+              <div class="tool-grid">
+                <button class="tool-button" id="translateToEnglishButton" type="button">中翻英</button>
+                <button class="tool-button" id="translateToChineseButton" type="button">英翻中</button>
+                <button class="tool-button" id="learnToneButton" type="button">學習語氣</button>
+              </div>
+              <p class="hint" id="articleToolStatus"></p>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong id="platformTitle">選擇 Media 平台</strong><span id="platformLabel">可多選</span></div>
+              <div class="platform-grid">
+                <button class="platform" type="button" data-platform="Facebook">FB</button>
+                <button class="platform" type="button" data-platform="Instagram">IG</button>
+                <button class="platform" type="button" data-platform="Threads">Threads</button>
+                <button class="platform" type="button" data-platform="LINE">LINE</button>
+                <button class="platform" type="button" data-platform="X">X</button>
+                <button class="platform" type="button" data-platform="Email">Email</button>
+              </div>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong id="previewTitle">發文預覽</strong><span id="shareStyleLabel">原始</span></div>
+              <div class="post-image-preview filter-original" id="postImagePreview">
+                <span id="postImageEmpty">尚未選擇照片</span>
+              </div>
+              <div class="caption-box" id="postPreview">請先產生短文章並選擇平台。</div>
+              <button class="primary" id="postButton" type="button">送出並發布</button>
+              <p class="hint" id="postStatus"></p>
+            </section>
+          </section>
+
+          <section class="page" id="upgradePage">
+            <section class="card">
+              <div class="label-row"><strong id="upgradeTitle">升級方案</strong><span id="upgradeBadge">點數 / 進階功能</span></div>
+              <div class="plan-grid">
+                <div class="plan-card">
+                  <strong id="basicCreditTitle">Basic NT$49/月</strong>
+                  <ul class="feature-list">
+                    <li id="basicCreditFeature">增加 100 點，可用於 AI 短文生成與社群發文輔助。</li>
+                  </ul>
+                  <button class="primary upgrade-button" type="button" data-plan="Basic NT$49/月" data-unlock="credits" data-points="100">升級</button>
+                </div>
+                <div class="plan-card">
+                  <strong id="plusCreditTitle">Plus NT$199/月</strong>
+                  <ul class="feature-list">
+                    <li id="plusCreditFeature">增加 500 點，適合高頻率社群內容製作。</li>
+                  </ul>
+                  <button class="primary upgrade-button" type="button" data-plan="Plus NT$199/月" data-unlock="credits" data-points="500">升級</button>
+                </div>
+                <div class="plan-card">
+                  <strong id="proCreditTitle">Pro NT$999/月</strong>
+                  <ul class="feature-list">
+                    <li id="proCreditFeature">增加 10000 點，適合團隊與大量社群帳號操作。</li>
+                  </ul>
+                  <button class="primary upgrade-button" type="button" data-plan="Pro NT$999/月" data-unlock="credits" data-points="10000">升級</button>
+                </div>
+                <div class="plan-card">
+                  <strong id="photoPlanTitle">升級照片優化 NT$99/月</strong>
+                  <ul class="feature-list">
+                    <li id="photoPlanFeatureA">開放高階美顏、膚色修正、清晰度提升與商品圖強化。</li>
+                    <li id="photoPlanFeatureB">增加動漫、電影感、商業形象照等進階風格。</li>
+                  </ul>
+                  <button class="primary upgrade-button" type="button" data-plan="升級照片優化 NT$99/月" data-unlock="photo">升級</button>
+                </div>
+                <div class="plan-card">
+                  <strong id="articlePlanTitle">升級文章生成優化 NT$19/月</strong>
+                  <ul class="feature-list">
+                    <li id="articlePlanFeatureA">支援中英文翻譯，例如中文翻英文、英文翻中文。</li>
+                    <li id="articlePlanFeatureB">學習使用者的文章語氣，產生更貼近個人品牌的貼文。</li>
+                  </ul>
+                  <button class="primary upgrade-button" type="button" data-plan="升級文章生成優化 NT$19/月" data-unlock="article">升級</button>
+                </div>
+                <div class="plan-card">
+                  <strong id="editPlanTitle">照片編輯功能 NT$99/月</strong>
+                  <ul class="feature-list">
+                    <li id="editPlanFeatureA">可對照片加入點綴圖像，例如星星、愛心、光暈與品牌貼紙。</li>
+                    <li id="editPlanFeatureB">提供貼文版型、封面裁切與社群尺寸快速套版。</li>
+                  </ul>
+                  <button class="primary upgrade-button" type="button" data-plan="照片編輯功能 NT$99/月" data-unlock="edit">升級</button>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="paymentPage">
+            <section class="card">
+              <div class="label-row"><strong id="paymentTitle">信用卡付款</strong><span id="selectedPlanLabel">Pro 社群創作方案</span></div>
+              <div class="form-grid">
+                <label><span id="cardNameLabel">持卡人姓名</span><input id="cardName" value="Clay Tseng"></label>
+                <label><span id="cardNumberLabel">信用卡號</span><input id="cardNumber" inputmode="numeric" placeholder="4242 4242 4242 4242"></label>
+                <span class="code-row">
+                  <label><span id="cardExpiryLabel">有效期限</span><input id="cardExpiry" placeholder="MM/YY"></label>
+                  <label><span id="cardCvcLabel">安全碼</span><input id="cardCvc" inputmode="numeric" placeholder="CVC"></label>
+                </span>
+                <button class="primary" id="payButton" type="button">確認付費升級</button>
+                <p class="hint" id="paymentStatus"></p>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="settingsPage">
+            <section class="card">
+              <div class="label-row"><strong id="settingsTitle">設定</strong><span id="settingsStatus">偏好設定</span></div>
+              <div class="settings-list">
+                <div class="setting-row">
+                  <span id="backgroundLabel">App 背景</span>
+                  <div class="segmented">
+                    <button class="setting-choice active" type="button" data-theme="dark">深色</button>
+                    <button class="setting-choice" type="button" data-theme="ocean">青藍</button>
+                    <button class="setting-choice" type="button" data-theme="sunset">粉橘</button>
+                  </div>
+                </div>
+                <label class="setting-row"><span id="fontLabel">字體大小</span>
+                  <select id="fontSelect">
+                    <option value="font-small">小</option>
+                    <option value="font-normal" selected>中</option>
+                    <option value="font-large">大</option>
+                  </select>
+                </label>
+                <label class="setting-row"><span id="languageLabel">語言</span>
+                  <select id="languageSelect">
+                    <option value="zh-Hant" selected>繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                    <option value="ko">한국어</option>
+                  </select>
+                </label>
+                <div class="setting-row">
+                  <span id="supportTitle">聯繫客服</span>
+                  <p class="hint" id="supportText">問題回報、廣告投放、合作洽談皆可透過 Email 聯繫：support@crovantix.com</p>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="requestPage">
+            <section class="card">
+              <div class="label-row"><strong id="requestTitle">新需求</strong><span id="requestBadge">功能建議</span></div>
+              <div class="form-grid">
+                <label><span id="requestNameLabel">提出需求者</span><input id="requestName" value="Clay Tseng" autocomplete="name"></label>
+                <label><span id="requestEmailLabel">Email</span><input id="requestEmail" value="clay@example.com" inputmode="email" autocomplete="email"></label>
+                <label><span id="requestTypeLabel">需求類型</span>
+                  <select id="requestType">
+                    <option>照片美化功能</option>
+                    <option>AI 文章生成</option>
+                    <option>社群平台發文</option>
+                    <option>帳號與會員</option>
+                    <option>其他需求</option>
+                  </select>
+                </label>
+                <label><span id="requestDetailLabel">需求內容</span><textarea id="requestDetail" maxlength="300" placeholder="請描述希望新增或修改的功能。"></textarea></label>
+                <button class="primary" id="submitRequest" type="button">送出新需求</button>
+                <p class="hint" id="requestStatus"></p>
+              </div>
+            </section>
+          </section>
+        </div>
+        <nav class="tabbar" hidden>
+          <button class="active" type="button" data-page="editPage"><span class="nav-symbol">P</span><span class="nav-label">發文</span></button>
+          <button type="button" data-page="upgradePage"><span class="nav-symbol">◇</span><span class="nav-label">升級</span></button>
+          <button type="button" data-page="requestPage"><span class="nav-symbol">＋</span><span class="nav-label">新需求</span></button>
+          <button type="button" data-page="settingsPage"><span class="nav-symbol">S</span><span class="nav-label">設定</span></button>
+        </nav>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const pages = document.querySelectorAll(".page");
+    const tabButtons = document.querySelectorAll(".tabbar button");
+    const userButton = document.querySelector("#userButton");
+    const creditButton = document.querySelector("#creditButton");
+    const creditEmptyAlert = document.querySelector("#creditEmptyAlert");
+    const creditUpgradeButton = document.querySelector("#creditUpgradeButton");
+    const appStatus = document.querySelector("#appStatus");
+    const loginName = document.querySelector("#loginName");
+    const loginPhone = document.querySelector("#loginPhone");
+    const loginEmail = document.querySelector("#loginEmail");
+    const loginCode = document.querySelector("#loginCode");
+    const codeHint = document.querySelector("#codeHint");
+    const sendCode = document.querySelector("#sendCode");
+    const finishLogin = document.querySelector("#finishLogin");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const termsDetails = document.querySelector("#termsDetails");
+    const loginHint = document.querySelector("#loginHint");
+    const profileName = document.querySelector("#profileName");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profileEmail = document.querySelector("#profileEmail");
+    const profileCode = document.querySelector("#profileCode");
+    const profileCodeHint = document.querySelector("#profileCodeHint");
+    const sendProfileCode = document.querySelector("#sendProfileCode");
+    const saveProfile = document.querySelector("#saveProfile");
+    const profileHint = document.querySelector("#profileHint");
+    const photoInput = document.querySelector("#photoInput");
+    const cameraInput = document.querySelector("#cameraInput");
+    const cameraButton = document.querySelector("#cameraButton");
+    const cameraControls = document.querySelector("#cameraControls");
+    const switchCameraButton = document.querySelector("#switchCameraButton");
+    const captureButton = document.querySelector("#captureButton");
+    const closeCameraButton = document.querySelector("#closeCameraButton");
+    const photoPreview = document.querySelector("#photoPreview");
+    const photoTypePanel = document.querySelector("#photoTypePanel");
+    const photoTypeTitle = document.querySelector("#photoTypeTitle");
+    const photoTypeBadge = document.querySelector("#photoTypeBadge");
+    const photoTypeDescription = document.querySelector("#photoTypeDescription");
+    const photoTypeRecommendations = document.querySelector("#photoTypeRecommendations");
+    const styleGrid = document.querySelector("#styleGrid");
+    const advancedStyleGrid = document.querySelector("#advancedStyleGrid");
+    const styleLabel = document.querySelector("#styleLabel");
+    const shareStyleLabel = document.querySelector("#shareStyleLabel");
+    const captionText = document.querySelector("#captionText");
+    const generateCaption = document.querySelector("#generateCaption");
+    const translateToEnglishButton = document.querySelector("#translateToEnglishButton");
+    const translateToChineseButton = document.querySelector("#translateToChineseButton");
+    const learnToneButton = document.querySelector("#learnToneButton");
+    const articleToolStatus = document.querySelector("#articleToolStatus");
+    const photoUpgradeTools = document.querySelector("#photoUpgradeTools");
+    const articleUpgradeTools = document.querySelector("#articleUpgradeTools");
+    const photoEditTools = document.querySelector("#photoEditTools");
+    const stickerSelect = document.querySelector("#stickerSelect");
+    const addStickerButton = document.querySelector("#addStickerButton");
+    const stickerControlPanel = document.querySelector("#stickerControlPanel");
+    const stickerDeleteButton = document.querySelector("#stickerDeleteButton");
+    const stickerToolStatus = document.querySelector("#stickerToolStatus");
+    const platformButtons = document.querySelectorAll(".platform");
+    const platformLabel = document.querySelector("#platformLabel");
+    const postPreview = document.querySelector("#postPreview");
+    const postImagePreview = document.querySelector("#postImagePreview");
+    const postImageEmpty = document.querySelector("#postImageEmpty");
+    const postButton = document.querySelector("#postButton");
+    const postStatus = document.querySelector("#postStatus");
+    const tabbar = document.querySelector(".tabbar");
+    const upgradeButtons = document.querySelectorAll(".upgrade-button");
+    const selectedPlanLabel = document.querySelector("#selectedPlanLabel");
+    const payButton = document.querySelector("#payButton");
+    const paymentStatus = document.querySelector("#paymentStatus");
+    const appShell = document.querySelector("#appShell");
+    const settingsStatus = document.querySelector("#settingsStatus");
+    const fontSelect = document.querySelector("#fontSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const themeButtons = document.querySelectorAll("[data-theme]");
+    const requestName = document.querySelector("#requestName");
+    const requestEmail = document.querySelector("#requestEmail");
+    const requestType = document.querySelector("#requestType");
+    const requestDetail = document.querySelector("#requestDetail");
+    const submitRequest = document.querySelector("#submitRequest");
+    const requestStatus = document.querySelector("#requestStatus");
+
+    const API_BASE_URL = window.location.protocol === "file:" ? "http://127.0.0.1:3000" : "";
+    const AI_STYLE_KEYS = new Set(["webtoon", "handdrawn-fantasy", "chinese-fantasy", "sketch"]);
+    const PHOTO_UPGRADE_STYLE_KEYS = new Set([
+      "hd-beauty",
+      "product",
+      "portrait",
+      "skin-tone",
+      "night-fix",
+      "food-pop",
+      "sky-blue",
+      "bg-clean",
+      "detail-sharp",
+      "webtoon",
+      "handdrawn-fantasy",
+      "chinese-fantasy",
+      "sketch"
+    ]);
+    const PHOTO_TYPE_STYLE_MAP = {
+      portrait: ["hd-beauty", "portrait", "skin-tone", "webtoon", "handdrawn-fantasy"],
+      landscape: ["sky-blue", "cinematic", "clean", "chinese-fantasy", "sketch"],
+      product: ["product", "bg-clean", "detail-sharp", "clean", "webtoon"],
+      document: ["clean", "detail-sharp", "sketch"],
+      lifestyle: ["webtoon", "handdrawn-fantasy", "cinematic", "clean"]
+    };
+
+    let loginCodeValue = "";
+    let profileCodeValue = "";
+    let loggedIn = false;
+    let credits = 10;
+    let currentLanguage = "zh-Hant";
+    let selectedStyleKey = "original";
+    let selectedStyle = "原始";
+    const selectedPlatforms = new Set();
+    let hasPhoto = false;
+    let sourcePhotoDataUrl = "";
+    let currentPhotoDataUrl = "";
+    let currentPhotoProfile = null;
+    let currentPhotoRatio = "1 / 1";
+    let cameraStream = null;
+    let currentFacingMode = "environment";
+    let pendingUnlock = "";
+    let activeSticker = null;
+    const unlockedFeatures = new Set();
+    const mediaPlatforms = ["Facebook", "Instagram", "Threads", "LINE", "X", "Email"];
+    let mediaAccounts = {};
+
+    const translations = {
+      "zh-Hant": {
+        appName: "社群媒體助手",
+        statusDefault: "登入後可選照片、套用風格、產生短文章並發送到社群平台。",
+        loginTitle: "登入 / 註冊",
+        loginBadge: "首次使用",
+        nameLabel: "使用者姓名",
+        phoneLabel: "電話",
+        emailLabel: "Email",
+        codeLabel: "簡訊驗證碼",
+        codePlaceholder: "輸入 4 位數",
+        sendCode: "發送驗證碼",
+        termsSummary: "展開使用條款、隱私權政策與免責聲明",
+        termsText: `社群媒體助手 App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「社群媒體助手 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供社群媒體內容創作、AI 文案生成、貼文排程、留言回覆建議、社群數據分析、圖片與影片內容輔助、語音互動及相關社群媒體管理服務，所有內容僅供一般資訊、創作及工作輔助用途。
+
+二、AI 內容聲明
+
+本 App 部分內容可能由 AI 系統自動生成，包括貼文內容、文案、標題、留言建議、Hashtag、圖片描述、影片腳本、語音回覆或其他互動內容。
+
+本公司不保證 AI 所生成內容之正確性、完整性、即時性、合法性、原創性、適用性或符合各社群平台規範。
+
+AI 產生之內容僅供使用者參考，使用者應自行審核、修改並確認其內容後再行發布。
+
+三、社群平台與第三方服務聲明
+
+本 App 可能串接第三方社群平台或服務，包括但不限於 Facebook、Instagram、Threads、X（Twitter）、YouTube、TikTok、LinkedIn 等。
+
+本公司並非上述社群平台之經營者，亦不保證第三方平台服務之可用性、穩定性或持續性。
+
+若因第三方平台政策變更、API 限制、帳號停權、內容下架或其他第三方因素導致服務受影響，本公司不負相關責任。
+
+四、使用風險與免責聲明
+
+使用者應自行判斷並承擔使用本 App 所產生之一切風險與責任。
+
+本 App 僅提供 AI 與社群媒體管理輔助服務，不保證：
+
+貼文觸及率
+粉絲成長
+廣告成效
+行銷成果
+商業收益
+社群演算法推薦
+社群平台審核結果
+
+使用者因依據本 App 提供之內容、AI 建議、數據分析、貼文排程或其他資訊所作之任何商業決策、廣告投放、內容發布或其他行為而產生之任何損失、損害或爭議，均由使用者自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+五、使用者內容
+
+使用者應確保其上傳、建立、發布或管理之內容符合相關法律及第三方平台規範。
+
+使用者不得利用本 App 製作、發布或散布任何違法、侵權、誹謗、詐騙、色情、暴力、仇恨、垃圾訊息或其他違反公共秩序善良風俗之內容。
+
+使用者應自行負擔其發布內容之一切法律責任。
+
+六、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+使用者帳號資訊
+Email
+裝置資訊
+IP 位址
+使用紀錄
+社群平台授權資訊
+AI 對話紀錄
+貼文內容
+排程資訊
+崩潰紀錄與分析資料
+
+七、資料用途
+
+蒐集資料主要用於：
+
+提供社群媒體管理服務
+AI 文案生成與內容分析
+社群排程與發布功能
+改善使用體驗
+系統安全維護
+客服支援
+防止詐騙、濫用或違法行為
+提升 AI 與系統服務品質
+
+八、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+OpenAI
+Firebase
+Google Analytics
+社群平台 API
+雲端儲存服務
+AI 模型服務
+
+部分資料可能因提供服務之需要而傳輸至第三方服務供應商。
+
+九、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、第三方平台介接或資料儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及第三方社群平台登入資訊，避免未經授權之存取。
+
+十、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、資料、AI 系統及相關內容，均屬本公司或合法授權人所有。
+
+未經本公司書面同意，不得重製、修改、散布、反向工程、破解或用於任何商業用途。
+
+使用者對其自行建立或上傳之內容仍保有其依法享有之智慧財產權，但使用者授權本公司於提供本 App 服務之必要範圍內處理、儲存及傳輸該等內容。
+
+十一、使用者權利
+
+使用者得依相關法律規定，就其個人資料行使查詢、閱覽、更正、補充、刪除或停止蒐集、處理及利用等權利。
+
+十二、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利。修改後內容將公布於本 App 或相關網站，自公告之日起生效。使用者於修改後繼續使用本 App，即視為已閱讀、了解並同意接受修訂後之內容。`,
+        agreeLabel: "我已閱讀並同意使用條款、隱私權政策與免責聲明",
+        finishLogin: "完成登入",
+        selectPhotoTitle: "選擇照片",
+        photoSourceLabel: "相簿 / 相機",
+        albumLabel: "從相簿挑選照片",
+        cameraLabel: "使用相機",
+        emptyPhotoTitle: "尚未選擇照片",
+        emptyPhotoBody: "請從相簿選取或使用相機拍照",
+        photoTypeTitle: "照片類型判斷",
+        photoTypeBadge: "自動分析",
+        photoTypeDefault: "選擇照片後，App 會判斷適合的人像、風景、商品或文件風格。",
+        photoTypeDetected: (type, reason) => `偵測為「${type}」。${reason}`,
+        photoTypeRecommend: "建議風格",
+        photoTypes: {
+          portrait: "人像 / 生活照",
+          landscape: "風景 / 場景照",
+          product: "商品 / 商業照",
+          document: "文件 / 截圖",
+          lifestyle: "一般生活照"
+        },
+        photoTypeReasons: {
+          portrait: "畫面比例與中央主體特徵明顯，適合高階美顏、商業形象照、威漫風格或日式奇幻動畫。",
+          landscape: "畫面較寬、色彩與空間感明顯，適合天空增藍、電影感或中國風奇幻動畫。",
+          product: "背景較乾淨且主體集中，適合商品圖強化、背景淨化與細節銳化。",
+          document: "畫面低飽和且線條密度高，適合清透、細節銳化或素描風格。",
+          lifestyle: "畫面屬一般生活情境，適合威漫風格、日式奇幻動畫、電影感或清透。"
+        },
+        styleTitle: "照片風格",
+        captionTitle: "AI 短文章",
+        captionBadge: "可修改",
+        captionPlaceholder: "選好照片與風格後，可按下產生短文章。",
+        generateCaption: "根據照片生成短文章",
+        platformTitle: "選擇 Media 平台",
+        noPlatform: "尚未選擇",
+        previewTitle: "發文預覽",
+        previewEmpty: "請先產生短文章並選擇平台。",
+        previewCaptionFirst: "請先產生短文章。",
+        postButton: "送出並發布",
+        navEdit: "美化",
+        navShare: "發送",
+        navPost: "發文",
+        navUpgrade: "升級",
+        navRequest: "新需求",
+        navSettings: "設定",
+        upgradeTitle: "升級方案",
+        upgradeBadge: "點數 / 進階功能",
+        creditEmptyTitle: "點數已用完",
+        creditEmptyBody: "請點選升級取得更多點數。",
+        creditUpgradeButton: "升級",
+        basicCreditTitle: "Basic NT$49/月",
+        basicCreditFeature: "增加 100 點，可用於 AI 短文生成與社群發文輔助。",
+        plusCreditTitle: "Plus NT$199/月",
+        plusCreditFeature: "增加 500 點，適合高頻率社群內容製作。",
+        proCreditTitle: "Pro NT$999/月",
+        proCreditFeature: "增加 10000 點，適合團隊與大量社群帳號操作。",
+        advancedPlanTitle: "Pro 社群創作方案",
+        advancedFeaturePhoto: "開啟進階的照片美化功能：高階美顏、動漫精修、商品圖強化、影片封面優化。",
+        advancedFeatureTranslate: "開啟進階的發文翻譯功能：中文翻英文、英文翻中文、多平台語氣調整。",
+        advancedFeatureCaption: "增加 AI 文案產生次數與社群 Hashtag 建議。",
+        upgradeButton: "升級",
+        photoPlanTitle: "升級照片優化 NT$99/月",
+        photoPlanFeatureA: "開放高階美顏、膚色修正、清晰度提升與商品圖強化。",
+        photoPlanFeatureB: "增加動漫、電影感、商業形象照等進階風格。",
+        articlePlanTitle: "升級文章生成優化 NT$19/月",
+        articlePlanFeatureA: "支援中英文翻譯，例如中文翻英文、英文翻中文。",
+        articlePlanFeatureB: "學習使用者的文章語氣，產生更貼近個人品牌的貼文。",
+        editPlanTitle: "照片編輯功能 NT$99/月",
+        editPlanFeatureA: "可對照片加入點綴圖像，例如星星、愛心、光暈與品牌貼紙。",
+        editPlanFeatureB: "提供貼文版型、封面裁切與社群尺寸快速套版。",
+        photoUpgradeToolsTitle: "進階照片優化",
+        photoUpgradeToolsBadge: "已解鎖",
+        articleUpgradeToolsTitle: "文章生成優化",
+        articleUpgradeToolsBadge: "已解鎖",
+        photoEditToolsTitle: "照片編輯功能",
+        photoEditToolsBadge: "長按可編輯",
+        translateToEnglish: "中翻英",
+        translateToChinese: "英翻中",
+        learnTone: "學習語氣",
+        stickerSelectLabel: "選擇點綴圖像",
+        addStickerButton: "加入點綴",
+        stickerDeleteButton: "刪除",
+        featureUnlocked: feature => `${feature} 已解鎖，已新增到發文頁面。`,
+        translatedEnglish: "已產生英文版貼文。",
+        translatedChinese: "已產生中文版貼文。",
+        toneLearned: "已學習你的文章語氣，下一段文案會更接近你的品牌風格。",
+        stickerAdded: "已加入點綴圖像，可拖曳位置；點選後拉右下角可改大小，長按可刪除。",
+        switchCamera: "切換鏡頭",
+        capturePhoto: "拍照",
+        closeCamera: "關閉相機",
+        paymentTitle: "信用卡付款",
+        cardNameLabel: "持卡人姓名",
+        cardNumberLabel: "信用卡號",
+        cardExpiryLabel: "有效期限",
+        cardCvcLabel: "安全碼",
+        payButton: "確認付費升級",
+        settingsTitle: "設定",
+        settingsStatus: "偏好設定",
+        backgroundLabel: "App 背景",
+        fontLabel: "字體大小",
+        languageLabel: "語言",
+        supportTitle: "聯繫客服",
+        supportText: "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫：support@crovantix.com",
+        requestTitle: "新需求",
+        requestBadge: "功能建議",
+        requestNameLabel: "提出需求者",
+        requestEmailLabel: "Email",
+        requestTypeLabel: "需求類型",
+        requestDetailLabel: "需求內容",
+        requestPlaceholder: "請描述希望新增或修改的功能。",
+        submitRequest: "送出新需求",
+        requestMissing: "請先填寫 Email 與需求內容。",
+        requestSent: "感謝您的新需求，已送出並記錄到後台資料庫。",
+        requireLogin: "請先完成登入註冊後再使用社群媒體助手功能。",
+        noPhone: "請先輸入電話號碼。",
+        codeSent: code => `已發送 4 位數簡訊驗證碼。原型示範碼：${code}`,
+        missingProfile: "請完整填寫姓名、電話與 Email。",
+        invalidEmail: "Email 格式不正確，請確認包含 @ 與正確網域。",
+        sendFirst: "請先發送簡訊驗證碼。",
+        wrongCode: "簡訊碼輸入錯誤。",
+        openTermsFirst: "請先展開條文閱讀後再完成註冊。",
+        agreeFirst: "請勾選我已閱讀並同意條款。",
+        loginSuccess: "登入成功。請選擇照片並套用想要的風格。",
+        photoLoaded: "照片已載入，請選擇美化風格。",
+        cameraReady: "相機鏡頭已開啟，畫面會顯示在中間視窗。",
+        cameraError: "無法開啟相機，請確認瀏覽器或裝置已允許相機權限。",
+        styleApplied: style => `已套用「${style}」風格。`,
+        noPhoto: "請先選擇照片或使用相機拍照。",
+        noCredits: "點數已用完，請升級後再產生短文章。",
+        photoUpgradeRequired: "此為進階照片優化建議風格，請先至升級頁面購買照片優化功能後再套用。",
+        captionReady: "AI 已根據照片風格產生短文章。",
+        noPlatformStatus: "請先選擇要發送的 media 平台。",
+        noCaption: "請先產生或填寫短文章。",
+        posted: platform => `已自動發布到 ${platform}。`,
+        postedStatus: platform => `照片與短文章已依據選取平台自動發布到 ${platform}。`,
+        paymentReady: plan => `已選擇 ${plan}，請輸入信用卡資料完成升級。`,
+        paymentDone: "已完成付費升級，進階照片美化與發文翻譯功能已開啟。",
+        pointsAdded: points => `已完成付費升級，新增 ${points} 點。`,
+        credits: count => `剩餘點數 ${count}`,
+        settingsUpdated: "設定已更新。",
+        languageChanged: "語言已切換。",
+        caption: (tag, style) => `今天想把生活調成${tag}的亮度。\n把這一刻留下來，也把心情整理成剛剛好的樣子。\n#Crovantix #社群媒體助手 #${style}`,
+        styles: {
+          original: { label: "原始", tag: "自然真實" },
+          beauty: { label: "美顏", tag: "柔光美顏" },
+          anime: { label: "動漫", tag: "動漫感" },
+          cinematic: { label: "電影感", tag: "電影濾鏡" },
+          clean: { label: "清透", tag: "清透明亮" },
+          vintage: { label: "復古", tag: "復古色調" },
+          "hd-beauty": { label: "高階美顏", tag: "高階精修" },
+          product: { label: "商品圖強化", tag: "商業商品圖" },
+          portrait: { label: "商業形象照", tag: "商業形象照" },
+          "skin-tone": { label: "膚色校正", tag: "自然膚色" },
+          "night-fix": { label: "夜拍修復", tag: "夜拍修復" },
+          "food-pop": { label: "美食增色", tag: "美食增色" },
+          "sky-blue": { label: "天空增藍", tag: "清澈天空" },
+          "bg-clean": { label: "背景淨化", tag: "乾淨背景" },
+          "detail-sharp": { label: "細節銳化", tag: "細節銳化" },
+          webtoon: { label: "威漫風格", tag: "威漫風格" },
+          "handdrawn-fantasy": { label: "日式奇幻動畫", tag: "日式奇幻動畫" },
+          "chinese-fantasy": { label: "中國風奇幻動畫", tag: "中國風奇幻動畫" },
+          sketch: { label: "素描風格", tag: "素描風格" }
+        }
+      },
+      en: {
+        appName: "Social Media Assistant",
+        statusDefault: "After signing in, choose a photo, apply a style, generate a caption, and send it to social platforms.",
+        loginTitle: "Sign In / Register",
+        loginBadge: "First use",
+        nameLabel: "User name",
+        phoneLabel: "Phone",
+        emailLabel: "Email",
+        codeLabel: "SMS verification code",
+        codePlaceholder: "Enter 4 digits",
+        sendCode: "Send Code",
+        termsSummary: "Open Terms, Privacy Policy, and Disclaimer",
+        termsText: "This app provides photo enhancement, AI style effects, social caption generation, and posting assistance. AI content is for reference only. Users must confirm photo rights, portrait rights, copyright, platform rules, and public posting content.",
+        agreeLabel: "I have read and agree to the Terms, Privacy Policy, and Disclaimer",
+        finishLogin: "Complete Sign In",
+        selectPhotoTitle: "Choose Photo",
+        photoSourceLabel: "Album / Camera",
+        albumLabel: "Choose from album",
+        cameraLabel: "Use Camera",
+        emptyPhotoTitle: "No photo selected",
+        emptyPhotoBody: "Choose a photo from album or camera",
+        photoTypeTitle: "Photo Type Detection",
+        photoTypeBadge: "Auto analysis",
+        photoTypeDefault: "After choosing a photo, the app recommends portrait, landscape, product, or document-friendly styles.",
+        photoTypeDetected: (type, reason) => `Detected as ${type}. ${reason}`,
+        photoTypeRecommend: "Recommended styles",
+        photoTypes: {
+          portrait: "Portrait / Lifestyle",
+          landscape: "Landscape / Scene",
+          product: "Product / Commercial",
+          document: "Document / Screenshot",
+          lifestyle: "General Lifestyle"
+        },
+        photoTypeReasons: {
+          portrait: "The frame and central subject are strong, so beauty, portrait, webtoon, or Japanese fantasy styles fit best.",
+          landscape: "The image is wider with clear color and space, so sky blue, cinematic, or Chinese fantasy styles fit best.",
+          product: "The background is clean and the subject is centered, so product boost, background clean, and sharp detail fit best.",
+          document: "The image has lower saturation and dense line detail, so clean, sharp detail, or sketch styles fit best.",
+          lifestyle: "The photo is a general lifestyle scene, so webtoon, Japanese fantasy, cinematic, or clean styles fit best."
+        },
+        styleTitle: "Photo Style",
+        captionTitle: "AI Caption",
+        captionBadge: "Editable",
+        captionPlaceholder: "Choose a photo and style, then generate a caption.",
+        generateCaption: "Generate Caption",
+        platformTitle: "Choose Media Platform",
+        noPlatform: "Not selected",
+        previewTitle: "Post Preview",
+        previewEmpty: "Generate a caption and choose a platform first.",
+        previewCaptionFirst: "Generate a caption first.",
+        postButton: "Post",
+        navEdit: "Edit",
+        navShare: "Send",
+        navPost: "Post",
+        navUpgrade: "Upgrade",
+        navRequest: "Request",
+        navSettings: "Settings",
+        upgradeTitle: "Upgrade Plan",
+        upgradeBadge: "Credits / Advanced",
+        creditEmptyTitle: "Credits used up",
+        creditEmptyBody: "Tap upgrade to get more credits.",
+        creditUpgradeButton: "Upgrade",
+        basicCreditTitle: "Basic NT$49/mo",
+        basicCreditFeature: "Add 100 credits for AI captions and social posting assistance.",
+        plusCreditTitle: "Plus NT$199/mo",
+        plusCreditFeature: "Add 500 credits for frequent content creation.",
+        proCreditTitle: "Pro NT$999/mo",
+        proCreditFeature: "Add 10000 credits for teams and high-volume social workflows.",
+        advancedPlanTitle: "Pro Creator Plan",
+        advancedFeaturePhoto: "Unlock advanced photo enhancement: beauty retouch, anime refinement, product image boost, and cover optimization.",
+        advancedFeatureTranslate: "Unlock advanced post translation: Chinese to English, English to Chinese, and tone adaptation.",
+        advancedFeatureCaption: "Increase AI caption generation and social hashtag suggestions.",
+        upgradeButton: "Upgrade",
+        photoPlanTitle: "Photo Optimization NT$99/mo",
+        photoPlanFeatureA: "Unlock beauty retouching, skin tone correction, clarity boost, and product image enhancement.",
+        photoPlanFeatureB: "Add advanced styles such as anime, cinematic, and business portrait looks.",
+        articlePlanTitle: "Caption Generation Upgrade NT$19/mo",
+        articlePlanFeatureA: "Support Chinese-English translation and English-Chinese translation.",
+        articlePlanFeatureB: "Learn your writing tone and generate posts closer to your personal brand.",
+        editPlanTitle: "Photo Editing Tools NT$99/mo",
+        editPlanFeatureA: "Add decorative graphics such as stars, hearts, glow effects, and brand stickers.",
+        editPlanFeatureB: "Provide post templates, cover cropping, and social size presets.",
+        photoUpgradeToolsTitle: "Advanced Photo Optimization",
+        photoUpgradeToolsBadge: "Unlocked",
+        articleUpgradeToolsTitle: "Caption Optimization",
+        articleUpgradeToolsBadge: "Unlocked",
+        photoEditToolsTitle: "Photo Editing Tools",
+        photoEditToolsBadge: "Long press to edit",
+        translateToEnglish: "ZH to EN",
+        translateToChinese: "EN to ZH",
+        learnTone: "Learn Tone",
+        stickerSelectLabel: "Choose decoration",
+        addStickerButton: "Add Decoration",
+        stickerDeleteButton: "Delete",
+        featureUnlocked: feature => `${feature} unlocked and added to the post page.`,
+        translatedEnglish: "English post generated.",
+        translatedChinese: "Chinese post generated.",
+        toneLearned: "Your writing tone has been learned for future captions.",
+        stickerAdded: "Decoration added. Drag to move; tap it and pull the bottom-right handle to resize, or long press to delete.",
+        switchCamera: "Switch",
+        capturePhoto: "Capture",
+        closeCamera: "Close",
+        paymentTitle: "Credit Card Payment",
+        cardNameLabel: "Cardholder name",
+        cardNumberLabel: "Card number",
+        cardExpiryLabel: "Expiry",
+        cardCvcLabel: "CVC",
+        payButton: "Confirm Upgrade",
+        settingsTitle: "Settings",
+        settingsStatus: "Preferences",
+        backgroundLabel: "App background",
+        fontLabel: "Font size",
+        languageLabel: "Language",
+        supportTitle: "Support",
+        supportText: "For issue reports, advertising, and partnerships, contact: support@crovantix.com",
+        requestTitle: "New Request",
+        requestBadge: "Feature idea",
+        requestNameLabel: "Requester",
+        requestEmailLabel: "Email",
+        requestTypeLabel: "Request type",
+        requestDetailLabel: "Request details",
+        requestPlaceholder: "Describe the feature you want added or changed.",
+        submitRequest: "Submit Request",
+        requestMissing: "Please fill in Email and request details.",
+        requestSent: "Thanks. Your request has been submitted and recorded in the backend database.",
+        requireLogin: "Please finish registration before using Social Media Assistant.",
+        noPhone: "Please enter your phone number first.",
+        codeSent: code => `4-digit SMS code sent. Demo code: ${code}`,
+        missingProfile: "Please fill in name, phone, and Email.",
+        invalidEmail: "Invalid Email format. Please include @ and a valid domain.",
+        sendFirst: "Please send the SMS code first.",
+        wrongCode: "Incorrect SMS code.",
+        openTermsFirst: "Please open and read the terms before completing registration.",
+        agreeFirst: "Please agree to the terms first.",
+        loginSuccess: "Signed in. Choose a photo and apply a style.",
+        photoLoaded: "Photo loaded. Choose a style.",
+        cameraReady: "Camera preview is on and shown in the middle panel.",
+        cameraError: "Unable to open camera. Please allow camera permission.",
+        styleApplied: style => `Applied ${style} style.`,
+        noPhoto: "Please choose a photo or take one with the camera first.",
+        noCredits: "Credits are used up. Please upgrade before generating captions.",
+        photoUpgradeRequired: "This recommended style is an advanced photo feature. Please upgrade photo optimization before applying it.",
+        captionReady: "AI generated a caption based on the photo style.",
+        noPlatformStatus: "Please choose a media platform first.",
+        noCaption: "Please generate or enter a caption first.",
+        posted: platform => `Automatically posted to ${platform}.`,
+        postedStatus: platform => `Photo and caption were automatically posted to ${platform}.`,
+        paymentReady: plan => `${plan} selected. Enter card details to complete the upgrade.`,
+        paymentDone: "Payment completed. Advanced photo enhancement and post translation are now unlocked.",
+        pointsAdded: points => `Payment completed. ${points} credits added.`,
+        credits: count => `Credits ${count}`,
+        settingsUpdated: "Settings updated.",
+        languageChanged: "Language changed.",
+        caption: (tag, style) => `Giving this moment a ${tag} mood.\nA small scene, polished and ready to share.\n#Crovantix #SocialMediaAssistant #${style}`,
+        styles: {
+          original: { label: "Original", tag: "natural" },
+          beauty: { label: "Beauty", tag: "soft beauty" },
+          anime: { label: "Anime", tag: "anime" },
+          cinematic: { label: "Cinematic", tag: "cinematic" },
+          clean: { label: "Clean", tag: "clean bright" },
+          vintage: { label: "Vintage", tag: "vintage" },
+          "hd-beauty": { label: "HD Beauty", tag: "HD retouched" },
+          product: { label: "Product Boost", tag: "commercial product" },
+          portrait: { label: "Business Portrait", tag: "business portrait" },
+          "skin-tone": { label: "Skin Tone", tag: "natural skin tone" },
+          "night-fix": { label: "Night Fix", tag: "night photo recovery" },
+          "food-pop": { label: "Food Pop", tag: "vibrant food" },
+          "sky-blue": { label: "Blue Sky", tag: "clear blue sky" },
+          "bg-clean": { label: "Clean Background", tag: "clean background" },
+          "detail-sharp": { label: "Sharp Details", tag: "sharp detail" },
+          webtoon: { label: "Webtoon Style", tag: "webtoon style" },
+          "handdrawn-fantasy": { label: "Japanese Fantasy Animation", tag: "Japanese fantasy animation" },
+          "chinese-fantasy": { label: "Chinese Fantasy Animation", tag: "Chinese fantasy animation" },
+          sketch: { label: "Sketch Style", tag: "sketch style" }
+        }
+      },
+      ja: {
+        appName: "SNSメディア助手",
+        statusDefault: "ログイン後、写真を選び、スタイルを適用し、短い投稿文を生成してSNSへ送信できます。",
+        loginTitle: "ログイン / 登録",
+        loginBadge: "初回利用",
+        nameLabel: "ユーザー名",
+        phoneLabel: "電話",
+        emailLabel: "Email",
+        codeLabel: "SMS認証コード",
+        codePlaceholder: "4桁を入力",
+        sendCode: "認証コード送信",
+        termsSummary: "利用規約・プライバシー・免責事項を開く",
+        termsText: "本 App は写真補正、AI スタイル適用、SNS 投稿文生成と送信補助を提供します。AI 生成内容は参考用です。",
+        agreeLabel: "利用規約、プライバシー、免責事項に同意します",
+        finishLogin: "登録完了",
+        selectPhotoTitle: "写真を選択",
+        photoSourceLabel: "アルバム / カメラ",
+        albumLabel: "アルバムから選択",
+        cameraLabel: "カメラ",
+        emptyPhotoTitle: "写真未選択",
+        emptyPhotoBody: "アルバムまたはカメラで写真を選択してください",
+        photoTypeTitle: "写真タイプ判定",
+        photoTypeBadge: "自動分析",
+        photoTypeDefault: "写真を選ぶと、人物・風景・商品・書類に合うスタイルをおすすめします。",
+        photoTypeDetected: (type, reason) => `${type} と判定しました。${reason}`,
+        photoTypeRecommend: "おすすめスタイル",
+        photoTypes: {
+          portrait: "人物 / ライフスタイル",
+          landscape: "風景 / シーン",
+          product: "商品 / 商用写真",
+          document: "書類 / スクリーンショット",
+          lifestyle: "日常写真"
+        },
+        photoTypeReasons: {
+          portrait: "中央の被写体がはっきりしているため、美顔、ポートレート、ウェブ漫画、日本幻想アニメが向いています。",
+          landscape: "横長で色と空間感があるため、青空、シネマ、中国幻想アニメが向いています。",
+          product: "背景がきれいで被写体が中央にあるため、商品強化、背景浄化、細部シャープ化が向いています。",
+          document: "低彩度で線が多いため、クリア、細部シャープ化、スケッチが向いています。",
+          lifestyle: "一般的な日常写真のため、ウェブ漫画、日本幻想アニメ、シネマ、クリアが向いています。"
+        },
+        styleTitle: "写真スタイル",
+        captionTitle: "AI 投稿文",
+        captionBadge: "編集可能",
+        captionPlaceholder: "写真とスタイルを選んで投稿文を生成できます。",
+        generateCaption: "投稿文を生成",
+        platformTitle: "Media プラットフォーム",
+        noPlatform: "未選択",
+        previewTitle: "投稿プレビュー",
+        previewEmpty: "先に投稿文を生成し、プラットフォームを選択してください。",
+        previewCaptionFirst: "先に投稿文を生成してください。",
+        postButton: "送信して投稿",
+        navEdit: "編集",
+        navShare: "送信",
+        navPost: "投稿",
+        navUpgrade: "アップグレード",
+        navSettings: "設定",
+        upgradeTitle: "アップグレード",
+        upgradeBadge: "ポイント / 高度機能",
+        creditEmptyTitle: "ポイント不足",
+        creditEmptyBody: "アップグレードしてポイントを追加してください。",
+        creditUpgradeButton: "アップグレード",
+        basicCreditTitle: "Basic NT$49/月",
+        basicCreditFeature: "100 ポイント追加。AI 投稿文生成とSNS投稿補助に使えます。",
+        plusCreditTitle: "Plus NT$199/月",
+        plusCreditFeature: "500 ポイント追加。高頻度の投稿制作に適しています。",
+        proCreditTitle: "Pro NT$999/月",
+        proCreditFeature: "10000 ポイント追加。チームや大量運用に適しています。",
+        advancedPlanTitle: "Pro SNS クリエイタープラン",
+        advancedFeaturePhoto: "高度な写真補正機能を開放：美顔補正、アニメ精修、商品画像強化、カバー最適化。",
+        advancedFeatureTranslate: "高度な投稿翻訳機能を開放：中国語から英語、英語から中国語、語調調整。",
+        advancedFeatureCaption: "AI 投稿文生成回数と Hashtag 提案を増やします。",
+        upgradeButton: "アップグレード",
+        photoPlanTitle: "写真最適化 NT$99/月",
+        photoPlanFeatureA: "高級美顔、肌色補正、鮮明度向上、商品画像強化を開放します。",
+        photoPlanFeatureB: "アニメ、映画風、ビジネスポートレートなどの高度スタイルを追加します。",
+        articlePlanTitle: "投稿文生成強化 NT$19/月",
+        articlePlanFeatureA: "中国語から英語、英語から中国語の翻訳を支援します。",
+        articlePlanFeatureB: "ユーザーの文章トーンを学習し、ブランドに近い投稿文を生成します。",
+        editPlanTitle: "写真編集機能 NT$99/月",
+        editPlanFeatureA: "星、ハート、光、ブランドステッカーなどの装飾を追加できます。",
+        editPlanFeatureB: "投稿テンプレート、カバー切り抜き、SNSサイズを提供します。",
+        photoUpgradeToolsTitle: "高度な写真最適化",
+        photoUpgradeToolsBadge: "解放済み",
+        articleUpgradeToolsTitle: "投稿文生成強化",
+        articleUpgradeToolsBadge: "解放済み",
+        photoEditToolsTitle: "写真編集機能",
+        photoEditToolsBadge: "長押しで編集",
+        translateToEnglish: "中→英",
+        translateToChinese: "英→中",
+        learnTone: "文体学習",
+        stickerSelectLabel: "装飾を選択",
+        addStickerButton: "装飾を追加",
+        stickerDeleteButton: "削除",
+        featureUnlocked: feature => `${feature} を解放し、投稿ページに追加しました。`,
+        translatedEnglish: "英語版の投稿文を生成しました。",
+        translatedChinese: "中国語版の投稿文を生成しました。",
+        toneLearned: "文章トーンを学習しました。次回の投稿文に反映します。",
+        stickerAdded: "装飾を追加しました。移動はドラッグ、サイズ変更は右下ハンドル、削除は長押しです。",
+        switchCamera: "切替",
+        capturePhoto: "撮影",
+        closeCamera: "閉じる",
+        paymentTitle: "クレジットカード決済",
+        cardNameLabel: "カード名義",
+        cardNumberLabel: "カード番号",
+        cardExpiryLabel: "有効期限",
+        cardCvcLabel: "セキュリティコード",
+        payButton: "支払いを確認",
+        settingsTitle: "設定",
+        settingsStatus: "環境設定",
+        backgroundLabel: "App 背景",
+        fontLabel: "文字サイズ",
+        languageLabel: "言語",
+        supportTitle: "サポート",
+        supportText: "問題報告、広告、提携は Email でお問い合わせください：support@crovantix.com",
+        requireLogin: "先に登録を完了してください。",
+        noPhone: "先に電話番号を入力してください。",
+        codeSent: code => `4桁のSMS認証コードを送信しました。デモコード：${code}`,
+        missingProfile: "氏名、電話、Email を入力してください。",
+        invalidEmail: "Email の形式が正しくありません。@ と有効なドメインを確認してください。",
+        sendFirst: "先に認証コードを送信してください。",
+        wrongCode: "SMSコードが正しくありません。",
+        openTermsFirst: "先に規約を開いて読んでください。",
+        agreeFirst: "利用規約に同意してください。",
+        loginSuccess: "登録完了。写真を選びスタイルを適用してください。",
+        photoLoaded: "写真を読み込みました。スタイルを選択してください。",
+        cameraReady: "カメラ映像を中央画面に表示しました。",
+        cameraError: "カメラを開けません。権限を確認してください。",
+        styleApplied: style => `「${style}」スタイルを適用しました。`,
+        noPhoto: "先に写真を選択または撮影してください。",
+        noCredits: "ポイントが不足しています。アップグレード後に生成してください。",
+        photoUpgradeRequired: "このおすすめスタイルは高度な写真機能です。写真最適化をアップグレードしてから適用してください。",
+        captionReady: "AI が写真スタイルに合わせて投稿文を生成しました。",
+        noPlatformStatus: "送信先の media プラットフォームを選択してください。",
+        noCaption: "投稿文を生成または入力してください。",
+        posted: platform => `${platform} に自動投稿しました。`,
+        postedStatus: platform => `写真と投稿文を ${platform} に自動投稿しました。`,
+        paymentReady: plan => `${plan} を選択しました。カード情報を入力してください。`,
+        paymentDone: "支払い完了。高度な写真補正と投稿翻訳機能を開放しました。",
+        pointsAdded: points => `支払い完了。${points} ポイントを追加しました。`,
+        credits: count => `残りポイント ${count}`,
+        settingsUpdated: "設定を更新しました。",
+        languageChanged: "言語を切り替えました。",
+        caption: (tag, style) => `今日の一枚を${tag}な雰囲気に。\nこの瞬間をきれいに整えてシェアします。\n#Crovantix #SNSメディア助手 #${style}`,
+        styles: {
+          original: { label: "原始", tag: "自然" },
+          beauty: { label: "美顔", tag: "柔らかい美顔" },
+          anime: { label: "アニメ", tag: "アニメ風" },
+          cinematic: { label: "映画風", tag: "映画風" },
+          clean: { label: "透明感", tag: "明るい透明感" },
+          vintage: { label: "レトロ", tag: "レトロ" },
+          "hd-beauty": { label: "高級美顔", tag: "高級補正" },
+          product: { label: "商品強化", tag: "商品写真" },
+          portrait: { label: "ビジネス写真", tag: "ビジネス写真" },
+          "skin-tone": { label: "肌色補正", tag: "自然な肌色" },
+          "night-fix": { label: "夜景補正", tag: "夜景補正" },
+          "food-pop": { label: "料理強調", tag: "料理写真" },
+          "sky-blue": { label: "青空強化", tag: "青空" },
+          "bg-clean": { label: "背景整理", tag: "整理された背景" },
+          "detail-sharp": { label: "細部強化", tag: "細部強化" },
+          webtoon: { label: "ウェブ漫画風", tag: "ウェブ漫画風" },
+          "handdrawn-fantasy": { label: "日本幻想アニメ", tag: "日本幻想アニメ" },
+          "chinese-fantasy": { label: "中国幻想アニメ", tag: "中国幻想アニメ" },
+          sketch: { label: "スケッチ風", tag: "スケッチ風" }
+        }
+      },
+      ko: {
+        appName: "소셜 미디어 도우미",
+        statusDefault: "로그인 후 사진을 선택하고 스타일을 적용해 짧은 글을 생성한 뒤 소셜 플랫폼으로 보낼 수 있습니다.",
+        loginTitle: "로그인 / 가입",
+        loginBadge: "첫 사용",
+        nameLabel: "사용자 이름",
+        phoneLabel: "전화",
+        emailLabel: "Email",
+        codeLabel: "문자 인증 코드",
+        codePlaceholder: "4자리 입력",
+        sendCode: "인증 코드 전송",
+        termsSummary: "이용약관, 개인정보 처리방침 및 면책 조항 열기",
+        termsText: "이 App은 사진 보정, AI 스타일 적용, 소셜 글 생성 및 발송 보조 기능을 제공합니다. AI 생성 내용은 참고용입니다.",
+        agreeLabel: "이용약관, 개인정보 처리방침 및 면책 조항에 동의합니다",
+        finishLogin: "가입 완료",
+        selectPhotoTitle: "사진 선택",
+        photoSourceLabel: "앨범 / 카메라",
+        albumLabel: "앨범에서 사진 선택",
+        cameraLabel: "카메라",
+        emptyPhotoTitle: "사진이 선택되지 않음",
+        emptyPhotoBody: "앨범 또는 카메라로 사진을 선택하세요",
+        photoTypeTitle: "사진 유형 분석",
+        photoTypeBadge: "자동 분석",
+        photoTypeDefault: "사진을 선택하면 인물, 풍경, 상품, 문서에 어울리는 스타일을 추천합니다.",
+        photoTypeDetected: (type, reason) => `${type}(으)로 감지했습니다. ${reason}`,
+        photoTypeRecommend: "추천 스타일",
+        photoTypes: {
+          portrait: "인물 / 라이프스타일",
+          landscape: "풍경 / 장면",
+          product: "상품 / 상업 사진",
+          document: "문서 / 스크린샷",
+          lifestyle: "일상 사진"
+        },
+        photoTypeReasons: {
+          portrait: "중앙 피사체가 뚜렷해 고급 보정, 프로필, 웹툰, 일본 판타지 애니 스타일이 잘 맞습니다.",
+          landscape: "넓은 화면과 색감, 공간감이 있어 하늘 보정, 시네마틱, 중국풍 판타지 애니가 잘 맞습니다.",
+          product: "배경이 깨끗하고 피사체가 중앙에 있어 상품 강화, 배경 정리, 디테일 선명화가 잘 맞습니다.",
+          document: "채도가 낮고 선 정보가 많아 클린, 디테일 선명화, 스케치가 잘 맞습니다.",
+          lifestyle: "일반 생활 사진으로 웹툰, 일본 판타지 애니, 시네마틱, 클린 스타일이 잘 맞습니다."
+        },
+        styleTitle: "사진 스타일",
+        captionTitle: "AI 짧은 글",
+        captionBadge: "수정 가능",
+        captionPlaceholder: "사진과 스타일을 선택한 뒤 글을 생성하세요.",
+        generateCaption: "짧은 글 생성",
+        platformTitle: "Media 플랫폼 선택",
+        noPlatform: "선택 안 됨",
+        previewTitle: "게시 미리보기",
+        previewEmpty: "먼저 글을 생성하고 플랫폼을 선택하세요.",
+        previewCaptionFirst: "먼저 글을 생성하세요.",
+        postButton: "전송 및 게시",
+        navEdit: "보정",
+        navShare: "전송",
+        navPost: "게시",
+        navUpgrade: "업그레이드",
+        navSettings: "설정",
+        upgradeTitle: "업그레이드",
+        upgradeBadge: "포인트 / 고급 기능",
+        creditEmptyTitle: "포인트 부족",
+        creditEmptyBody: "업그레이드를 눌러 포인트를 추가하세요.",
+        creditUpgradeButton: "업그레이드",
+        basicCreditTitle: "Basic NT$49/월",
+        basicCreditFeature: "100 포인트 추가. AI 글 생성과 소셜 게시 보조에 사용할 수 있습니다.",
+        plusCreditTitle: "Plus NT$199/월",
+        plusCreditFeature: "500 포인트 추가. 자주 콘텐츠를 만드는 사용자에게 적합합니다.",
+        proCreditTitle: "Pro NT$999/월",
+        proCreditFeature: "10000 포인트 추가. 팀과 대량 소셜 운영에 적합합니다.",
+        advancedPlanTitle: "Pro 소셜 크리에이터 플랜",
+        advancedFeaturePhoto: "고급 사진 보정 기능: 뷰티 보정, 애니 정밀 보정, 상품 이미지 강화, 커버 최적화.",
+        advancedFeatureTranslate: "고급 게시글 번역 기능: 중국어-영어, 영어-중국어, 플랫폼별 톤 조정.",
+        advancedFeatureCaption: "AI 글 생성 횟수와 해시태그 추천을 늘립니다.",
+        upgradeButton: "업그레이드",
+        photoPlanTitle: "사진 최적화 NT$99/월",
+        photoPlanFeatureA: "고급 뷰티 보정, 피부톤 보정, 선명도 향상, 상품 이미지 강화를 엽니다.",
+        photoPlanFeatureB: "애니, 시네마틱, 비즈니스 프로필 등 고급 스타일을 추가합니다.",
+        articlePlanTitle: "글 생성 최적화 NT$19/월",
+        articlePlanFeatureA: "중국어-영어, 영어-중국어 번역을 지원합니다.",
+        articlePlanFeatureB: "사용자의 글쓰기 톤을 학습해 개인 브랜드에 가까운 게시글을 생성합니다.",
+        editPlanTitle: "사진 편집 기능 NT$99/월",
+        editPlanFeatureA: "별, 하트, 빛 효과, 브랜드 스티커 같은 장식 이미지를 추가할 수 있습니다.",
+        editPlanFeatureB: "게시글 템플릿, 커버 자르기, 소셜 사이즈 프리셋을 제공합니다.",
+        photoUpgradeToolsTitle: "고급 사진 최적화",
+        photoUpgradeToolsBadge: "잠금 해제",
+        articleUpgradeToolsTitle: "글 생성 최적화",
+        articleUpgradeToolsBadge: "잠금 해제",
+        photoEditToolsTitle: "사진 편집 기능",
+        photoEditToolsBadge: "길게 눌러 편집",
+        translateToEnglish: "중→영",
+        translateToChinese: "영→중",
+        learnTone: "톤 학습",
+        stickerSelectLabel: "장식 선택",
+        addStickerButton: "장식 추가",
+        stickerDeleteButton: "삭제",
+        featureUnlocked: feature => `${feature} 기능이 열렸고 게시 페이지에 추가되었습니다.`,
+        translatedEnglish: "영문 게시글을 생성했습니다.",
+        translatedChinese: "중문 게시글을 생성했습니다.",
+        toneLearned: "글쓰기 톤을 학습했습니다. 다음 문안에 반영합니다.",
+        stickerAdded: "장식을 추가했습니다. 드래그로 이동하고 오른쪽 아래 핸들로 크기를 조절하며 길게 눌러 삭제할 수 있습니다.",
+        switchCamera: "전환",
+        capturePhoto: "촬영",
+        closeCamera: "닫기",
+        paymentTitle: "신용카드 결제",
+        cardNameLabel: "카드 소유자 이름",
+        cardNumberLabel: "카드 번호",
+        cardExpiryLabel: "유효기간",
+        cardCvcLabel: "보안 코드",
+        payButton: "결제 업그레이드",
+        settingsTitle: "설정",
+        settingsStatus: "환경 설정",
+        backgroundLabel: "App 배경",
+        fontLabel: "글자 크기",
+        languageLabel: "언어",
+        supportTitle: "고객 지원",
+        supportText: "문제 신고, 광고, 제휴 문의는 Email로 연락하세요: support@crovantix.com",
+        requireLogin: "먼저 가입을 완료해 주세요.",
+        noPhone: "먼저 전화번호를 입력하세요.",
+        codeSent: code => `4자리 문자 인증 코드를 보냈습니다. 데모 코드: ${code}`,
+        missingProfile: "이름, 전화, Email을 모두 입력하세요.",
+        invalidEmail: "Email 형식이 올바르지 않습니다. @와 올바른 도메인을 확인하세요.",
+        sendFirst: "먼저 문자 인증 코드를 보내세요.",
+        wrongCode: "문자 코드가 올바르지 않습니다.",
+        openTermsFirst: "먼저 약관을 펼쳐 읽어 주세요.",
+        agreeFirst: "약관에 동의해 주세요.",
+        loginSuccess: "가입 완료. 사진을 선택하고 스타일을 적용하세요.",
+        photoLoaded: "사진을 불러왔습니다. 스타일을 선택하세요.",
+        cameraReady: "카메라 화면이 가운데 미리보기에 표시됩니다.",
+        cameraError: "카메라를 열 수 없습니다. 권한을 확인하세요.",
+        styleApplied: style => `${style} 스타일을 적용했습니다.`,
+        noPhoto: "먼저 사진을 선택하거나 촬영하세요.",
+        noCredits: "포인트가 부족합니다. 업그레이드 후 생성하세요.",
+        photoUpgradeRequired: "이 추천 스타일은 고급 사진 기능입니다. 사진 최적화 업그레이드 후 적용하세요.",
+        captionReady: "AI가 사진 스타일에 맞춰 짧은 글을 생성했습니다.",
+        noPlatformStatus: "보낼 media 플랫폼을 선택하세요.",
+        noCaption: "먼저 글을 생성하거나 입력하세요.",
+        posted: platform => `${platform}에 자동 게시했습니다.`,
+        postedStatus: platform => `사진과 글을 ${platform}에 자동 게시했습니다.`,
+        paymentReady: plan => `${plan}을 선택했습니다. 카드 정보를 입력하세요.`,
+        paymentDone: "결제가 완료되었습니다. 고급 사진 보정과 게시글 번역 기능이 열렸습니다.",
+        pointsAdded: points => `결제가 완료되었습니다. ${points} 포인트가 추가되었습니다.`,
+        credits: count => `남은 포인트 ${count}`,
+        settingsUpdated: "설정이 업데이트되었습니다.",
+        languageChanged: "언어가 변경되었습니다.",
+        caption: (tag, style) => `오늘의 순간을 ${tag} 분위기로 정리했어요.\n이 장면을 예쁘게 남기고 공유합니다.\n#Crovantix #소셜미디어도우미 #${style}`,
+        styles: {
+          original: { label: "원본", tag: "자연스러운" },
+          beauty: { label: "보정", tag: "소프트 뷰티" },
+          anime: { label: "애니", tag: "애니메이션" },
+          cinematic: { label: "시네마", tag: "영화 같은" },
+          clean: { label: "맑게", tag: "깨끗하고 밝은" },
+          vintage: { label: "빈티지", tag: "빈티지" },
+          "hd-beauty": { label: "고급 보정", tag: "고급 리터칭" },
+          product: { label: "상품 강화", tag: "상업 상품 이미지" },
+          portrait: { label: "비즈니스 사진", tag: "비즈니스 프로필" },
+          "skin-tone": { label: "피부톤 보정", tag: "자연스러운 피부톤" },
+          "night-fix": { label: "야간 보정", tag: "야간 사진 보정" },
+          "food-pop": { label: "음식 강조", tag: "음식 사진" },
+          "sky-blue": { label: "하늘 강조", tag: "맑은 하늘" },
+          "bg-clean": { label: "배경 정리", tag: "깔끔한 배경" },
+          "detail-sharp": { label: "디테일 강화", tag: "선명한 디테일" },
+          webtoon: { label: "웹툰 스타일", tag: "웹툰 스타일" },
+          "handdrawn-fantasy": { label: "일본 판타지 애니", tag: "일본 판타지 애니" },
+          "chinese-fantasy": { label: "중국풍 판타지 애니", tag: "중국풍 판타지 애니" },
+          sketch: { label: "스케치 스타일", tag: "스케치 스타일" }
+        }
+      }
+    };
+
+    function copy() {
+      return translations[currentLanguage] || translations["zh-Hant"];
+    }
+
+    function setText(id, value) {
+      const element = document.querySelector(`#${id}`);
+      if (element) element.textContent = value;
+    }
+
+    function uiText(key) {
+      const table = {
+        "zh-Hant": {
+          mediaTitle: "Media 平台帳密",
+          mediaOptional: "可留空",
+          mediaPermission: "更新發文權限",
+          account: "帳號",
+          password: "密碼",
+          profileTitle: "使用者資料",
+          profileBadge: "可修改",
+          profileCodeLabel: "修改驗證碼",
+          profileVerifyHint: "若修改電話或 Email，需重新驗證。",
+          saveProfile: "儲存使用者資料",
+          profileSaved: "使用者資料已更新。",
+          verified: "驗證成功。",
+          missingMediaCredentials: "請點選左上使用者按鈕進行media平台資料更新."
+        },
+        en: {
+          mediaTitle: "Media Platform Accounts",
+          mediaOptional: "Optional",
+          mediaPermission: "Update posting access",
+          account: "Account",
+          password: "Password",
+          profileTitle: "User Profile",
+          profileBadge: "Editable",
+          profileCodeLabel: "Edit Verification Code",
+          profileVerifyHint: "If phone or Email changes, verification is required.",
+          saveProfile: "Save User Profile",
+          profileSaved: "User profile updated.",
+          verified: "Verification successful.",
+          missingMediaCredentials: "Tap the top-left user button to update media platform information."
+        },
+        ja: {
+          mediaTitle: "Media プラットフォームアカウント",
+          mediaOptional: "任意",
+          mediaPermission: "投稿権限を更新",
+          account: "アカウント",
+          password: "パスワード",
+          profileTitle: "ユーザー情報",
+          profileBadge: "編集可能",
+          profileCodeLabel: "変更認証コード",
+          profileVerifyHint: "電話または Email を変更する場合は再認証が必要です。",
+          saveProfile: "ユーザー情報を保存",
+          profileSaved: "ユーザー情報を更新しました。",
+          verified: "認証成功。",
+          missingMediaCredentials: "左上のユーザーボタンから Media プラットフォーム情報を更新してください。"
+        },
+        ko: {
+          mediaTitle: "Media 플랫폼 계정",
+          mediaOptional: "선택 입력",
+          mediaPermission: "게시 권한 업데이트",
+          account: "계정",
+          password: "비밀번호",
+          profileTitle: "사용자 정보",
+          profileBadge: "수정 가능",
+          profileCodeLabel: "수정 인증 코드",
+          profileVerifyHint: "전화 또는 Email 변경 시 재인증이 필요합니다.",
+          saveProfile: "사용자 정보 저장",
+          profileSaved: "사용자 정보가 업데이트되었습니다.",
+          verified: "인증 성공.",
+          missingMediaCredentials: "왼쪽 위 사용자 버튼을 눌러 media 플랫폼 정보를 업데이트하세요."
+        }
+      };
+      return (table[currentLanguage] || table["zh-Hant"])[key];
+    }
+
+    function updateMediaAccountLanguage() {
+      document.querySelectorAll(".media-account-card").forEach(card => {
+        const platform = card.querySelector("strong")?.textContent.trim() || "Media";
+        const labels = card.querySelectorAll("label");
+        const accountInput = labels[0]?.querySelector("input");
+        const passwordInput = labels[1]?.querySelector("input");
+        if (labels[0]?.firstChild) labels[0].firstChild.nodeValue = uiText("account");
+        if (labels[1]?.firstChild) labels[1].firstChild.nodeValue = uiText("password");
+        if (accountInput) accountInput.placeholder = `${platform} ${uiText("account")}`;
+        if (passwordInput) passwordInput.placeholder = `${platform} ${uiText("password")}`;
+      });
+    }
+
+    function mediaId(prefix, platform, field) {
+      const platformKey = platform === "Email" ? "EmailPlatform" : platform;
+      return `${prefix}${platformKey}${field}`;
+    }
+
+    function collectMediaAccounts(prefix) {
+      return Object.fromEntries(mediaPlatforms.map(platform => {
+        const account = document.querySelector(`#${mediaId(prefix, platform, "Account")}`)?.value.trim() || "";
+        const password = document.querySelector(`#${mediaId(prefix, platform, "Password")}`)?.value.trim() || "";
+        return [platform, { account, password }];
+      }));
+    }
+
+    function fillMediaAccounts(prefix, accounts = mediaAccounts) {
+      mediaPlatforms.forEach(platform => {
+        const accountInput = document.querySelector(`#${mediaId(prefix, platform, "Account")}`);
+        const passwordInput = document.querySelector(`#${mediaId(prefix, platform, "Password")}`);
+        if (accountInput) accountInput.value = accounts[platform]?.account || "";
+        if (passwordInput) passwordInput.value = accounts[platform]?.password || "";
+      });
+    }
+
+    function hasMediaCredentials(platform) {
+      return Boolean(mediaAccounts[platform]?.account && mediaAccounts[platform]?.password);
+    }
+
+    function isValidEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+    }
+
+    function isValidMediaEmail(prefix) {
+      const emailAccount = document.querySelector(`#${mediaId(prefix, "Email", "Account")}`)?.value.trim() || "";
+      return !emailAccount || isValidEmail(emailAccount);
+    }
+
+    function selectedPlatformList() {
+      return [...selectedPlatforms];
+    }
+
+    function updateSelectedPlatformLabel() {
+      const platforms = selectedPlatformList();
+      if (!platforms.length) {
+        platformLabel.textContent = copy().noPlatform;
+        return;
+      }
+      platformLabel.textContent = platforms.length === 1 ? platforms[0] : `已選 ${platforms.length} 個`;
+    }
+
+    function updatePlatformAvailability() {
+      platformButtons.forEach(button => {
+        const platform = button.dataset.platform;
+        const available = hasMediaCredentials(platform);
+        button.classList.toggle("unavailable", !available);
+        if (!available) {
+          selectedPlatforms.delete(platform);
+          button.classList.remove("active");
+        }
+      });
+      updateSelectedPlatformLabel();
+    }
+
+    function syncProfileFields() {
+      profileName.value = loginName.value.trim();
+      profilePhone.value = loginPhone.value.trim();
+      profileEmail.value = loginEmail.value.trim();
+      requestName.value = loginName.value.trim();
+      requestEmail.value = loginEmail.value.trim();
+      fillMediaAccounts("profile");
+    }
+
+    function applyLanguage(language) {
+      currentLanguage = translations[language] ? language : "zh-Hant";
+      document.documentElement.lang = currentLanguage;
+      const c = copy();
+      document.title = `${c.appName} iOS App`;
+      setText("appTitle", c.appName);
+      setText("creditEmptyTitle", c.creditEmptyTitle);
+      setText("creditEmptyBody", c.creditEmptyBody);
+      creditUpgradeButton.textContent = c.creditUpgradeButton;
+      if (!loggedIn) appStatus.textContent = c.statusDefault;
+      setText("loginTitle", c.loginTitle);
+      setText("loginBadge", c.loginBadge);
+      setText("nameLabel", c.nameLabel);
+      setText("phoneLabel", c.phoneLabel);
+      setText("emailLabel", c.emailLabel);
+      setText("loginMediaTitle", uiText("mediaTitle"));
+      setText("loginMediaBadge", uiText("mediaOptional"));
+      setText("codeLabel", c.codeLabel);
+      loginCode.placeholder = c.codePlaceholder;
+      sendCode.textContent = c.sendCode;
+      setText("termsSummary", c.termsSummary);
+      setText("termsText", c.termsText);
+      setText("agreeLabel", c.agreeLabel);
+      finishLogin.textContent = c.finishLogin;
+      setText("selectPhotoTitle", c.selectPhotoTitle);
+      setText("photoSourceLabel", c.photoSourceLabel);
+      setText("albumLabel", c.albumLabel);
+      cameraButton.textContent = c.cameraLabel;
+      setText("emptyPhotoTitle", c.emptyPhotoTitle);
+      setText("emptyPhotoBody", c.emptyPhotoBody);
+      setText("photoTypeTitle", c.photoTypeTitle);
+      setText("photoTypeBadge", c.photoTypeBadge);
+      setText("styleTitle", c.styleTitle);
+      setText("captionTitle", c.captionTitle);
+      setText("captionBadge", c.captionBadge);
+      captionText.placeholder = c.captionPlaceholder;
+      generateCaption.textContent = c.generateCaption;
+      setText("platformTitle", c.platformTitle);
+      updateSelectedPlatformLabel();
+      setText("previewTitle", c.previewTitle);
+      setText("postImageEmpty", c.emptyPhotoTitle);
+      if (!captionText.value.trim()) postPreview.textContent = c.previewEmpty;
+      postButton.textContent = c.postButton;
+      setText("upgradeTitle", c.upgradeTitle);
+      setText("upgradeBadge", c.upgradeBadge);
+      setText("basicCreditTitle", c.basicCreditTitle);
+      setText("basicCreditFeature", c.basicCreditFeature);
+      setText("plusCreditTitle", c.plusCreditTitle);
+      setText("plusCreditFeature", c.plusCreditFeature);
+      setText("proCreditTitle", c.proCreditTitle);
+      setText("proCreditFeature", c.proCreditFeature);
+      setText("advancedPlanTitle", c.advancedPlanTitle);
+      setText("advancedFeaturePhoto", c.advancedFeaturePhoto);
+      setText("advancedFeatureTranslate", c.advancedFeatureTranslate);
+      setText("advancedFeatureCaption", c.advancedFeatureCaption);
+      setText("photoPlanTitle", c.photoPlanTitle);
+      setText("photoPlanFeatureA", c.photoPlanFeatureA);
+      setText("photoPlanFeatureB", c.photoPlanFeatureB);
+      setText("articlePlanTitle", c.articlePlanTitle);
+      setText("articlePlanFeatureA", c.articlePlanFeatureA);
+      setText("articlePlanFeatureB", c.articlePlanFeatureB);
+      setText("editPlanTitle", c.editPlanTitle);
+      setText("editPlanFeatureA", c.editPlanFeatureA);
+      setText("editPlanFeatureB", c.editPlanFeatureB);
+      setText("photoUpgradeToolsTitle", c.photoUpgradeToolsTitle);
+      setText("photoUpgradeToolsBadge", c.photoUpgradeToolsBadge);
+      setText("articleUpgradeToolsTitle", c.articleUpgradeToolsTitle);
+      setText("articleUpgradeToolsBadge", c.articleUpgradeToolsBadge);
+      setText("photoEditToolsTitle", c.photoEditToolsTitle);
+      setText("photoEditToolsBadge", c.photoEditToolsBadge);
+      translateToEnglishButton.textContent = c.translateToEnglish;
+      translateToChineseButton.textContent = c.translateToChinese;
+      learnToneButton.textContent = c.learnTone;
+      setText("stickerSelectLabel", c.stickerSelectLabel);
+      addStickerButton.textContent = c.addStickerButton;
+      stickerDeleteButton.textContent = c.stickerDeleteButton;
+      switchCameraButton.textContent = c.switchCamera;
+      captureButton.textContent = c.capturePhoto;
+      closeCameraButton.textContent = c.closeCamera;
+      document.querySelectorAll(".upgrade-button").forEach(button => {
+        button.textContent = c.upgradeButton;
+      });
+      setText("paymentTitle", c.paymentTitle);
+      setText("cardNameLabel", c.cardNameLabel);
+      setText("cardNumberLabel", c.cardNumberLabel);
+      setText("cardExpiryLabel", c.cardExpiryLabel);
+      setText("cardCvcLabel", c.cardCvcLabel);
+      payButton.textContent = c.payButton;
+      setText("settingsTitle", c.settingsTitle);
+      settingsStatus.textContent = c.settingsStatus;
+      setText("backgroundLabel", c.backgroundLabel);
+      setText("fontLabel", c.fontLabel);
+      setText("languageLabel", c.languageLabel);
+      setText("supportTitle", c.supportTitle);
+      setText("supportText", c.supportText);
+      const zh = translations["zh-Hant"];
+      setText("requestTitle", c.requestTitle || zh.requestTitle);
+      setText("requestBadge", c.requestBadge || zh.requestBadge);
+      setText("requestNameLabel", c.requestNameLabel || zh.requestNameLabel);
+      setText("requestEmailLabel", c.requestEmailLabel || zh.requestEmailLabel);
+      setText("requestTypeLabel", c.requestTypeLabel || zh.requestTypeLabel);
+      setText("requestDetailLabel", c.requestDetailLabel || zh.requestDetailLabel);
+      requestDetail.placeholder = c.requestPlaceholder || zh.requestPlaceholder;
+      submitRequest.textContent = c.submitRequest || zh.submitRequest;
+      setText("profileTitle", uiText("profileTitle"));
+      setText("profileBadge", uiText("profileBadge"));
+      setText("profileNameLabel", c.nameLabel);
+      setText("profilePhoneLabel", c.phoneLabel);
+      setText("profileEmailLabel", c.emailLabel);
+      setText("profileCodeLabel", uiText("profileCodeLabel"));
+      profileCode.placeholder = c.codePlaceholder;
+      sendProfileCode.textContent = c.sendCode;
+      if (!profileCodeValue) profileCodeHint.textContent = uiText("profileVerifyHint");
+      setText("profileMediaTitle", uiText("mediaTitle"));
+      setText("profileMediaBadge", uiText("mediaPermission"));
+      saveProfile.textContent = uiText("saveProfile");
+      updateMediaAccountLanguage();
+      const nav = document.querySelectorAll(".tabbar button");
+      nav[0].querySelector(".nav-label").textContent = c.navPost;
+      nav[1].querySelector(".nav-label").textContent = c.navUpgrade;
+      nav[2].querySelector(".nav-label").textContent = c.navRequest || zh.navRequest;
+      nav[3].querySelector(".nav-label").textContent = c.navSettings;
+      document.querySelectorAll(".style-option").forEach(button => {
+        button.textContent = c.styles[button.dataset.style].label;
+      });
+      selectedStyle = c.styles[selectedStyleKey].label;
+      styleLabel.textContent = selectedStyle;
+      shareStyleLabel.textContent = selectedStyle;
+      updatePhotoTypePanel();
+      updateCredits();
+    }
+
+    function showPage(pageId) {
+      if (!loggedIn && pageId !== "loginPage") {
+        appStatus.textContent = copy().requireLogin;
+        pageId = "loginPage";
+      }
+      tabbar.hidden = pageId === "loginPage";
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      tabButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+    }
+
+    function updateCredits() {
+      creditButton.textContent = copy().credits(credits);
+      creditEmptyAlert.hidden = credits > 0;
+    }
+
+    function saveRecord(type, payload) {
+      window.AppDatabase?.save?.(type, {
+        ...payload,
+        app: "photo-beautify-ios-app"
+      });
+    }
+
+    function updatePhotoTypePanel() {
+      if (!currentPhotoProfile) {
+        photoTypePanel.classList.remove("active");
+        photoTypeDescription.textContent = copy().photoTypeDefault;
+        photoTypeRecommendations.innerHTML = "";
+        return;
+      }
+      const c = copy();
+      const typeLabel = c.photoTypes[currentPhotoProfile.type] || c.photoTypes.lifestyle;
+      const reason = c.photoTypeReasons[currentPhotoProfile.type] || c.photoTypeReasons.lifestyle;
+      const recommendedStyles = PHOTO_TYPE_STYLE_MAP[currentPhotoProfile.type] || PHOTO_TYPE_STYLE_MAP.lifestyle;
+      photoTypePanel.classList.add("active");
+      photoTypeTitle.textContent = c.photoTypeTitle;
+      photoTypeBadge.textContent = `${c.photoTypeBadge} · ${Math.round(currentPhotoProfile.confidence * 100)}%`;
+      photoTypeDescription.textContent = c.photoTypeDetected(typeLabel, reason);
+      photoTypeRecommendations.innerHTML = recommendedStyles.map(styleKey => {
+        const label = c.styles[styleKey]?.label || styleKey;
+        return `<button class="recommend-pill" type="button" data-recommend-style="${styleKey}">${c.photoTypeRecommend}: ${label}</button>`;
+      }).join("");
+    }
+
+    async function analyzePhotoType(image) {
+      const sampleSize = 64;
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      canvas.width = sampleSize;
+      canvas.height = sampleSize;
+      context.drawImage(image, 0, 0, sampleSize, sampleSize);
+      const { data } = context.getImageData(0, 0, sampleSize, sampleSize);
+      let brightLowSat = 0;
+      let saturationTotal = 0;
+      let edgeTotal = 0;
+      let centerEdge = 0;
+      let warmTotal = 0;
+      let blueGreenTop = 0;
+      let darkTextLike = 0;
+      const pixels = sampleSize * sampleSize;
+      for (let y = 0; y < sampleSize; y += 1) {
+        for (let x = 0; x < sampleSize; x += 1) {
+          const index = (y * sampleSize + x) * 4;
+          const r = data[index];
+          const g = data[index + 1];
+          const b = data[index + 2];
+          const max = Math.max(r, g, b);
+          const min = Math.min(r, g, b);
+          const sat = max === 0 ? 0 : (max - min) / max;
+          const lum = r * 0.299 + g * 0.587 + b * 0.114;
+          const edge = edgeStrength(data, sampleSize, sampleSize, x, y);
+          saturationTotal += sat;
+          edgeTotal += edge;
+          warmTotal += Math.max(0, r - b);
+          if (lum > 205 && sat < 0.2) brightLowSat += 1;
+          if (lum < 115 && sat < 0.32 && edge > 14) darkTextLike += 1;
+          if (y < sampleSize * 0.45 && (b > r + 8 || g > r + 12) && sat > 0.16) blueGreenTop += 1;
+          if (x > sampleSize * 0.28 && x < sampleSize * 0.72 && y > sampleSize * 0.16 && y < sampleSize * 0.88) {
+            centerEdge += edge;
+          }
+        }
+      }
+
+      const aspect = (image.naturalWidth || image.width || 1) / (image.naturalHeight || image.height || 1);
+      const avgSat = saturationTotal / pixels;
+      const avgEdge = edgeTotal / pixels;
+      const centerDetail = centerEdge / Math.max(1, pixels * 0.34);
+      const whiteRatio = brightLowSat / pixels;
+      const textRatio = darkTextLike / pixels;
+      const skyNatureRatio = blueGreenTop / Math.max(1, pixels * 0.45);
+      const warmRatio = warmTotal / Math.max(1, pixels * 255);
+
+      if (whiteRatio > 0.42 && textRatio > 0.09 && avgSat < 0.24) {
+        return { type: "document", confidence: Math.min(0.96, 0.72 + textRatio) };
+      }
+      if (whiteRatio > 0.32 && centerDetail > avgEdge * 1.16 && avgSat < 0.42) {
+        return { type: "product", confidence: Math.min(0.94, 0.68 + whiteRatio * 0.32) };
+      }
+      if (aspect > 1.18 && (skyNatureRatio > 0.22 || avgSat > 0.32)) {
+        return { type: "landscape", confidence: Math.min(0.93, 0.64 + skyNatureRatio * 0.5) };
+      }
+      if (aspect < 0.92 || centerDetail > avgEdge * 1.25 || warmRatio > 0.16) {
+        return { type: "portrait", confidence: Math.min(0.92, 0.62 + Math.min(0.24, centerDetail / 160) + Math.min(0.1, warmRatio / 2)) };
+      }
+      return { type: "lifestyle", confidence: 0.66 };
+    }
+
+    async function updatePhotoTypeFromImage(image) {
+      currentPhotoProfile = await analyzePhotoType(image);
+      updatePhotoTypePanel();
+      saveRecord("questions", {
+        source: "照片類型判斷",
+        photoType: currentPhotoProfile.type,
+        confidence: currentPhotoProfile.confidence,
+        recommendedStyles: PHOTO_TYPE_STYLE_MAP[currentPhotoProfile.type] || PHOTO_TYPE_STYLE_MAP.lifestyle,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    function setPreviewMode(mode, ratio = "") {
+      photoPreview.classList.toggle("has-photo", mode === "photo");
+      photoPreview.classList.toggle("camera-mode", mode === "camera");
+      if (ratio) {
+        photoPreview.style.setProperty("--photo-ratio", ratio);
+      } else {
+        photoPreview.style.removeProperty("--photo-ratio");
+      }
+    }
+
+    function syncPostImagePreview() {
+      postImagePreview.className = "post-image-preview filter-original";
+      if (!currentPhotoDataUrl) {
+        postImagePreview.style.removeProperty("--post-photo-ratio");
+        postImagePreview.innerHTML = `<span id="postImageEmpty">${copy().emptyPhotoTitle}</span>`;
+        return;
+      }
+      postImagePreview.style.setProperty("--post-photo-ratio", currentPhotoRatio);
+      postImagePreview.innerHTML = `<img alt="發文預覽照片" src="${currentPhotoDataUrl}">`;
+    }
+
+    function unlockFeature(feature) {
+      unlockedFeatures.add(feature);
+      photoUpgradeTools.hidden = !unlockedFeatures.has("photo");
+      articleUpgradeTools.hidden = !unlockedFeatures.has("article");
+      photoEditTools.hidden = !unlockedFeatures.has("edit");
+      showPage("editPage");
+    }
+
+    sendCode.addEventListener("click", () => {
+      if (!loginPhone.value.trim()) {
+        codeHint.textContent = copy().noPhone;
+        return;
+      }
+      loginCodeValue = String(Math.floor(1000 + Math.random() * 9000));
+      codeHint.textContent = copy().codeSent(loginCodeValue);
+      loginHint.textContent = "";
+    });
+
+    finishLogin.addEventListener("click", () => {
+      if (!loginName.value.trim() || !loginPhone.value.trim() || !loginEmail.value.trim()) {
+        loginHint.textContent = copy().missingProfile;
+        return;
+      }
+      if (!isValidEmail(loginEmail.value)) {
+        loginHint.textContent = copy().invalidEmail;
+        return;
+      }
+      if (!isValidMediaEmail("login")) {
+        loginHint.textContent = copy().invalidEmail;
+        return;
+      }
+      if (!loginCodeValue) {
+        codeHint.textContent = copy().sendFirst;
+        loginHint.textContent = "";
+        return;
+      }
+      if (loginCode.value.trim() !== loginCodeValue) {
+        codeHint.textContent = copy().wrongCode;
+        loginHint.textContent = "";
+        return;
+      }
+      if (!termsDetails.open) {
+        loginHint.textContent = copy().openTermsFirst;
+        return;
+      }
+      if (!agreeTerms.checked) {
+        loginHint.textContent = copy().agreeFirst;
+        return;
+      }
+      loggedIn = true;
+      mediaAccounts = collectMediaAccounts("login");
+      syncProfileFields();
+      updatePlatformAvailability();
+      userButton.textContent = loginName.value.trim();
+      codeHint.textContent = "";
+      loginHint.textContent = "";
+      appStatus.textContent = copy().loginSuccess;
+      saveRecord("users", {
+        source: "完成註冊",
+        name: loginName.value.trim(),
+        phone: loginPhone.value.trim(),
+        email: loginEmail.value.trim(),
+        mediaAccounts,
+        credits
+      });
+      showPage("editPage");
+    });
+
+    sendProfileCode.addEventListener("click", () => {
+      if (!profilePhone.value.trim()) {
+        profileCodeHint.textContent = copy().noPhone;
+        return;
+      }
+      profileCodeValue = String(Math.floor(1000 + Math.random() * 9000));
+      profileCodeHint.textContent = copy().codeSent(profileCodeValue);
+      profileHint.textContent = "";
+    });
+
+    saveProfile.addEventListener("click", () => {
+      if (!profileName.value.trim() || !profilePhone.value.trim() || !profileEmail.value.trim()) {
+        profileHint.textContent = copy().missingProfile;
+        return;
+      }
+      if (!isValidEmail(profileEmail.value)) {
+        profileHint.textContent = copy().invalidEmail;
+        return;
+      }
+      if (!isValidMediaEmail("profile")) {
+        profileHint.textContent = copy().invalidEmail;
+        return;
+      }
+      const contactChanged = profilePhone.value.trim() !== loginPhone.value.trim()
+        || profileEmail.value.trim() !== loginEmail.value.trim();
+      if (contactChanged && !profileCodeValue) {
+        profileCodeHint.textContent = copy().sendFirst;
+        profileHint.textContent = "";
+        return;
+      }
+      if (contactChanged && profileCode.value.trim() !== profileCodeValue) {
+        profileCodeHint.textContent = copy().wrongCode;
+        profileHint.textContent = "";
+        return;
+      }
+      loginName.value = profileName.value.trim();
+      loginPhone.value = profilePhone.value.trim();
+      loginEmail.value = profileEmail.value.trim();
+      mediaAccounts = collectMediaAccounts("profile");
+      updatePlatformAvailability();
+      userButton.textContent = loginName.value.trim();
+      requestName.value = loginName.value.trim();
+      requestEmail.value = loginEmail.value.trim();
+      profileCode.value = "";
+      profileCodeValue = "";
+      profileCodeHint.textContent = contactChanged ? uiText("verified") : uiText("profileVerifyHint");
+      profileHint.textContent = uiText("profileSaved");
+      saveRecord("users", {
+        source: "修改使用者資料",
+        name: loginName.value.trim(),
+        phone: loginPhone.value.trim(),
+        email: loginEmail.value.trim(),
+        mediaAccounts,
+        updatedAt: new Date().toISOString()
+      });
+    });
+
+    submitRequest.addEventListener("click", () => {
+      const c = copy();
+      const email = requestEmail.value.trim();
+      const detail = requestDetail.value.trim();
+      if (!email || !detail) {
+        requestStatus.textContent = c.requestMissing || translations["zh-Hant"].requestMissing;
+        return;
+      }
+      if (!isValidEmail(email)) {
+        requestStatus.textContent = c.invalidEmail;
+        return;
+      }
+      requestStatus.textContent = c.requestSent || translations["zh-Hant"].requestSent;
+      saveRecord("questions", {
+        source: "新需求",
+        requester: requestName.value.trim() || loginName.value.trim() || "使用者",
+        email,
+        requestType: requestType.value,
+        detail,
+        createdAt: new Date().toISOString()
+      });
+      requestDetail.value = "";
+    });
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+      cameraControls.hidden = true;
+    }
+
+    function clampChannel(value) {
+      return Math.max(0, Math.min(255, Math.round(value)));
+    }
+
+    function loadImageElement(dataUrl) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = dataUrl;
+      });
+    }
+
+    function tuneColor(r, g, b, options = {}) {
+      const brightness = options.brightness || 0;
+      const contrast = options.contrast || 1;
+      const saturation = options.saturation || 1;
+      const warm = options.warm || 0;
+      const gray = r * 0.299 + g * 0.587 + b * 0.114;
+      return [
+        clampChannel((gray + (r - gray) * saturation - 128) * contrast + 128 + brightness + warm),
+        clampChannel((gray + (g - gray) * saturation - 128) * contrast + 128 + brightness + warm * 0.28),
+        clampChannel((gray + (b - gray) * saturation - 128) * contrast + 128 + brightness - warm * 0.36)
+      ];
+    }
+
+    function posterize(value, steps) {
+      const size = 255 / Math.max(2, steps - 1);
+      return Math.round(value / size) * size;
+    }
+
+    function edgeStrength(data, width, height, x, y) {
+      const index = (y * width + x) * 4;
+      const right = (y * width + Math.min(width - 1, x + 1)) * 4;
+      const down = (Math.min(height - 1, y + 1) * width + x) * 4;
+      const lum = data[index] * 0.299 + data[index + 1] * 0.587 + data[index + 2] * 0.114;
+      const lumRight = data[right] * 0.299 + data[right + 1] * 0.587 + data[right + 2] * 0.114;
+      const lumDown = data[down] * 0.299 + data[down + 1] * 0.587 + data[down + 2] * 0.114;
+      return Math.max(Math.abs(lum - lumRight), Math.abs(lum - lumDown));
+    }
+
+    function blendWithSoftCopy(original, soft, index, strength) {
+      return [
+        original[index] * (1 - strength) + soft[index] * strength,
+        original[index + 1] * (1 - strength) + soft[index + 1] * strength,
+        original[index + 2] * (1 - strength) + soft[index + 2] * strength
+      ];
+    }
+
+    function styleTransferPrompt(styleKey) {
+      const prompts = {
+        webtoon: "Transform the uploaded photo into a polished webtoon-style illustration with rounded characters, clean shapes, bright commercial colors, clear black outlines, soft highlights, and a friendly app-icon illustration look. Preserve the subject composition.",
+        "handdrawn-fantasy": "Transform the uploaded photo into a Japanese fantasy animation illustration with soft watercolor texture, pastel lighting, magical atmosphere, gentle hand-drawn linework, and storybook fantasy details. Preserve the subject composition.",
+        "chinese-fantasy": "Transform the uploaded photo into a Chinese fantasy animation illustration with ink-wash inspired mountains and clouds, warm parchment texture, elegant brush lines, teal and gold accents, and xianxia fantasy atmosphere. Preserve the subject composition.",
+        sketch: "Transform the uploaded photo into a detailed pencil sketch with graphite linework, cross-hatching, paper texture, clean outlines, and hand-drawn shading. Preserve the subject composition."
+      };
+      return prompts[styleKey] || "";
+    }
+
+    function hasCoreMLStyleTransferBridge() {
+      return Boolean(window.webkit?.messageHandlers?.coreMLStyleTransfer);
+    }
+
+    function requestAiStyleTransfer(styleKey) {
+      const bridge = window.webkit?.messageHandlers?.coreMLStyleTransfer;
+      if (!bridge) {
+        return renderProcessedPhoto(styleKey);
+      }
+      return new Promise((resolve, reject) => {
+        const requestId = `style-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        window.__coreMLStyleTransferCallbacks = window.__coreMLStyleTransferCallbacks || {};
+        window.__coreMLStyleTransferCallbacks[requestId] = { resolve, reject };
+        bridge.postMessage({
+          requestId,
+          imageDataUrl: sourcePhotoDataUrl,
+          styleKey,
+          photoType: currentPhotoProfile?.type || "unknown",
+          styleName: selectedStyle,
+          prompt: styleTransferPrompt(styleKey)
+        });
+        window.setTimeout(() => {
+          if (!window.__coreMLStyleTransferCallbacks?.[requestId]) return;
+          delete window.__coreMLStyleTransferCallbacks[requestId];
+          reject(new Error("Core ML 風格轉換逾時，請確認模型已載入。"));
+        }, 45000);
+      });
+    }
+
+    window.handleCoreMLStyleTransferResult = function handleCoreMLStyleTransferResult(requestId, payload) {
+      const callbacks = window.__coreMLStyleTransferCallbacks || {};
+      const callback = callbacks[requestId];
+      if (!callback) return;
+      delete callbacks[requestId];
+      if (payload?.imageDataUrl) {
+        callback.resolve(payload.imageDataUrl);
+      } else {
+        callback.reject(new Error(payload?.error || "Core ML 風格轉換失敗。"));
+      }
+    };
+
+    function drawStyleTransferOverlay(context, width, height, styleKey) {
+      if (!["webtoon", "handdrawn-fantasy", "chinese-fantasy", "sketch"].includes(styleKey)) return;
+      context.save();
+      if (styleKey === "webtoon") {
+        const gradient = context.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, "rgba(255,255,255,.22)");
+        gradient.addColorStop(.52, "rgba(255,204,90,.1)");
+        gradient.addColorStop(1, "rgba(0,135,255,.18)");
+        context.globalCompositeOperation = "screen";
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, width, height);
+        context.globalCompositeOperation = "multiply";
+        context.strokeStyle = "rgba(12,18,32,.2)";
+        context.lineWidth = Math.max(2, width / 280);
+        for (let x = -height; x < width; x += Math.max(28, width / 24)) {
+          context.beginPath();
+          context.moveTo(x, height);
+          context.lineTo(x + height, 0);
+          context.stroke();
+        }
+      }
+      if (styleKey === "handdrawn-fantasy") {
+        const glow = context.createRadialGradient(width * .28, height * .2, 0, width * .28, height * .2, Math.max(width, height) * .75);
+        glow.addColorStop(0, "rgba(255,244,198,.14)");
+        glow.addColorStop(.45, "rgba(255,203,218,.08)");
+        glow.addColorStop(1, "rgba(166,205,255,.07)");
+        context.globalCompositeOperation = "soft-light";
+        context.fillStyle = glow;
+        context.fillRect(0, 0, width, height);
+        context.fillStyle = "rgba(255,255,255,.16)";
+        for (let i = 0; i < 18; i += 1) {
+          const x = (i * 89) % width;
+          const y = (i * 137) % height;
+          const s = Math.max(2, width / 240);
+          context.fillRect(x - s / 2, y, s, s);
+          context.fillRect(x, y - s / 2, s, s);
+        }
+      }
+      if (styleKey === "chinese-fantasy") {
+        context.globalCompositeOperation = "multiply";
+        context.fillStyle = "rgba(238,224,190,.28)";
+        context.fillRect(0, 0, width, height);
+        context.strokeStyle = "rgba(60,88,86,.18)";
+        context.lineWidth = Math.max(1, width / 360);
+        for (let y = 0; y < height; y += Math.max(18, height / 22)) {
+          context.beginPath();
+          context.moveTo(0, y);
+          for (let x = 0; x <= width; x += 24) {
+            context.lineTo(x, y + Math.sin((x + y) / 42) * 7);
+          }
+          context.stroke();
+        }
+        context.globalCompositeOperation = "screen";
+        context.fillStyle = "rgba(255,245,218,.18)";
+        context.fillRect(0, 0, width, height);
+      }
+      if (styleKey === "sketch") {
+        context.globalCompositeOperation = "multiply";
+        context.strokeStyle = "rgba(40,40,40,.16)";
+        context.lineWidth = 1;
+        for (let x = -height; x < width; x += 13) {
+          context.beginPath();
+          context.moveTo(x, height);
+          context.lineTo(x + height, 0);
+          context.stroke();
+        }
+        context.strokeStyle = "rgba(90,90,90,.12)";
+        for (let x = 0; x < width + height; x += 17) {
+          context.beginPath();
+          context.moveTo(x, 0);
+          context.lineTo(x - height, height);
+          context.stroke();
+        }
+        context.globalCompositeOperation = "screen";
+        context.fillStyle = "rgba(255,255,255,.2)";
+        context.fillRect(0, 0, width, height);
+      }
+      context.restore();
+    }
+
+    async function renderProcessedPhoto(styleKey) {
+      if (!sourcePhotoDataUrl) return "";
+      const image = await loadImageElement(sourcePhotoDataUrl);
+      const maxSide = 1280;
+      const scale = Math.min(1, maxSide / Math.max(image.naturalWidth || 1, image.naturalHeight || 1));
+      const width = Math.max(1, Math.round((image.naturalWidth || 1) * scale));
+      const height = Math.max(1, Math.round((image.naturalHeight || 1) * scale));
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      canvas.width = width;
+      canvas.height = height;
+      context.drawImage(image, 0, 0, width, height);
+
+      const original = context.getImageData(0, 0, width, height);
+      const output = context.createImageData(width, height);
+      const source = original.data;
+      const result = output.data;
+
+      const softCanvas = document.createElement("canvas");
+      softCanvas.width = width;
+      softCanvas.height = height;
+      const softContext = softCanvas.getContext("2d", { willReadFrequently: true });
+      softContext.filter = "blur(5px)";
+      softContext.drawImage(canvas, 0, 0);
+      const soft = softContext.getImageData(0, 0, width, height).data;
+
+      const beautyStyles = new Set(["beauty", "hd-beauty", "skin-tone", "portrait"]);
+      const animeStyles = new Set(["anime", "webtoon", "handdrawn-fantasy", "chinese-fantasy"]);
+
+      for (let y = 0; y < height; y += 1) {
+        for (let x = 0; x < width; x += 1) {
+          const index = (y * width + x) * 4;
+          let r = source[index];
+          let g = source[index + 1];
+          let b = source[index + 2];
+
+          if (beautyStyles.has(styleKey)) {
+            const [sr, sg, sb] = blendWithSoftCopy(source, soft, index, styleKey === "hd-beauty" ? 0.46 : 0.32);
+            [r, g, b] = tuneColor(sr, sg, sb, {
+              brightness: styleKey === "hd-beauty" ? 17 : 11,
+              contrast: styleKey === "portrait" ? 1.1 : 1.05,
+              saturation: styleKey === "skin-tone" ? 1.08 : 1.16,
+              warm: styleKey === "skin-tone" ? 8 : 5
+            });
+          } else if (styleKey === "sketch") {
+            const edge = edgeStrength(source, width, height, x, y);
+            const gray = r * 0.299 + g * 0.587 + b * 0.114;
+            const paper = clampChannel(255 - edge * 2.35);
+            const hatch = ((x + y) % 10 < 2 || (x - y + width) % 14 < 2) ? 26 : 0;
+            const sketchTone = clampChannel(Math.min(paper, gray + 72) - hatch);
+            if (edge > 12) {
+              r = g = b = clampChannel(24 + Math.max(0, 86 - edge * 1.25));
+            } else {
+              r = g = b = sketchTone;
+            }
+          } else if (animeStyles.has(styleKey)) {
+            const isWebtoon = styleKey === "webtoon";
+            const isFantasy = styleKey === "handdrawn-fantasy";
+            const isChineseFantasy = styleKey === "chinese-fantasy";
+            if (isFantasy || isChineseFantasy) {
+              const [sr, sg, sb] = blendWithSoftCopy(source, soft, index, isChineseFantasy ? 0.42 : 0.2);
+              r = sr;
+              g = sg;
+              b = sb;
+            }
+            [r, g, b] = tuneColor(r, g, b, {
+              brightness: isChineseFantasy ? 28 : (isFantasy ? 7 : 22),
+              contrast: isWebtoon ? 1.62 : (isChineseFantasy ? 1.18 : 1.04),
+              saturation: isWebtoon ? 2.32 : (isChineseFantasy ? 1.12 : 1.08),
+              warm: isChineseFantasy ? 24 : (isFantasy ? 8 : -2)
+            });
+            if (isFantasy) {
+              const sourceLum = source[index] * 0.299 + source[index + 1] * 0.587 + source[index + 2] * 0.114;
+              const highlightBlend = sourceLum > 218 ? 0.03 : 0.08;
+              r = clampChannel(r * (1 - highlightBlend) + 246 * highlightBlend);
+              g = clampChannel(g * (1 - highlightBlend) + 232 * highlightBlend);
+              b = clampChannel(b * (1 - highlightBlend) + 220 * highlightBlend);
+            } else if (isChineseFantasy) {
+              const ink = r * 0.299 + g * 0.587 + b * 0.114;
+              r = clampChannel(r * 0.72 + 238 * 0.16 + ink * 0.12);
+              g = clampChannel(g * 0.76 + 224 * 0.14 + ink * 0.1);
+              b = clampChannel(b * 0.68 + 198 * 0.14 + ink * 0.18);
+            }
+            const levels = isChineseFantasy ? 8 : (isFantasy ? 18 : 3);
+            r = posterize(r, levels);
+            g = posterize(g, levels);
+            b = posterize(b, levels);
+            const edge = edgeStrength(source, width, height, x, y);
+            if (edge > (isWebtoon ? 10 : (isChineseFantasy ? 16 : (isFantasy ? 24 : 18)))) {
+              r = isChineseFantasy ? 48 : (isFantasy ? 82 : 8);
+              g = isChineseFantasy ? 66 : (isFantasy ? 62 : 12);
+              b = isChineseFantasy ? 56 : (isFantasy ? 50 : 18);
+            } else if (isWebtoon && edge > 6) {
+              r = clampChannel(r * 0.52);
+              g = clampChannel(g * 0.52);
+              b = clampChannel(b * 0.58);
+            } else if (isChineseFantasy && ((x + y) % 46 < 2 || (x - y + width) % 53 < 2)) {
+              r = clampChannel(r * 0.88 + 210 * 0.12);
+              g = clampChannel(g * 0.88 + 180 * 0.12);
+              b = clampChannel(b * 0.82 + 130 * 0.18);
+            }
+          } else {
+            const presets = {
+              product: { brightness: 16, contrast: 1.24, saturation: 1.08 },
+              cinematic: { brightness: -2, contrast: 1.18, saturation: 0.86, warm: 7 },
+              clean: { brightness: 18, contrast: 1.04, saturation: 0.96 },
+              vintage: { brightness: 6, contrast: 1.08, saturation: 0.82, warm: 18 },
+              "night-fix": { brightness: 30, contrast: 1.18, saturation: 1.14 },
+              "food-pop": { brightness: 12, contrast: 1.18, saturation: 1.52, warm: 8 },
+              "sky-blue": { brightness: 10, contrast: 1.1, saturation: 1.32, warm: -5 },
+              "bg-clean": { brightness: 16, contrast: 1.1, saturation: 0.92 },
+              "detail-sharp": { brightness: 2, contrast: 1.34, saturation: 1.08 }
+            };
+            [r, g, b] = tuneColor(r, g, b, presets[styleKey] || {});
+          }
+
+          result[index] = r;
+          result[index + 1] = g;
+          result[index + 2] = b;
+          result[index + 3] = source[index + 3];
+        }
+      }
+
+      context.putImageData(output, 0, 0);
+      drawStyleTransferOverlay(context, width, height, styleKey);
+      return canvas.toDataURL("image/png");
+    }
+
+    async function applyProcessedStyle(styleKey) {
+      if (!sourcePhotoDataUrl) return;
+      const processingText = currentLanguage === "en"
+        ? `${AI_STYLE_KEYS.has(styleKey) ? "AI style transfer" : "Applying"} ${selectedStyle}...`
+        : `${AI_STYLE_KEYS.has(styleKey) ? "AI 照片風格轉換中" : "正在套用"}「${selectedStyle}」...`;
+      appStatus.textContent = processingText;
+      try {
+        let processed = "";
+        if (AI_STYLE_KEYS.has(styleKey)) {
+          try {
+            processed = await requestAiStyleTransfer(styleKey);
+          } catch (error) {
+            processed = await renderProcessedPhoto(styleKey);
+            appStatus.textContent = currentLanguage === "en"
+              ? "Core ML bridge is unavailable, using built-in local style transfer."
+              : "Core ML 尚未連線，已改用 App 內建本地風格轉換。";
+          }
+        } else {
+          processed = await renderProcessedPhoto(styleKey);
+        }
+        if (!processed) return;
+        currentPhotoDataUrl = processed;
+        photoPreview.innerHTML = `<img alt="已套用${selectedStyle}風格的照片" src="${processed}">`;
+        photoPreview.className = "preview has-photo filter-original";
+        setPreviewMode("photo", currentPhotoRatio);
+        syncPostImagePreview();
+        appStatus.textContent = copy().styleApplied(selectedStyle);
+        if (AI_STYLE_KEYS.has(styleKey)) {
+          saveRecord("questions", {
+            source: "AI照片風格轉換",
+            style: selectedStyle,
+            styleKey,
+            photoType: currentPhotoProfile?.type || "unknown",
+            prompt: styleTransferPrompt(styleKey),
+            engine: hasCoreMLStyleTransferBridge() ? "Core ML bridge" : "App 內建本地風格轉換",
+            hasPhoto: true
+          });
+        }
+      } catch (error) {
+        appStatus.textContent = currentLanguage === "en"
+          ? `Photo optimization failed: ${error.message}`
+          : `照片優化失敗：${error.message}`;
+      }
+    }
+
+    async function openCameraPreview() {
+      if (!loggedIn) return showPage("loginPage");
+      if (!navigator.mediaDevices?.getUserMedia) {
+        cameraInput.click();
+        return;
+      }
+      try {
+        stopCamera();
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: currentFacingMode },
+          audio: false
+        });
+        hasPhoto = true;
+        photoPreview.innerHTML = '<video id="cameraPreview" autoplay muted playsinline></video>';
+        photoPreview.querySelector("video").srcObject = cameraStream;
+        setPreviewMode("camera");
+        cameraControls.hidden = false;
+        appStatus.textContent = copy().cameraReady;
+      } catch (error) {
+        appStatus.textContent = copy().cameraError;
+        cameraControls.hidden = true;
+        cameraInput.click();
+      }
+    }
+
+    function captureCameraPhoto() {
+      const video = photoPreview.querySelector("video");
+      if (!video) return;
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth || 1080;
+      canvas.height = video.videoHeight || 1440;
+      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL("image/png");
+      stopCamera();
+      hasPhoto = true;
+      sourcePhotoDataUrl = dataUrl;
+      currentPhotoDataUrl = dataUrl;
+      currentPhotoRatio = `${canvas.width} / ${canvas.height}`;
+      photoPreview.innerHTML = `<img alt="相機拍攝照片" src="${dataUrl}">`;
+      setPreviewMode("photo", currentPhotoRatio);
+      syncPostImagePreview();
+      loadImageElement(dataUrl).then(updatePhotoTypeFromImage).catch(() => {
+        currentPhotoProfile = { type: "lifestyle", confidence: 0.58 };
+        updatePhotoTypePanel();
+      });
+      appStatus.textContent = copy().photoLoaded;
+    }
+
+    function loadPhoto(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        hasPhoto = true;
+        stopCamera();
+        const image = new Image();
+        image.onload = () => {
+          const ratio = `${image.naturalWidth || 1} / ${image.naturalHeight || 1}`;
+          sourcePhotoDataUrl = reader.result;
+          currentPhotoDataUrl = reader.result;
+          currentPhotoRatio = ratio;
+          photoPreview.innerHTML = `<img alt="選取的照片" src="${reader.result}">`;
+          setPreviewMode("photo", ratio);
+          syncPostImagePreview();
+          updatePhotoTypeFromImage(image);
+          appStatus.textContent = copy().photoLoaded;
+        };
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    photoInput.addEventListener("change", () => loadPhoto(photoInput.files[0]));
+    cameraInput.addEventListener("change", () => loadPhoto(cameraInput.files[0]));
+    cameraButton.addEventListener("click", openCameraPreview);
+    switchCameraButton.addEventListener("click", () => {
+      currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+      openCameraPreview();
+    });
+    captureButton.addEventListener("click", captureCameraPhoto);
+    closeCameraButton.addEventListener("click", () => {
+      stopCamera();
+      setPreviewMode("empty");
+      photoPreview.innerHTML = `<div class="empty-preview"><strong id="emptyPhotoTitle">${copy().emptyPhotoTitle}</strong><span id="emptyPhotoBody">${copy().emptyPhotoBody}</span></div>`;
+      hasPhoto = false;
+      sourcePhotoDataUrl = "";
+      currentPhotoDataUrl = "";
+      currentPhotoProfile = null;
+      updatePhotoTypePanel();
+      syncPostImagePreview();
+    });
+
+    async function chooseStyle(styleKey) {
+      const button = document.querySelector(`.style-option[data-style="${styleKey}"]`);
+      if (!button) return;
+      if (PHOTO_UPGRADE_STYLE_KEYS.has(styleKey) && !unlockedFeatures.has("photo")) {
+        appStatus.textContent = copy().photoUpgradeRequired;
+        return;
+      }
+      document.querySelectorAll(".style-option").forEach(item => item.classList.toggle("active", item === button));
+      selectedStyleKey = styleKey;
+      const config = copy().styles[selectedStyleKey];
+      selectedStyle = config.label;
+      styleLabel.textContent = selectedStyle;
+      shareStyleLabel.textContent = selectedStyle;
+      if (hasPhoto) {
+        await applyProcessedStyle(styleKey);
+      } else {
+        photoPreview.className = `preview filter-${styleKey}`;
+        syncPostImagePreview();
+        appStatus.textContent = copy().styleApplied(selectedStyle);
+      }
+    }
+
+    async function handleStyleClick(event) {
+      const button = event.target.closest(".style-option");
+      if (!button) return;
+      await chooseStyle(button.dataset.style);
+    }
+
+    styleGrid.addEventListener("click", handleStyleClick);
+    advancedStyleGrid.addEventListener("click", handleStyleClick);
+    photoTypeRecommendations.addEventListener("click", async event => {
+      const button = event.target.closest("[data-recommend-style]");
+      if (!button) return;
+      await chooseStyle(button.dataset.recommendStyle);
+    });
+
+    generateCaption.addEventListener("click", () => {
+      if (!loggedIn) return showPage("loginPage");
+      if (!hasPhoto) {
+        appStatus.textContent = copy().noPhoto;
+        return;
+      }
+      if (credits <= 0) {
+        appStatus.textContent = copy().noCredits;
+        creditEmptyAlert.hidden = false;
+        return;
+      }
+      credits -= 1;
+      updateCredits();
+      const config = copy().styles[selectedStyleKey] || copy().styles.original;
+      captionText.value = copy().caption(config.tag, selectedStyle);
+      postPreview.textContent = captionText.value;
+      appStatus.textContent = copy().captionReady;
+      saveRecord("questions", {
+        source: "產生照片短文章",
+        style: selectedStyle,
+        caption: captionText.value,
+        remainingCredits: credits
+      });
+    });
+
+    platformButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const platform = button.dataset.platform;
+        if (!hasMediaCredentials(platform)) {
+          postStatus.textContent = uiText("missingMediaCredentials");
+          appStatus.textContent = uiText("missingMediaCredentials");
+          return;
+        }
+        if (selectedPlatforms.has(platform)) {
+          selectedPlatforms.delete(platform);
+          button.classList.remove("active");
+        } else {
+          selectedPlatforms.add(platform);
+          button.classList.add("active");
+        }
+        updateSelectedPlatformLabel();
+        postPreview.textContent = captionText.value.trim() || copy().previewCaptionFirst;
+      });
+    });
+
+    captionText.addEventListener("input", () => {
+      postPreview.textContent = captionText.value.trim() || copy().previewEmpty;
+    });
+
+    translateToEnglishButton.addEventListener("click", () => {
+      const styleName = (translations.en.styles[selectedStyleKey] || translations.en.styles.original).label;
+      captionText.value = `A polished ${styleName.toLowerCase()} moment, refined for social media and ready to share.\n\nThis photo captures a clean, memorable feeling with a stronger visual identity. Posting it today keeps the brand warm, current, and easy to connect with.\n\n#Crovantix #SocialMediaAssistant #${styleName.replace(/\s+/g, "")}`;
+      postPreview.textContent = captionText.value;
+      articleToolStatus.textContent = copy().translatedEnglish;
+    });
+
+    translateToChineseButton.addEventListener("click", () => {
+      const styleName = (translations["zh-Hant"].styles[selectedStyleKey] || translations["zh-Hant"].styles.original).label;
+      captionText.value = `這張照片已完成「${styleName}」風格整理，很適合用在社群貼文中分享。\n\n畫面更乾淨、重點更清楚，也保留自然有溫度的氛圍。今天就把這一刻整理成品牌可以延續的內容。\n\n#Crovantix #社群媒體助手 #${styleName}`;
+      postPreview.textContent = captionText.value;
+      articleToolStatus.textContent = copy().translatedChinese;
+    });
+
+    learnToneButton.addEventListener("click", () => {
+      const source = captionText.value.trim() || copy().caption(copy().styles[selectedStyleKey].tag, selectedStyle);
+      captionText.value = `${source}\n\n語氣優化：延續你平常自然、直接、有溫度的說話方式，讓貼文更像你的品牌聲音。`;
+      postPreview.textContent = captionText.value;
+      articleToolStatus.textContent = copy().toneLearned;
+    });
+
+    function updateStickerTransform(sticker) {
+      const x = parseFloat(sticker.dataset.x || "0");
+      const y = parseFloat(sticker.dataset.y || "0");
+      const scale = parseFloat(sticker.dataset.scale || "1");
+      sticker.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+    }
+
+    function selectSticker(sticker) {
+      document.querySelectorAll(".sticker").forEach(item => item.classList.toggle("active", item === sticker));
+      activeSticker = sticker;
+      stickerControlPanel.classList.remove("active");
+      stickerToolStatus.textContent = sticker
+        ? "已選取點綴圖像，可拖曳位置；拉右下角可改大小，長按可刪除。"
+        : "";
+    }
+
+    function showStickerDeleteMenu(sticker) {
+      selectSticker(sticker);
+      stickerControlPanel.classList.add("active");
+      stickerToolStatus.textContent = "長按已選取點綴圖像，可選擇刪除。";
+    }
+
+    function makeStickerResizable(sticker, handle) {
+      let startX = 0;
+      let startY = 0;
+      let startScale = 1;
+      handle.addEventListener("pointerdown", event => {
+        event.stopPropagation();
+        selectSticker(sticker);
+        handle.setPointerCapture(event.pointerId);
+        startX = event.clientX;
+        startY = event.clientY;
+        startScale = parseFloat(sticker.dataset.scale || "1");
+      });
+      handle.addEventListener("pointermove", event => {
+        if (!handle.hasPointerCapture(event.pointerId)) return;
+        const delta = Math.max(event.clientX - startX, event.clientY - startY);
+        const nextScale = Math.max(0.4, Math.min(3.2, startScale + delta / 90));
+        sticker.dataset.scale = String(nextScale);
+        updateStickerTransform(sticker);
+      });
+      handle.addEventListener("pointerup", event => {
+        if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+      });
+      handle.addEventListener("pointercancel", event => {
+        if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
+      });
+    }
+
+    function makeStickerDraggable(sticker) {
+      let startX = 0;
+      let startY = 0;
+      let stickerX = 0;
+      let stickerY = 0;
+      let longPressTimer = null;
+      sticker.addEventListener("pointerdown", event => {
+        if (event.target.closest(".sticker-resize-handle")) return;
+        selectSticker(sticker);
+        sticker.setPointerCapture(event.pointerId);
+        startX = event.clientX;
+        startY = event.clientY;
+        stickerX = parseFloat(sticker.dataset.x || "0");
+        stickerY = parseFloat(sticker.dataset.y || "0");
+        longPressTimer = window.setTimeout(() => showStickerDeleteMenu(sticker), 620);
+      });
+      sticker.addEventListener("pointermove", event => {
+        if (!sticker.hasPointerCapture(event.pointerId)) return;
+        const nextX = stickerX + event.clientX - startX;
+        const nextY = stickerY + event.clientY - startY;
+        if (Math.abs(event.clientX - startX) > 5 || Math.abs(event.clientY - startY) > 5) {
+          window.clearTimeout(longPressTimer);
+        }
+        sticker.dataset.x = String(nextX);
+        sticker.dataset.y = String(nextY);
+        updateStickerTransform(sticker);
+      });
+      sticker.addEventListener("pointerup", event => {
+        window.clearTimeout(longPressTimer);
+        if (sticker.hasPointerCapture(event.pointerId)) sticker.releasePointerCapture(event.pointerId);
+      });
+      sticker.addEventListener("pointercancel", () => window.clearTimeout(longPressTimer));
+    }
+
+    addStickerButton.addEventListener("click", () => {
+      const sticker = document.createElement("span");
+      const handle = document.createElement("span");
+      sticker.className = "sticker";
+      sticker.append(document.createTextNode(stickerSelect.value), handle);
+      handle.className = "sticker-resize-handle";
+      sticker.dataset.x = "0";
+      sticker.dataset.y = "0";
+      sticker.dataset.scale = "1";
+      photoPreview.appendChild(sticker);
+      makeStickerDraggable(sticker);
+      makeStickerResizable(sticker, handle);
+      selectSticker(sticker);
+      stickerToolStatus.textContent = copy().stickerAdded;
+    });
+
+    stickerDeleteButton.addEventListener("click", () => {
+      if (!activeSticker) return;
+      activeSticker.remove();
+      activeSticker = null;
+      stickerControlPanel.classList.remove("active");
+      stickerToolStatus.textContent = "已刪除點綴圖像。";
+    });
+
+    postButton.addEventListener("click", () => {
+      const platforms = selectedPlatformList();
+      if (!platforms.length) {
+        postStatus.textContent = copy().noPlatformStatus;
+        return;
+      }
+      const unavailablePlatforms = platforms.filter(platform => !hasMediaCredentials(platform));
+      if (unavailablePlatforms.length) {
+        postStatus.textContent = uiText("missingMediaCredentials");
+        appStatus.textContent = uiText("missingMediaCredentials");
+        unavailablePlatforms.forEach(platform => selectedPlatforms.delete(platform));
+        updatePlatformAvailability();
+        return;
+      }
+      if (!captionText.value.trim()) {
+        postStatus.textContent = copy().noCaption;
+        return;
+      }
+      if (credits <= 0) {
+        postStatus.textContent = copy().noCredits;
+        appStatus.textContent = copy().noCredits;
+        creditEmptyAlert.hidden = false;
+        return;
+      }
+      credits -= 1;
+      updateCredits();
+      const platformText = platforms.join("、");
+      postStatus.textContent = copy().posted(platformText);
+      appStatus.textContent = copy().postedStatus(platformText);
+      saveRecord("messages", {
+        source: "送出社群發文",
+        platforms,
+        platformAccounts: Object.fromEntries(platforms.map(platform => [platform, mediaAccounts[platform]?.account || ""])),
+        autoPosted: true,
+        style: selectedStyle,
+        caption: captionText.value.trim(),
+        hasPhoto,
+        remainingCredits: credits
+      });
+    });
+
+    tabButtons.forEach(button => {
+      button.addEventListener("click", () => showPage(button.dataset.page));
+    });
+
+    userButton.addEventListener("click", () => {
+      if (loggedIn) {
+        syncProfileFields();
+        showPage("profilePage");
+        return;
+      }
+      showPage("loginPage");
+    });
+    creditButton.addEventListener("click", () => showPage("upgradePage"));
+    creditUpgradeButton.addEventListener("click", () => showPage("upgradePage"));
+
+    upgradeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        pendingUnlock = button.dataset.unlock;
+        selectedPlanLabel.textContent = button.dataset.plan;
+        selectedPlanLabel.dataset.points = button.dataset.points || "0";
+        paymentStatus.textContent = copy().paymentReady(button.dataset.plan);
+        showPage("paymentPage");
+      });
+    });
+
+    payButton.addEventListener("click", () => {
+      const selectedPoints = Number(selectedPlanLabel.dataset.points || 0);
+      if (pendingUnlock === "credits" && selectedPoints > 0) {
+        credits += selectedPoints;
+        updateCredits();
+        paymentStatus.textContent = copy().pointsAdded(selectedPoints);
+        appStatus.textContent = copy().pointsAdded(selectedPoints);
+        showPage("editPage");
+      } else {
+        unlockFeature(pendingUnlock);
+        paymentStatus.textContent = copy().paymentDone;
+        appStatus.textContent = copy().featureUnlocked(selectedPlanLabel.textContent);
+      }
+      saveRecord("emails", {
+        source: "升級付款",
+        plan: selectedPlanLabel.textContent,
+        unlockedFeature: pendingUnlock,
+        pointsAdded: selectedPoints,
+        remainingCredits: credits,
+        payment: "prototype-credit-card"
+      });
+    });
+
+    themeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        themeButtons.forEach(item => item.classList.toggle("active", item === button));
+        document.body.dataset.theme = button.dataset.theme;
+        settingsStatus.textContent = copy().settingsUpdated;
+      });
+    });
+
+    fontSelect.addEventListener("change", () => {
+      appShell.classList.remove("font-small", "font-normal", "font-large");
+      appShell.classList.add(fontSelect.value);
+      settingsStatus.textContent = copy().settingsUpdated;
+    });
+
+    languageSelect.addEventListener("change", () => {
+      applyLanguage(languageSelect.value);
+      settingsStatus.textContent = copy().languageChanged;
+    });
+
+    applyLanguage(currentLanguage);
+    updateCredits();
+  </script>
+  <script src="app-database.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

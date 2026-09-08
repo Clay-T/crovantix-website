@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nexora Technologies | AI Solutions. Real Impact.</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7fbff;
+      --ink: #071a33;
+      --muted: #53657a;
+      --line: rgba(8, 42, 80, .13);
+      --panel: #ffffff;
+      --panel-2: #eef7ff;
+      --navy: #082553;
+      --blue: #0d8fe8;
+      --cyan: #31c8ff;
+      --teal: #35d2c5;
+      --gold: #f5b94a;
+      --shadow: 0 22px 60px rgba(8, 36, 76, .13);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", Arial, sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 251, 255, .9);
+      backdrop-filter: blur(18px);
+    }
+    .nav-inner {
+      width: min(1180px, calc(100% - 32px));
+      min-height: 72px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
+    }
+    .brand img {
+      width: 58px;
+      height: 58px;
+      border-radius: 12px;
+      object-fit: cover;
+      object-position: 50% 22%;
+      background: #fff;
+      box-shadow: 0 10px 28px rgba(0, 121, 204, .18);
+    }
+    .brand strong {
+      display: block;
+      font-size: 18px;
+      letter-spacing: 0;
+      color: var(--navy);
+    }
+    .brand span {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--blue);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      min-height: 36px;
+      display: grid;
+      place-items: center;
+      padding: 0 12px;
+      border-radius: 8px;
+      color: #183a61;
+      font-size: 14px;
+      font-weight: 850;
+    }
+    .nav-links a:hover,
+    .nav-links a.cta {
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+    }
+    .lang-toggle {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid rgba(13,143,232,.2);
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(8, 36, 76, .08);
+    }
+    .lang-toggle button {
+      min-width: 42px;
+      height: 32px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: #183a61;
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .lang-toggle button.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+    }
+
+    .section {
+      padding: 92px 0;
+    }
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .hero {
+      min-height: calc(100vh - 72px);
+      display: grid;
+      align-items: center;
+      padding: 64px 0 44px;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,.9), rgba(236,248,255,.82)),
+        radial-gradient(circle at 78% 28%, rgba(49,200,255,.2), transparent 34%),
+        radial-gradient(circle at 18% 72%, rgba(53,210,197,.15), transparent 28%);
+      border-bottom: 1px solid var(--line);
+    }
+    .estimator-band {
+      padding: 36px 0 28px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(135deg, rgba(8,37,83,.96), rgba(13,143,232,.9)),
+        radial-gradient(circle at 82% 18%, rgba(53,210,197,.32), transparent 28%);
+      color: #fff;
+    }
+    .estimator-card {
+      display: grid;
+      grid-template-columns: minmax(260px, .72fr) minmax(0, 1.28fr);
+      gap: 24px;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 8px;
+      background: rgba(255,255,255,.1);
+      box-shadow: 0 22px 60px rgba(8, 36, 76, .22);
+    }
+    .estimator-intro h2 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+    .estimator-intro p {
+      margin: 0;
+      color: rgba(255,255,255,.82);
+      font-size: 16px;
+      line-height: 1.75;
+      font-weight: 760;
+    }
+    .estimate-form {
+      display: grid;
+      gap: 16px;
+    }
+    .estimate-group {
+      display: grid;
+      gap: 10px;
+    }
+    .estimate-group h3 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+    .estimate-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .estimate-option {
+      min-height: 72px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 8px;
+      background: rgba(255,255,255,.12);
+      cursor: pointer;
+    }
+    .estimate-option input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--cyan);
+    }
+    .estimate-option b {
+      display: block;
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+    .estimate-option span {
+      display: block;
+      margin-top: 2px;
+      color: rgba(255,255,255,.72);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .estimate-submit {
+      width: fit-content;
+      min-height: 48px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--navy);
+      font-weight: 950;
+      cursor: pointer;
+    }
+    .estimate-result {
+      min-height: 44px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 8px;
+      background: rgba(255,255,255,.14);
+      color: #fff;
+      font-weight: 900;
+      line-height: 1.55;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(320px, .78fr);
+      gap: 52px;
+      align-items: center;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+      padding: 0 12px;
+      border: 1px solid rgba(13,143,232,.22);
+      border-radius: 999px;
+      background: rgba(13,143,232,.08);
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 900;
+    }
+    h1 {
+      margin: 18px 0 18px;
+      max-width: 760px;
+      color: var(--navy);
+      font-size: clamp(44px, 7vw, 92px);
+      line-height: .95;
+      letter-spacing: 0;
+    }
+    .hero-copy {
+      max-width: 730px;
+      color: #3f5570;
+      font-size: clamp(18px, 2.2vw, 24px);
+      line-height: 1.65;
+      font-weight: 720;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+    }
+    .button {
+      min-height: 50px;
+      display: inline-grid;
+      place-items: center;
+      padding: 0 20px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: var(--navy);
+      color: #fff;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .button.secondary {
+      background: #fff;
+      color: var(--navy);
+      border-color: var(--line);
+    }
+    .hero-logo-panel {
+      min-height: 520px;
+      display: grid;
+      align-content: center;
+      gap: 22px;
+      padding: 26px;
+      border: 1px solid rgba(8, 42, 80, .1);
+      border-radius: 8px;
+      background: rgba(255,255,255,.82);
+      box-shadow: var(--shadow);
+    }
+    .hero-logo-panel img {
+      width: 100%;
+      max-height: 430px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .metric {
+      min-height: 88px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
+    }
+    .metric b {
+      color: var(--navy);
+      font-size: 22px;
+    }
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+    .section-title h2 {
+      margin: 0;
+      color: var(--navy);
+      font-size: clamp(30px, 4vw, 52px);
+      letter-spacing: 0;
+    }
+    .section-title p {
+      width: min(520px, 100%);
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 720;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .card {
+      min-height: 228px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 12px 36px rgba(8, 36, 76, .07);
+    }
+    .icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      font-size: 22px;
+      font-weight: 950;
+    }
+    .card h3 {
+      margin: 0 0 10px;
+      color: var(--navy);
+      font-size: 22px;
+    }
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 680;
+    }
+
+    .dark-band {
+      background: #071a33;
+      color: #fff;
+    }
+    .dark-band .section-title h2,
+    .dark-band .card h3 {
+      color: #fff;
+    }
+    .dark-band .section-title p,
+    .dark-band .card p {
+      color: #bfd0e5;
+    }
+    .dark-band .card {
+      background: rgba(255,255,255,.07);
+      border-color: rgba(255,255,255,.13);
+      box-shadow: none;
+    }
+    .solution-layout {
+      display: grid;
+      grid-template-columns: .8fr 1.2fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .feature-list {
+      display: grid;
+      gap: 12px;
+    }
+    .feature-item {
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 8px;
+      background: rgba(255,255,255,.06);
+    }
+    .feature-item b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+    .feature-item span {
+      color: #bfd0e5;
+      line-height: 1.65;
+      font-weight: 680;
+    }
+
+    .process {
+      counter-reset: step;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .step {
+      position: relative;
+      min-height: 190px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .step:before {
+      counter-increment: step;
+      content: "0" counter(step);
+      display: inline-grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      background: #e8f6ff;
+      color: var(--blue);
+      font-weight: 950;
+    }
+    .step h3 {
+      margin: 0 0 8px;
+      color: var(--navy);
+    }
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-weight: 680;
+    }
+
+    .contact-layout {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .contact-card,
+    .form-card {
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 14px 44px rgba(8, 36, 76, .08);
+    }
+    .contact-card img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .contact-card h3 {
+      margin: 0 0 8px;
+      color: var(--navy);
+      font-size: 26px;
+    }
+    .contact-card p {
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 700;
+    }
+    .info-row {
+      padding: 14px 0;
+      border-top: 1px solid var(--line);
+      color: #263f5d;
+      font-weight: 800;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    label {
+      display: grid;
+      gap: 8px;
+      color: #263f5d;
+      font-weight: 900;
+    }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid rgba(8, 42, 80, .18);
+      border-radius: 8px;
+      padding: 13px 14px;
+      background: #f8fbff;
+      color: var(--ink);
+      outline: none;
+    }
+    textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(13,143,232,.13);
+    }
+    .full { grid-column: 1 / -1; }
+    .form-result {
+      min-height: 24px;
+      margin-top: 12px;
+      color: var(--blue);
+      font-weight: 900;
+    }
+    footer {
+      padding: 34px 0;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      background: #fff;
+      font-weight: 760;
+    }
+
+    @media (max-width: 920px) {
+      .nav-inner { align-items: flex-start; flex-direction: column; padding: 12px 0; }
+      .nav-links { justify-content: flex-start; }
+      .hero-grid,
+      .estimator-card,
+      .solution-layout,
+      .contact-layout {
+        grid-template-columns: 1fr;
+      }
+      .hero-logo-panel { min-height: auto; }
+      .grid,
+      .process {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .section { padding: 68px 0; }
+      .brand { min-width: 0; }
+      .grid,
+      .process,
+      .estimate-options,
+      .form-grid,
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+      .nav-links a {
+        font-size: 13px;
+        padding: 0 9px;
+      }
+      h1 { font-size: 46px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a class="brand" href="#home" aria-label="Nexora home">
+        <img src="nexora-logo.png" alt="Nexora Technologies logo">
+        <span>
+          <strong>Nexora Technologies</strong>
+          <span>AI Solutions. Real Impact.</span>
+        </span>
+      </a>
+      <div class="nav-links">
+        <a href="#services">服務</a>
+        <a href="#solutions">解決方案</a>
+        <a href="#process">流程</a>
+        <a href="#cases">案例</a>
+        <a href="#estimate">估價</a>
+        <a class="cta" href="#contact">聯絡我們</a>
+      </div>
+      <div class="lang-toggle" aria-label="Language switch">
+        <button type="button" class="active" data-lang="zh">中</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section id="home" class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="eyebrow">AI SOLUTIONS FOR BUSINESS GROWTH</span>
+          <h1>Nexora Technologies</h1>
+          <p class="hero-copy">Nexora 協助企業把 AI 應用、數據流程與營運系統整合成可落地、可擴充、可持續優化的數位能力，讓創新真正產生商業影響。</p>
+          <div class="hero-actions">
+            <a class="button" href="#contact">預約需求諮詢</a>
+            <a class="button secondary" href="#solutions">查看解決方案</a>
+          </div>
+        </div>
+        <aside class="hero-logo-panel" aria-label="Nexora brand">
+          <img src="nexora-logo.png" alt="Nexora Technologies">
+          <div class="metrics">
+            <div class="metric"><b>AI</b><span>策略與導入</span></div>
+            <div class="metric"><b>Data</b><span>資料與後台</span></div>
+            <div class="metric"><b>Cloud</b><span>雲端與 API</span></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="services" class="section">
+      <div class="wrap">
+        <div class="section-title">
+          <h2>核心服務</h2>
+          <p>從需求盤點、系統規劃、AI 功能開發到資料庫與雲端部署，Nexora 以可維護的架構協助團隊快速上線。</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <div class="icon">AI</div>
+            <h3>AI 應用開發</h3>
+            <p>建立 AI 助理、摘要、推薦、內容生成、自動化工作流與企業知識庫，讓 AI 直接支援日常營運。</p>
+          </article>
+          <article class="card">
+            <div class="icon">DB</div>
+            <h3>後台資料庫</h3>
+            <p>規劃會員、訂閱、權限、交易、紀錄與分析資料表，串接 Supabase、PostgreSQL 或企業既有資料庫。</p>
+          </article>
+          <article class="card">
+            <div class="icon">API</div>
+            <h3>雲端 API 串接</h3>
+            <p>設計穩定的 API Gateway、第三方服務整合、金流、通知、權限驗證與跨平台資料同步。</p>
+          </article>
+          <article class="card">
+            <div class="icon">UX</div>
+            <h3>App 與網頁設計</h3>
+            <p>製作 iOS App、Web App、企業官網、會員中心與管理後台，兼顧品牌、效能與實際工作流程。</p>
+          </article>
+          <article class="card">
+            <div class="icon">BI</div>
+            <h3>消費者行為分析</h3>
+            <p>建立數據儀表板、事件追蹤、漏斗分析與客戶分群，協助企業判斷產品方向與行銷策略。</p>
+          </article>
+          <article class="card">
+            <div class="icon">AD</div>
+            <h3>廣告與成長串接</h3>
+            <p>整合廣告投放、追蹤像素、活動頁與 CRM，讓網站與 App 不只是展示，而能帶來有效轉換。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="solutions" class="section dark-band">
+      <div class="wrap solution-layout">
+        <div class="section-title" style="display:block;margin-bottom:0">
+          <h2>企業 AI 解決方案</h2>
+          <p style="margin-top:16px">Nexora 將 AI 模型、資料流程、後端服務與前端體驗整合為完整系統，協助企業把想法轉成可上線的產品。</p>
+        </div>
+        <div class="feature-list">
+          <div class="feature-item">
+            <b>智能客服與內部知識庫</b>
+            <span>整合企業文件、FAQ、產品資訊與客服紀錄，建立可查詢、可追蹤、可持續更新的 AI 助理。</span>
+          </div>
+          <div class="feature-item">
+            <b>會員訂閱與權限控管</b>
+            <span>支援免費會員、付費方案、點數制、到期判斷與後台授權，避免重裝或修改時間規避付費。</span>
+          </div>
+          <div class="feature-item">
+            <b>AI 自動化營運流程</b>
+            <span>將摘要、分類、排程、提醒、資料輸入與報表生成自動化，降低重複工作並提升回應速度。</span>
+          </div>
+          <div class="feature-item">
+            <b>跨平台產品建置</b>
+            <span>同時規劃 App、Web、Chrome Extension、API 與資料庫，讓使用者體驗與後台管理一致。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="process" class="section">
+      <div class="wrap">
+        <div class="section-title">
+          <h2>合作流程</h2>
+          <p>用清楚的階段管理，把需求、設計、開發、測試與上線節奏拆開，降低溝通成本與返工風險。</p>
+        </div>
+        <div class="process">
+          <article class="step">
+            <h3>需求訪談</h3>
+            <p>確認商業目標、使用者情境、功能優先級、資料需求與預算範圍。</p>
+          </article>
+          <article class="step">
+            <h3>架構規劃</h3>
+            <p>設計 UI 流程、資料表、API、AI 模型使用方式與部署策略。</p>
+          </article>
+          <article class="step">
+            <h3>開發驗證</h3>
+            <p>建立可操作原型、整合後台、撰寫測試項目並逐步驗收。</p>
+          </article>
+          <article class="step">
+            <h3>上線維護</h3>
+            <p>協助部署、監控、數據分析、功能擴充與後續版本迭代。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="cases" class="section" style="background:#eef7ff">
+      <div class="wrap">
+        <div class="section-title">
+          <h2>應用場景</h2>
+          <p>適合需要把 AI 真正導入業務流程的中小企業、品牌、服務商、教育單位與創業團隊。</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <h3>AI AOI 智慧視覺檢測</h3>
+            <p>導入影像辨識與瑕疵分類模型，協助產線即時判斷缺陷、降低人工檢測負擔並累積品質資料。</p>
+          </article>
+          <article class="card">
+            <h3>設備預測維護與異常偵測</h3>
+            <p>整合設備感測、歷史維修紀錄與運轉數據，提前偵測異常趨勢，降低停機風險與維護成本。</p>
+          </article>
+          <article class="card">
+            <h3>企業地端 LLM / RAG 知識助理</h3>
+            <p>建立可在企業內部環境運行的知識檢索與問答系統，串接文件、SOP、FAQ 與專案資料，提升查詢效率。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="estimator-band" id="estimate">
+      <div class="wrap estimator-card">
+        <div class="estimator-intro">
+          <h2>初步估價</h2>
+          <p>挑選需要的硬體規格與軟體服務項目，送出後會立即顯示初步估價區間。實際報價仍會依數量、資料規模、模型需求與部署環境調整。</p>
+        </div>
+        <form class="estimate-form" id="estimateForm">
+          <div class="estimate-group">
+            <h3>硬體規格</h3>
+            <div class="estimate-options">
+              <label class="estimate-option">
+                <input type="checkbox" data-price="120000" data-label="工業相機與光源">
+                <span><b>工業相機與光源</b><span>AOI 視覺檢測、影像擷取</span></span>
+              </label>
+              <label class="estimate-option">
+                <input type="checkbox" data-price="180000" data-label="邊緣 AI 運算主機">
+                <span><b>邊緣 AI 運算主機</b><span>地端推論、設備旁部署</span></span>
+              </label>
+              <label class="estimate-option">
+                <input type="checkbox" data-price="260000" data-label="GPU 工作站">
+                <span><b>GPU 工作站</b><span>模型訓練、RAG 與高效推論</span></span>
+              </label>
+              <label class="estimate-option">
+                <input type="checkbox" data-price="160000" data-label="資料庫伺服器">
+                <span><b>資料庫伺服器</b><span>資料儲存、備份、權限與內部系統串接</span></span>
+              </label>
+              <label class="estimate-option">
+                <input type="checkbox" data-price="90000" data-label="感測器與資料閘道">
+                <span><b>感測器與資料閘道</b><span>設備監控、數據採集</span></span>
+              </label>
+            </div>
+          </div>
+          <div class="estimate-group">
+            <h3>軟體服務項目</h3>
+            <div class="estimate-options">
+              <label class="estimate-option">
+                <input type="checkbox" data-price="180000" data-label="AI AOI 模型建置">
+                <span><b>AI AOI 模型建置</b><span>瑕疵分類、影像模型、報表</span></span>
+              </label>
+              <label class="estimate-option">
+                <input type="checkbox" data-price="220000" data-label="預測維護與異常偵測">
+                <span><b>預測維護與異常偵測</b><span>設備數據、告警、趨勢分析</span></span>
+              </label>
+              <label class="estimate-option">
+                <input type="checkbox" data-price="250000" data-label="地端 LLM / RAG 知識助理">
+                <span><b>地端 LLM / RAG 知識助理</b><span>文件檢索、權限、企業問答</span></span>
+              </label>
+              <label class="estimate-option">
+                <input type="checkbox" data-price="150000" data-label="後台儀表板與 API">
+                <span><b>後台儀表板與 API</b><span>管理後台、資料庫、API 串接</span></span>
+              </label>
+            </div>
+          </div>
+          <button class="estimate-submit" type="submit">送出並顯示估價</button>
+          <div class="estimate-result" id="estimateResult">請勾選硬體規格與軟體服務項目後送出。</div>
+        </form>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="wrap contact-layout">
+        <aside class="contact-card">
+          <img src="nexora-logo.png" alt="Nexora Technologies logo">
+          <h3>開始建立你的 AI 應用</h3>
+          <p>留下需求後，Nexora 團隊會依據功能範圍、資料庫、AI 功能、雲端與上線需求協助評估。</p>
+          <div class="info-row">Email：support@nexora.ai</div>
+          <div class="info-row">服務範圍：App、Web、AI、API、Cloud、Database</div>
+          <div class="info-row">總部：Taiwan</div>
+        </aside>
+        <form class="form-card" id="quoteForm">
+          <div class="form-grid">
+            <label>姓名
+              <input name="name" value="Clay Tseng" required>
+            </label>
+            <label>Email
+              <input name="email" type="email" value="clay@example.com" required>
+            </label>
+            <label>公司名稱
+              <input name="company" placeholder="請輸入公司名稱">
+            </label>
+            <label>需求類型
+              <select name="service">
+                <option>AI 應用開發</option>
+                <option>App / Web 設計</option>
+                <option>後台資料庫</option>
+                <option>雲端 API 串接</option>
+                <option>數據分析與廣告串接</option>
+              </select>
+            </label>
+            <label class="full">需求內容
+              <textarea name="message" placeholder="請描述想建立的功能、目標使用者、預計上線時間與預算"></textarea>
+            </label>
+          </div>
+          <button class="button" type="submit" style="margin-top:16px">送出需求</button>
+          <div class="form-result" id="formResult"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">Copyright © 2026 Nexora Technologies. AI Solutions. Real Impact.</div>
+  </footer>
+
+  <script>
+    const estimateForm = document.getElementById("estimateForm");
+    const estimateResult = document.getElementById("estimateResult");
+    const form = document.getElementById("quoteForm");
+    const result = document.getElementById("formResult");
+    const languageButtons = document.querySelectorAll(".lang-toggle button");
+    const translations = {
+      en: {
+        "估價": "Estimate",
+        "服務": "Services",
+        "解決方案": "Solutions",
+        "流程": "Process",
+        "案例": "Cases",
+        "聯絡我們": "Contact",
+        "AI 策略與導入": "AI Strategy",
+        "資料與後台": "Data & Backend",
+        "雲端與 API": "Cloud & API",
+        "Nexora 協助企業把 AI 應用、數據流程與營運系統整合成可落地、可擴充、可持續優化的數位能力，讓創新真正產生商業影響。": "Nexora helps companies turn AI applications, data workflows, and operating systems into practical, scalable digital capabilities that create measurable business impact.",
+        "初步估價": "Instant Estimate",
+        "挑選需要的硬體規格與軟體服務項目，送出後會立即顯示初步估價區間。實際報價仍會依數量、資料規模、模型需求與部署環境調整。": "Select the hardware specifications and software services you need. Submit to view an instant preliminary estimate. Final pricing may vary by quantity, data scale, model requirements, and deployment environment.",
+        "硬體規格": "Hardware Specifications",
+        "工業相機與光源": "Industrial Camera & Lighting",
+        "AOI 視覺檢測、影像擷取": "AOI visual inspection and image capture",
+        "邊緣 AI 運算主機": "Edge AI Computer",
+        "地端推論、設備旁部署": "On-site inference and machine-side deployment",
+        "GPU 工作站": "GPU Workstation",
+        "模型訓練、RAG 與高效推論": "Model training, RAG, and efficient inference",
+        "資料庫伺服器": "Database Server",
+        "資料儲存、備份、權限與內部系統串接": "Data storage, backup, access control, and internal system integration",
+        "感測器與資料閘道": "Sensors & Data Gateway",
+        "設備監控、數據採集": "Equipment monitoring and data collection",
+        "軟體服務項目": "Software Services",
+        "AI AOI 模型建置": "AI AOI Model Development",
+        "瑕疵分類、影像模型、報表": "Defect classification, vision models, and reports",
+        "預測維護與異常偵測": "Predictive Maintenance & Anomaly Detection",
+        "設備數據、告警、趨勢分析": "Equipment data, alerts, and trend analysis",
+        "地端 LLM / RAG 知識助理": "On-Premise LLM / RAG Assistant",
+        "文件檢索、權限、企業問答": "Document retrieval, access control, and enterprise Q&A",
+        "後台儀表板與 API": "Admin Dashboard & API",
+        "管理後台、資料庫、API 串接": "Admin console, database, and API integration",
+        "送出並顯示估價": "Submit & Show Estimate",
+        "請勾選硬體規格與軟體服務項目後送出。": "Select hardware specifications and software services, then submit.",
+        "預約需求諮詢": "Book a Consultation",
+        "查看解決方案": "View Solutions",
+        "核心服務": "Core Services",
+        "從需求盤點、系統規劃、AI 功能開發到資料庫與雲端部署，Nexora 以可維護的架構協助團隊快速上線。": "From requirement discovery and system planning to AI development, databases, and cloud deployment, Nexora helps teams launch quickly with maintainable architecture.",
+        "AI 應用開發": "AI Application Development",
+        "建立 AI 助理、摘要、推薦、內容生成、自動化工作流與企業知識庫，讓 AI 直接支援日常營運。": "Build AI assistants, summarization, recommendations, content generation, automated workflows, and enterprise knowledge bases for daily operations.",
+        "後台資料庫": "Backend Databases",
+        "規劃會員、訂閱、權限、交易、紀錄與分析資料表，串接 Supabase、PostgreSQL 或企業既有資料庫。": "Design member, subscription, permission, transaction, record, and analytics tables with Supabase, PostgreSQL, or existing enterprise databases.",
+        "雲端 API 串接": "Cloud API Integration",
+        "設計穩定的 API Gateway、第三方服務整合、金流、通知、權限驗證與跨平台資料同步。": "Design reliable API gateways, third-party integrations, payments, notifications, authorization, and cross-platform data sync.",
+        "App 與網頁設計": "App & Web Design",
+        "製作 iOS App、Web App、企業官網、會員中心與管理後台，兼顧品牌、效能與實際工作流程。": "Create iOS apps, web apps, corporate websites, member centers, and admin dashboards with brand, performance, and workflow in mind.",
+        "消費者行為分析": "Consumer Behavior Analytics",
+        "建立數據儀表板、事件追蹤、漏斗分析與客戶分群，協助企業判斷產品方向與行銷策略。": "Build dashboards, event tracking, funnel analysis, and customer segmentation to guide product and marketing decisions.",
+        "廣告與成長串接": "Ads & Growth Integration",
+        "整合廣告投放、追蹤像素、活動頁與 CRM，讓網站與 App 不只是展示，而能帶來有效轉換。": "Connect ad campaigns, tracking pixels, campaign pages, and CRM so websites and apps drive measurable conversions.",
+        "企業 AI 解決方案": "Enterprise AI Solutions",
+        "Nexora 將 AI 模型、資料流程、後端服務與前端體驗整合為完整系統，協助企業把想法轉成可上線的產品。": "Nexora combines AI models, data workflows, backend services, and frontend experiences into complete systems that can go live.",
+        "智能客服與內部知識庫": "AI Support & Internal Knowledge Base",
+        "整合企業文件、FAQ、產品資訊與客服紀錄，建立可查詢、可追蹤、可持續更新的 AI 助理。": "Integrate company documents, FAQ, product information, and support records into searchable and maintainable AI assistants.",
+        "會員訂閱與權限控管": "Membership, Subscription & Access Control",
+        "支援免費會員、付費方案、點數制、到期判斷與後台授權，避免重裝或修改時間規避付費。": "Support free members, paid plans, point systems, expiration checks, and backend authorization.",
+        "AI 自動化營運流程": "AI Operations Automation",
+        "將摘要、分類、排程、提醒、資料輸入與報表生成自動化，降低重複工作並提升回應速度。": "Automate summaries, classification, scheduling, reminders, data entry, and reporting to reduce repetitive work.",
+        "跨平台產品建置": "Cross-Platform Product Buildout",
+        "同時規劃 App、Web、Chrome Extension、API 與資料庫，讓使用者體驗與後台管理一致。": "Plan apps, web, Chrome extensions, APIs, and databases together for a consistent user and admin experience.",
+        "合作流程": "Workflow",
+        "用清楚的階段管理，把需求、設計、開發、測試與上線節奏拆開，降低溝通成本與返工風險。": "A clear phased workflow separates discovery, design, development, testing, and launch to reduce communication cost and rework.",
+        "需求訪談": "Discovery",
+        "確認商業目標、使用者情境、功能優先級、資料需求與預算範圍。": "Clarify business goals, user scenarios, feature priorities, data needs, and budget range.",
+        "架構規劃": "Architecture Planning",
+        "設計 UI 流程、資料表、API、AI 模型使用方式與部署策略。": "Design UI flows, data tables, APIs, AI model usage, and deployment strategy.",
+        "開發驗證": "Development & Validation",
+        "建立可操作原型、整合後台、撰寫測試項目並逐步驗收。": "Build working prototypes, integrate backends, define test items, and validate step by step.",
+        "上線維護": "Launch & Maintenance",
+        "協助部署、監控、數據分析、功能擴充與後續版本迭代。": "Support deployment, monitoring, analytics, feature expansion, and ongoing releases.",
+        "應用場景": "Use Cases",
+        "適合需要把 AI 真正導入業務流程的中小企業、品牌、服務商、教育單位與創業團隊。": "For SMEs, brands, service providers, education teams, and startups that need to bring AI into real workflows.",
+        "AI AOI 智慧視覺檢測": "AI AOI Smart Visual Inspection",
+        "導入影像辨識與瑕疵分類模型，協助產線即時判斷缺陷、降低人工檢測負擔並累積品質資料。": "Deploy vision recognition and defect classification models to detect production defects in real time, reduce manual inspection, and accumulate quality data.",
+        "設備預測維護與異常偵測": "Predictive Maintenance & Anomaly Detection",
+        "整合設備感測、歷史維修紀錄與運轉數據，提前偵測異常趨勢，降低停機風險與維護成本。": "Combine sensor signals, maintenance history, and operating data to detect abnormal trends early and reduce downtime risk.",
+        "企業地端 LLM / RAG 知識助理": "On-Premise Enterprise LLM / RAG Assistant",
+        "建立可在企業內部環境運行的知識檢索與問答系統，串接文件、SOP、FAQ 與專案資料，提升查詢效率。": "Build internal retrieval and Q&A systems connected to documents, SOPs, FAQs, and project data to improve knowledge access.",
+        "開始建立你的 AI 應用": "Start Building Your AI Application",
+        "留下需求後，Nexora 團隊會依據功能範圍、資料庫、AI 功能、雲端與上線需求協助評估。": "Share your requirements and Nexora will evaluate scope, database needs, AI features, cloud deployment, and launch requirements.",
+        "服務範圍：App、Web、AI、API、Cloud、Database": "Scope: App, Web, AI, API, Cloud, Database",
+        "總部：Taiwan": "Headquarters: Taiwan",
+        "姓名": "Name",
+        "公司名稱": "Company",
+        "需求類型": "Service Type",
+        "需求內容": "Requirements",
+        "送出需求": "Submit Request",
+        "已收到您的需求，Nexora 團隊將盡快與您聯繫。": "Your request has been received. The Nexora team will contact you soon.",
+        "AI 應用開發": "AI Application Development",
+        "App / Web 設計": "App / Web Design",
+        "後台資料庫": "Backend Database",
+        "數據分析與廣告串接": "Analytics & Ads Integration"
+      },
+      zh: {}
+    };
+    Object.entries(translations.en).forEach(([zh, en]) => {
+      translations.zh[en] = zh;
+    });
+    const placeholders = {
+      en: {
+        "請輸入公司名稱": "Enter company name",
+        "請描述想建立的功能、目標使用者、預計上線時間與預算": "Describe the features, target users, expected launch timeline, and budget"
+      },
+      zh: {
+        "Enter company name": "請輸入公司名稱",
+        "Describe the features, target users, expected launch timeline, and budget": "請描述想建立的功能、目標使用者、預計上線時間與預算"
+      }
+    };
+
+    function replaceTextNodes(root, lang) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          const parent = node.parentElement;
+          if (!parent || ["SCRIPT", "STYLE"].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
+          return node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+        }
+      });
+      const dictionary = translations[lang];
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(node => {
+        const current = node.nodeValue.trim();
+        if (!dictionary[current]) return;
+        node.nodeValue = node.nodeValue.replace(current, dictionary[current]);
+      });
+      document.querySelectorAll("[placeholder]").forEach(input => {
+        const current = input.getAttribute("placeholder");
+        if (placeholders[lang][current]) input.setAttribute("placeholder", placeholders[lang][current]);
+      });
+    }
+
+    function setLanguage(lang) {
+      replaceTextNodes(document.body, lang);
+      document.documentElement.lang = lang === "en" ? "en" : "zh-Hant";
+      languageButtons.forEach(button => button.classList.toggle("active", button.dataset.lang === lang));
+    }
+
+    languageButtons.forEach(button => {
+      button.addEventListener("click", () => setLanguage(button.dataset.lang));
+    });
+
+    estimateForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const selected = [...estimateForm.querySelectorAll("input[type='checkbox']:checked")];
+      const isEnglish = document.documentElement.lang === "en";
+      if (!selected.length) {
+        estimateResult.textContent = isEnglish
+          ? "Please select at least one hardware or software item."
+          : "請至少勾選一項硬體規格或軟體服務。";
+        return;
+      }
+      const subtotal = selected.reduce((sum, input) => sum + Number(input.dataset.price || 0), 0);
+      const low = subtotal;
+      const high = Math.ceil(subtotal * 1.35 / 10000) * 10000;
+      const formatter = new Intl.NumberFormat("zh-TW", {
+        style: "currency",
+        currency: "TWD",
+        maximumFractionDigits: 0
+      });
+      estimateResult.textContent = isEnglish
+        ? `Selected ${selected.length} item(s). Preliminary estimate: ${formatter.format(low)} - ${formatter.format(high)}. Final quote will be adjusted after requirement review.`
+        : `已選 ${selected.length} 項，初步估價約 ${formatter.format(low)} - ${formatter.format(high)}。實際報價會依需求訪談後調整。`;
+      estimateResult.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      result.textContent = document.documentElement.lang === "en"
+        ? "Your request has been received. The Nexora team will contact you soon."
+        : "已收到您的需求，Nexora 團隊將盡快與您聯繫。";
+      form.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  </script>
+</body>
+</html>

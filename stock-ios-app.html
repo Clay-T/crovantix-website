@@ -1,0 +1,1134 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stock iOS App Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050608;
+      --panel: #101216;
+      --panel-2: #171a20;
+      --panel-3: #20242b;
+      --text: #f4f7fb;
+      --muted: #8c949f;
+      --line: rgba(255,255,255,.1);
+      --green: #30d158;
+      --red: #ff453a;
+      --blue: #0a84ff;
+      --yellow: #ffd60a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(10,132,255,.22), transparent 28rem),
+        radial-gradient(circle at 80% 100%, rgba(48,209,88,.14), transparent 26rem),
+        #0b0d10;
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100vw, 1100px);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 420px minmax(320px, 1fr);
+      gap: 48px;
+      align-items: center;
+      padding: 32px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #2b3038, #08090b 34%, #353a42);
+      box-shadow: 0 30px 80px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.16);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background: var(--bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen.theme-light {
+      --bg: #f6f9fc;
+      --panel: #ffffff;
+      --panel-2: #eaf1f8;
+      --panel-3: #dbe7f2;
+      --text: #111827;
+      --muted: #5f6b7a;
+      --line: rgba(17,24,39,.12);
+    }
+
+    .screen.theme-blue {
+      --bg: #07111f;
+      --panel: #111d2d;
+      --panel-2: #172840;
+      --panel-3: #203653;
+      --blue: #64d2ff;
+    }
+
+    .screen.font-small { font-size: 12px; }
+    .screen.font-large { font-size: 16px; }
+
+    .island {
+      position: absolute;
+      z-index: 4;
+      top: 11px;
+      left: 50%;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+
+    .status {
+      height: 58px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 26px 0;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: rgba(255,255,255,.92);
+    }
+
+    .icons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .signal {
+      display: flex;
+      gap: 2px;
+      align-items: end;
+      height: 12px;
+    }
+
+    .signal i {
+      width: 3px;
+      border-radius: 2px;
+      background: #fff;
+      display: block;
+    }
+
+    .signal i:nth-child(1) { height: 4px; }
+    .signal i:nth-child(2) { height: 6px; }
+    .signal i:nth-child(3) { height: 9px; }
+    .signal i:nth-child(4) { height: 12px; }
+
+    .battery {
+      width: 24px;
+      height: 12px;
+      border: 1.6px solid #fff;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      background: #fff;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      inset: 2px 5px 2px 2px;
+      background: #fff;
+      border-radius: 2px;
+    }
+
+    .app {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 158px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 4px;
+    }
+
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 0;
+      background: linear-gradient(135deg, #fff, #b3d9ff 45%, #0a84ff);
+      color: #08121f;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .icon-button {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      color: var(--text);
+      background: var(--panel-2);
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease;
+    }
+
+    .icon-button:hover { transform: translateY(-1px); background: var(--panel-3); }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      position: relative;
+      display: block;
+    }
+
+    .search-icon::before {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      left: 0;
+      top: 0;
+    }
+
+    .search-icon::after {
+      content: "";
+      position: absolute;
+      width: 7px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 2px;
+      transform: rotate(45deg);
+      right: 0;
+      bottom: 1px;
+    }
+
+    .bell::before {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 2px;
+      width: 10px;
+      height: 11px;
+      border: 2px solid currentColor;
+      border-bottom: 0;
+      border-radius: 9px 9px 2px 2px;
+    }
+
+    .bell::after {
+      content: "";
+      position: absolute;
+      left: 6px;
+      bottom: 0;
+      width: 5px;
+      height: 3px;
+      background: currentColor;
+      border-radius: 0 0 6px 6px;
+      box-shadow: -5px -3px 0 -1px currentColor, 5px -3px 0 -1px currentColor;
+    }
+
+    h1 {
+      margin: 18px 0 4px;
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .portfolio {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 26px;
+      background:
+        linear-gradient(145deg, rgba(48,209,88,.16), transparent 48%),
+        linear-gradient(315deg, rgba(10,132,255,.16), transparent 46%),
+        var(--panel);
+      border: 1px solid var(--line);
+    }
+
+    .label-row, .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .balance {
+      margin-top: 6px;
+      font-size: 31px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .gain {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .spark {
+      width: 100%;
+      height: 64px;
+      margin-top: 8px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin: 14px 0 12px;
+      padding: 4px;
+      background: var(--panel);
+      border-radius: 16px;
+      border: 1px solid var(--line);
+    }
+
+    .tab {
+      min-height: 32px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      color: #061018;
+      background: var(--text);
+    }
+
+    .watchlist {
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 2px;
+      scrollbar-width: none;
+    }
+
+    .watchlist::-webkit-scrollbar { width: 0; }
+
+    .page { display: none; min-height: 0; flex: 1; }
+    .page.active { display: flex; flex-direction: column; }
+
+    .stock {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 46px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .stock:last-child { border-bottom: 0; }
+
+    .ticker-badge {
+      width: 46px;
+      height: 46px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 900;
+      background: var(--panel-2);
+      color: var(--text);
+    }
+
+    .stock.active .ticker-badge { background: var(--blue); }
+
+    .name {
+      display: block;
+      font-size: 16px;
+      font-weight: 850;
+      line-height: 1.1;
+    }
+
+    .meta {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+
+    .price {
+      text-align: right;
+      font-size: 16px;
+      font-weight: 850;
+    }
+
+    .change {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 72px;
+      min-height: 24px;
+      margin-top: 5px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #061018;
+      background: var(--green);
+    }
+
+    .change.down {
+      color: #fff;
+      background: var(--red);
+    }
+
+    .sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 68px;
+      height: 306px;
+      transform: translateY(calc(100% - 76px));
+      background: rgba(18,20,24,.96);
+      border-top: 1px solid var(--line);
+      border-radius: 28px 28px 0 0;
+      padding: 11px 18px 18px;
+      box-shadow: 0 -20px 50px rgba(0,0,0,.4);
+      transition: transform .35s cubic-bezier(.2,.8,.2,1);
+      z-index: 3;
+    }
+
+    .sheet.open { transform: translateY(0); }
+
+    .handle {
+      width: 44px;
+      height: 5px;
+      margin: 0 auto 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.22);
+    }
+
+    .detail-title {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .detail-title h2 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .detail-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .detail-price {
+      text-align: right;
+      font-weight: 850;
+      font-size: 22px;
+    }
+
+    .chart {
+      height: 78px;
+      width: 100%;
+      margin: 14px 0 10px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+    }
+
+    .range {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+
+    .range button {
+      border: 0;
+      border-radius: 999px;
+      min-height: 28px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .range button.active {
+      color: #061018;
+      background: var(--text);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      padding: 10px;
+      border-radius: 16px;
+      background: var(--panel-2);
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 11px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .metric strong {
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .trade {
+      display: grid;
+      grid-template-columns: 1fr 1fr 44px;
+      gap: 8px;
+    }
+
+    .trade button {
+      min-height: 46px;
+      border: 0;
+      border-radius: 15px;
+      font-size: 15px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .buy { background: var(--green); color: #061018; }
+    .sell { background: var(--red); color: #fff; }
+    .star { background: var(--panel-3); color: var(--yellow); }
+
+    .settings-card {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--panel);
+    }
+
+    .settings-card h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .setting-field {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .setting-field select,
+    .setting-field input {
+      min-height: 42px;
+      border: 0;
+      border-radius: 14px;
+      padding: 0 12px;
+      color: var(--text);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    .nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 74px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: rgba(15,17,20,.92);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      padding-bottom: 10px;
+      z-index: 5;
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 4px;
+    }
+
+    .nav button.active { color: var(--blue); }
+
+    .nav-symbol {
+      width: 22px;
+      height: 22px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .brief {
+      max-width: 510px;
+    }
+
+    .brief h2 {
+      font-size: clamp(30px, 4vw, 54px);
+      line-height: 1.02;
+      margin: 0 0 16px;
+      letter-spacing: 0;
+    }
+
+    .brief p {
+      margin: 0 0 22px;
+      color: #b7c0cc;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .spec {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .spec b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .spec span {
+      color: #a8b0ba;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 860px) {
+      body { place-items: start center; }
+
+      .stage {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 24px;
+        padding: 18px 14px 28px;
+      }
+
+      .phone {
+        width: min(390px, calc(100vw - 28px));
+        height: min(844px, calc(100vh - 28px));
+        min-height: 720px;
+      }
+
+      .brief {
+        width: min(390px, calc(100vw - 28px));
+      }
+
+      .specs { grid-template-columns: 1fr; }
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="iPhone stock app prototype">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status">
+          <span>9:41</span>
+          <span class="icons" aria-hidden="true">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span>5G</span>
+            <span class="battery"></span>
+          </span>
+        </div>
+
+        <div class="app">
+          <div class="topbar">
+            <button class="avatar" title="帳戶">C</button>
+            <div class="row">
+              <button class="icon-button" title="搜尋股票"><span class="icon search-icon"></span></button>
+              <button class="icon-button" title="價格提醒"><span class="icon bell"></span></button>
+            </div>
+          </div>
+
+          <h1>Stocks</h1>
+          <p class="subline">模擬行情 · 台北時間 09:41</p>
+
+          <div class="page active" id="watchPage">
+            <section class="portfolio" aria-label="portfolio summary">
+              <div class="label-row">
+                <span class="label">Portfolio Value</span>
+                <span class="gain">+$1,284.32 today</span>
+              </div>
+              <div class="balance">$48,290.18</div>
+              <svg class="spark" viewBox="0 0 320 64" role="img" aria-label="portfolio trend">
+                <defs>
+                  <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#30d158" stop-opacity=".32"></stop>
+                    <stop offset="100%" stop-color="#30d158" stop-opacity="0"></stop>
+                  </linearGradient>
+                </defs>
+                <path d="M2 58 L2 44 C24 48 29 23 51 29 C72 36 83 14 103 21 C128 30 141 47 161 35 C185 20 197 21 217 26 C242 33 253 10 273 13 C291 15 303 6 318 10 L318 64 L2 64 Z" fill="url(#sparkFill)"></path>
+                <path d="M2 44 C24 48 29 23 51 29 C72 36 83 14 103 21 C128 30 141 47 161 35 C185 20 197 21 217 26 C242 33 253 10 273 13 C291 15 303 6 318 10" fill="none" stroke="#30d158" stroke-width="4" stroke-linecap="round"></path>
+              </svg>
+            </section>
+
+            <div class="tabs" role="tablist" aria-label="market filters">
+              <button class="tab active" data-filter="all">全部</button>
+              <button class="tab" data-filter="tech">科技</button>
+              <button class="tab" data-filter="etf">ETF</button>
+              <button class="tab" data-filter="alert">提醒</button>
+            </div>
+
+            <section class="watchlist" aria-label="watchlist">
+              <button class="stock active" data-ticker="NVDA" data-name="NVIDIA Corp." data-price="142.88" data-change="+2.41%" data-sector="tech" data-mcap="3.5T" data-volume="48.2M" data-pe="48.7"><span class="ticker-badge">NVDA</span><span><span class="name">NVIDIA</span><span class="meta">AI chips · Nasdaq</span></span><span class="price">$142.88<span class="change">+2.41%</span></span></button>
+              <button class="stock" data-ticker="TSM" data-name="Taiwan Semiconductor" data-price="184.02" data-change="+1.08%" data-sector="tech" data-mcap="956B" data-volume="12.7M" data-pe="29.4"><span class="ticker-badge">TSM</span><span><span class="name">TSMC</span><span class="meta">Foundry · NYSE</span></span><span class="price">$184.02<span class="change">+1.08%</span></span></button>
+              <button class="stock" data-ticker="AAPL" data-name="Apple Inc." data-price="211.19" data-change="-0.36%" data-sector="tech alert" data-mcap="3.2T" data-volume="55.1M" data-pe="32.1"><span class="ticker-badge">AAPL</span><span><span class="name">Apple</span><span class="meta">Devices · Nasdaq</span></span><span class="price">$211.19<span class="change down">-0.36%</span></span></button>
+              <button class="stock" data-ticker="VOO" data-name="Vanguard S&P 500 ETF" data-price="504.73" data-change="+0.67%" data-sector="etf" data-mcap="ETF" data-volume="4.6M" data-pe="Index"><span class="ticker-badge">VOO</span><span><span class="name">Vanguard 500</span><span class="meta">S&P 500 ETF</span></span><span class="price">$504.73<span class="change">+0.67%</span></span></button>
+              <button class="stock" data-ticker="QQQ" data-name="Invesco QQQ Trust" data-price="491.15" data-change="-0.12%" data-sector="etf alert" data-mcap="ETF" data-volume="31.4M" data-pe="Index"><span class="ticker-badge">QQQ</span><span><span class="name">Invesco QQQ</span><span class="meta">Nasdaq 100 ETF</span></span><span class="price">$491.15<span class="change down">-0.12%</span></span></button>
+            </section>
+          </div>
+
+          <div class="page" id="accountPage">
+            <section class="settings-card">
+              <h2>設定</h2>
+              <label class="setting-field">App 背景
+                <select id="themeSelect">
+                  <option value="default">深色黑</option>
+                  <option value="blue">金融藍</option>
+                  <option value="light">明亮白</option>
+                </select>
+              </label>
+              <label class="setting-field">字體大小
+                <select id="fontSizeSelect">
+                  <option value="normal">標準</option>
+                  <option value="small">小</option>
+                  <option value="large">大</option>
+                </select>
+              </label>
+              <label class="setting-field">語言
+                <select id="languageSelect">
+                  <option value="zh">繁體中文</option>
+                  <option value="en">English</option>
+                  <option value="ja">日本語</option>
+                </select>
+              </label>
+            </section>
+            <section class="settings-card">
+              <h2>聯繫客服</h2>
+              <label class="setting-field">客服說明<input value="問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。" readonly></label>
+              <label class="setting-field">Email<input value="support@app-service.example" readonly></label>
+            </section>
+          </div>
+        </div>
+
+        <section class="sheet" aria-label="stock detail">
+          <div class="handle"></div>
+          <div class="detail-title">
+            <div>
+              <h2 id="detailTicker">NVDA</h2>
+              <p id="detailName">NVIDIA Corp.</p>
+            </div>
+            <div class="detail-price">
+              <div id="detailPrice">$142.88</div>
+              <div class="gain" id="detailChange">+2.41%</div>
+            </div>
+          </div>
+          <svg id="chart" class="chart" viewBox="0 0 330 120" role="img" aria-label="stock chart"></svg>
+          <div class="range" role="tablist" aria-label="chart ranges">
+            <button>1D</button>
+            <button class="active">1W</button>
+            <button>1M</button>
+            <button>6M</button>
+            <button>1Y</button>
+          </div>
+          <div class="metrics">
+            <div class="metric"><span>市值</span><strong id="metricMcap">3.5T</strong></div>
+            <div class="metric"><span>成交量</span><strong id="metricVolume">48.2M</strong></div>
+            <div class="metric"><span>P/E</span><strong id="metricPe">48.7</strong></div>
+          </div>
+          <div class="trade">
+            <button class="buy">買入</button>
+            <button class="sell">賣出</button>
+            <button class="star" title="加入自選">★</button>
+          </div>
+        </section>
+
+        <nav class="nav" aria-label="main navigation">
+          <button class="active" data-page="watchPage"><span class="nav-symbol">⌁</span>自選</button>
+          <button data-page="watchPage"><span class="nav-symbol">▥</span>市場</button>
+          <button data-page="watchPage"><span class="nav-symbol">◴</span>投資組合</button>
+          <button data-page="accountPage"><span class="nav-symbol">⌾</span>帳戶</button>
+        </nav>
+      </div>
+    </section>
+
+    <aside class="brief">
+      <h2>iOS 股票投資 App 設計稿</h2>
+      <p>這是一個可互動的手機原型，聚焦日常看盤流程：快速掌握資產、掃描自選股、點進個股細節、切換圖表區間並完成買入或賣出動作。</p>
+      <div class="specs">
+        <div class="spec"><b>介面語氣</b><span>深色 iOS、資訊密度高、重點數字清楚，適合頻繁使用。</span></div>
+        <div class="spec"><b>核心畫面</b><span>首頁即是產品，不做 landing page；第一屏完成看盤與下單入口。</span></div>
+        <div class="spec"><b>互動</b><span>點股票會更新詳情卡，點分類會篩選自選股，圖表區間有狀態切換。</span></div>
+        <div class="spec"><b>資料聲明</b><span>所有價格與漲跌皆為模擬資料，可替換成真實 API。</span></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const stocks = [...document.querySelectorAll(".stock")];
+    const filterTabs = [...document.querySelectorAll(".tab")];
+    const rangeButtons = [...document.querySelectorAll(".range button")];
+    const pages = [...document.querySelectorAll(".page")];
+    const navButtons = [...document.querySelectorAll(".nav button")];
+    const screen = document.querySelector(".screen");
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSizeSelect = document.querySelector("#fontSizeSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const chart = document.querySelector("#chart");
+    const sheet = document.querySelector(".sheet");
+    const handle = document.querySelector(".handle");
+    const uiCopy = {
+      zh: {
+        title: "Stocks",
+        status: "模擬行情 · 台北時間 09:41",
+        nav: ["自選", "市場", "投資組合", "帳戶"],
+        settings: "設定",
+        background: "App 背景",
+        fontSize: "字體大小",
+        language: "語言",
+        support: "聯繫客服",
+        report: "客服說明",
+        reportValue: "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。",
+        partner: "Email",
+        partnerValue: "support@app-service.example",
+        updated: "語言設定已更新"
+      },
+      en: {
+        title: "Stocks",
+        status: "Simulated quotes · Taipei 09:41",
+        nav: ["Watchlist", "Market", "Portfolio", "Account"],
+        settings: "Settings",
+        background: "App Background",
+        fontSize: "Font Size",
+        language: "Language",
+        support: "Contact Support",
+        report: "Issue Report",
+        reportValue: "App issues, quote errors, payment issues",
+        partner: "Partnership",
+        partnerValue: "Enterprise, data, and plan partnerships",
+        updated: "Language updated"
+      },
+      ja: {
+        title: "株式",
+        status: "模擬相場 · 台北時間 09:41",
+        nav: ["ウォッチ", "市場", "ポートフォリオ", "アカウント"],
+        settings: "設定",
+        background: "App 背景",
+        fontSize: "文字サイズ",
+        language: "言語",
+        support: "サポート連絡",
+        report: "問題報告",
+        reportValue: "App の問題、相場異常、支払い問題",
+        partner: "提携相談",
+        partnerValue: "企業提携、データ提携、プラン提携",
+        updated: "言語設定を更新しました"
+      }
+    };
+
+    const paths = {
+      up: "M8 92 C28 88 34 48 58 55 C82 62 92 28 116 34 C144 42 151 86 176 68 C200 50 213 34 238 42 C264 51 278 19 302 24 C315 26 322 18 328 14",
+      down: "M8 34 C31 22 43 28 62 40 C88 57 101 46 124 51 C149 56 155 84 181 76 C205 69 217 88 240 82 C264 77 277 94 300 89 C314 86 322 99 328 104"
+    };
+
+    function drawChart(isDown = false) {
+      const color = isDown ? "#ff453a" : "#30d158";
+      const d = isDown ? paths.down : paths.up;
+      chart.innerHTML = `
+        <defs>
+          <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${color}" stop-opacity=".26"></stop>
+            <stop offset="100%" stop-color="${color}" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <path d="${d} L328 120 L8 120 Z" fill="url(#chartFill)"></path>
+        <path d="${d}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"></path>
+      `;
+    }
+
+    function showPage(pageId, navButton) {
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button === navButton));
+      sheet.classList.toggle("open", pageId === "watchPage" && sheet.classList.contains("open"));
+      if (pageId !== "watchPage") sheet.classList.remove("open");
+    }
+
+    function setLabelText(select, text) {
+      const label = select.closest("label");
+      label.childNodes[0].textContent = text;
+    }
+
+    function applyLanguage() {
+      const copy = uiCopy[languageSelect.value] || uiCopy.zh;
+      document.querySelector("h1").textContent = copy.title;
+      document.querySelector(".subline").textContent = copy.status;
+      navButtons.forEach((button, index) => {
+        button.lastChild.textContent = copy.nav[index];
+      });
+      document.querySelector("#accountPage .settings-card:first-child h2").textContent = copy.settings;
+      setLabelText(themeSelect, copy.background);
+      setLabelText(fontSizeSelect, copy.fontSize);
+      setLabelText(languageSelect, copy.language);
+      document.querySelector("#accountPage .settings-card:last-child h2").textContent = copy.support;
+      const supportLabels = document.querySelectorAll("#accountPage .settings-card:last-child .setting-field");
+      supportLabels[0].childNodes[0].textContent = copy.report;
+      supportLabels[0].querySelector("input").value = copy.reportValue;
+      supportLabels[1].childNodes[0].textContent = copy.partner;
+      supportLabels[1].querySelector("input").value = copy.partnerValue;
+    }
+
+    function selectStock(button) {
+      stocks.forEach(stock => stock.classList.toggle("active", stock === button));
+      const isDown = button.dataset.change.startsWith("-");
+      document.querySelector("#detailTicker").textContent = button.dataset.ticker;
+      document.querySelector("#detailName").textContent = button.dataset.name;
+      document.querySelector("#detailPrice").textContent = `$${button.dataset.price}`;
+      const detailChange = document.querySelector("#detailChange");
+      detailChange.textContent = button.dataset.change;
+      detailChange.style.color = isDown ? "var(--red)" : "var(--green)";
+      document.querySelector("#metricMcap").textContent = button.dataset.mcap;
+      document.querySelector("#metricVolume").textContent = button.dataset.volume;
+      document.querySelector("#metricPe").textContent = button.dataset.pe;
+      drawChart(isDown);
+      sheet.classList.add("open");
+    }
+
+    stocks.forEach(button => button.addEventListener("click", () => selectStock(button)));
+
+    filterTabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        filterTabs.forEach(item => item.classList.toggle("active", item === tab));
+        const filter = tab.dataset.filter;
+        stocks.forEach(stock => {
+          const show = filter === "all" || stock.dataset.sector.includes(filter);
+          stock.style.display = show ? "grid" : "none";
+        });
+      });
+    });
+
+    rangeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        rangeButtons.forEach(item => item.classList.toggle("active", item === button));
+      });
+    });
+
+    handle.addEventListener("click", () => sheet.classList.toggle("open"));
+
+    navButtons.forEach(button => {
+      button.addEventListener("click", () => showPage(button.dataset.page, button));
+    });
+
+    themeSelect.addEventListener("change", () => {
+      screen.classList.remove("theme-blue", "theme-light");
+      if (themeSelect.value !== "default") screen.classList.add(`theme-${themeSelect.value}`);
+    });
+
+    fontSizeSelect.addEventListener("change", () => {
+      screen.classList.remove("font-small", "font-large");
+      if (fontSizeSelect.value !== "normal") screen.classList.add(`font-${fontSizeSelect.value}`);
+    });
+
+    languageSelect.addEventListener("change", () => {
+      applyLanguage();
+      document.querySelector(".subline").textContent = (uiCopy[languageSelect.value] || uiCopy.zh).updated;
+    });
+
+    applyLanguage();
+    drawChart(false);
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

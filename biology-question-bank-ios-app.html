@@ -1,0 +1,1749 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Biology Question Bank iOS App Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --ink: #f7fbff;
+      --muted: #a6b4c6;
+      --line: rgba(255,255,255,.13);
+      --panel: #111d2b;
+      --panel-2: #18283a;
+      --panel-3: #243a53;
+      --blue: #64d2ff;
+      --green: #30d158;
+      --yellow: #ffd60a;
+      --red: #ff453a;
+      --app-font-size: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      padding: 28px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(100,210,255,.18), transparent 24rem),
+        radial-gradient(circle at 88% 92%, rgba(48,209,88,.13), transparent 22rem),
+        #06101b;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100%, 1060px);
+      display: grid;
+      grid-template-columns: 390px minmax(280px, 1fr);
+      gap: 44px;
+      align-items: start;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #334252, #05070a 34%, #3b4d5f);
+      box-shadow: 0 30px 80px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.16);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(100,210,255,.18), transparent 13rem),
+        linear-gradient(180deg, rgba(48,209,88,.08), transparent 34%),
+        var(--bg);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .screen.theme-green {
+      --bg: #07140f;
+      --panel: #102119;
+      --panel-2: #173326;
+      --panel-3: #204935;
+      --blue: #7ee7bd;
+    }
+
+    .screen.theme-light {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --ink: #102033;
+      --muted: #607084;
+      --line: rgba(20,40,60,.14);
+      --panel: #ffffff;
+      --panel-2: #e9f0f7;
+      --panel-3: #dbe8f2;
+      --blue: #0a84ff;
+    }
+
+    .screen.font-small { --app-font-size: 12px; }
+    .screen.font-large { --app-font-size: 16px; }
+
+    .island {
+      position: absolute;
+      z-index: 10;
+      top: 11px;
+      left: 50%;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+    }
+
+    .status {
+      height: 58px;
+      padding: 12px 26px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .app {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 84px;
+      overflow: hidden;
+      font-size: var(--app-font-size);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      min-height: 36px;
+      gap: 8px;
+    }
+
+    .user,
+    .points {
+      height: 36px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 12px;
+      color: #061018;
+      font-weight: 950;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .user {
+      max-width: 168px;
+      background: linear-gradient(135deg, #fff, #bdefff 44%, var(--blue));
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .points {
+      margin-left: auto;
+      background: var(--yellow);
+    }
+
+    .credit-alert {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      color: #061018;
+      background: var(--yellow);
+      font-weight: 950;
+    }
+
+    .credit-alert.show { display: flex; }
+
+    .credit-alert button {
+      min-height: 32px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 12px;
+      color: #061018;
+      background: var(--green);
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    h1 {
+      margin: 16px 0 6px;
+      font-size: calc(var(--app-font-size) + 19px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 1px);
+      line-height: 1.35;
+    }
+
+    .content {
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-right: 2px;
+    }
+
+    .content::-webkit-scrollbar { width: 0; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background:
+        linear-gradient(145deg, rgba(100,210,255,.11), transparent 48%),
+        var(--panel);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: calc(var(--app-font-size) + 4px);
+      letter-spacing: 0;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 850;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-radius: 15px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 96px;
+      padding-top: 12px;
+      resize: none;
+      line-height: 1.45;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .terms-box {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .terms-toggle {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: var(--panel-3);
+      font: inherit;
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .terms-panel {
+      display: none;
+      max-height: 220px;
+      overflow-y: auto;
+      white-space: pre-line;
+      color: #d7e5f2;
+      font-size: calc(var(--app-font-size) - 2px);
+      line-height: 1.55;
+      scrollbar-width: thin;
+    }
+
+    .terms-panel.show {
+      display: block;
+    }
+
+    .terms-consent {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 850;
+    }
+
+    .terms-consent input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue);
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.05);
+      padding: 10px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 15px;
+    }
+
+    .segment {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .segment button,
+    .primary,
+    .secondary {
+      min-height: 42px;
+      border: 0;
+      border-radius: 15px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .segment button,
+    .secondary {
+      color: var(--ink);
+      background: var(--panel-3);
+      border: 1px solid var(--line);
+    }
+
+    .segment button.active {
+      color: #061018;
+      background: var(--blue);
+    }
+
+    .primary {
+      color: #061018;
+      background: var(--blue);
+    }
+
+    .question-card {
+      padding: 13px;
+      margin-bottom: 10px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid var(--line);
+    }
+
+    .question-card.correct {
+      border: 3px solid var(--green);
+      background: rgba(48,209,88,.18);
+      box-shadow: 0 0 0 3px rgba(48,209,88,.16), 0 12px 28px rgba(48,209,88,.16);
+    }
+
+    .question-card.incorrect {
+      border: 2px solid var(--red);
+      background: rgba(255,69,58,.12);
+    }
+
+    .question-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--blue);
+    }
+
+    .question-card p {
+      margin: 0;
+      color: var(--ink);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .solution {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 14px;
+      color: #061018;
+      background: rgba(48,209,88,.9);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .solution.show { display: block; }
+
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .plan {
+      min-height: 82px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .plan.active {
+      color: #061018;
+      background: var(--yellow);
+      box-shadow: 0 0 0 4px rgba(255,214,10,.14);
+    }
+
+    .school-card {
+      width: 100%;
+      display: grid;
+      gap: 6px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--ink);
+      background: var(--panel-2);
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .school-card strong { color: var(--blue); }
+    .school-card span { color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .recommend-badge {
+      align-self: flex-start;
+      background: rgba(94, 210, 255, .16);
+      border: 1px solid rgba(94, 210, 255, .75);
+      border-radius: 999px;
+      color: var(--blue) !important;
+      font-size: 12px !important;
+      font-weight: 900;
+      max-width: 92px;
+      overflow: hidden;
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+    .recommend-badge::before {
+      animation: recommendMarquee 2.4s linear infinite;
+      color: var(--blue);
+      content: "★ 推薦 ★";
+      display: inline-block;
+      min-width: 100%;
+      transform: translateX(100%);
+    }
+    .recommend-badge { color: transparent !important; }
+    @keyframes recommendMarquee {
+      from { transform: translateX(100%); }
+      to { transform: translateX(-100%); }
+    }
+    .contact-form { display: none; }
+    .contact-form.show { display: grid; }
+
+    .paywall { display: none; }
+    .paywall.show { display: grid; }
+
+    .nav {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      height: 64px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border-radius: 0 0 38px 38px;
+      background: rgba(8,16,24,.86);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-size: calc(var(--app-font-size) - 3px);
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .nav button.active { color: var(--blue); }
+
+    .brief {
+      max-width: 520px;
+      padding-top: 32px;
+    }
+
+    .brief h2 {
+      margin: 0 0 14px;
+      font-size: clamp(30px, 4vw, 52px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .brief p {
+      margin: 0;
+      color: #b9c7d6;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="iPhone biology question bank app prototype">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status"><span>9:41</span><span>5G  ▰</span></div>
+
+        <div class="app">
+          <div class="toolbar">
+            <button class="user" id="userNameButton">尚未註冊</button>
+            <button class="points" id="pointsButton">3 點</button>
+          </div>
+          <div class="credit-alert" id="creditAlert">
+            <span id="creditAlertText">點數已用完 請點選升級</span>
+            <button id="creditAlertUpgrade" type="button">升級</button>
+          </div>
+
+          <h1 id="title">生物題庫</h1>
+          <p class="subline" id="appStatus">完成註冊後開始產生生物題庫。</p>
+
+          <section class="content">
+            <section class="page active" id="loginPage">
+              <div class="card">
+                <h2>註冊登入</h2>
+                <label>姓名<input id="studentName" value="Clay Tseng" placeholder="請輸入姓名"></label>
+                <label>電話<input id="studentPhone" value="0912-345-678" inputmode="tel" placeholder="請輸入電話"></label>
+                <label>Email<input id="studentEmail" value="clay.tseng@example.com" inputmode="email" placeholder="請輸入 Email"></label>
+                <div class="grid-2">
+                  <label>地址縣市<input id="studentCity" value="台北市" placeholder="例如：台北市"></label>
+                  <label>地址區域<input id="studentDistrict" value="大安區" placeholder="例如：大安區"></label>
+                </div>
+                <div class="grid-2">
+                  <label>簡訊驗證碼<input id="smsCode" maxlength="4" inputmode="numeric" placeholder="4 位數"></label>
+                  <button class="secondary" id="sendSms" type="button">發送簡訊</button>
+                </div>
+                <p class="subline" id="smsHint">按下發送簡訊後會產生 4 位數驗證碼。</p>
+                <div class="terms-box">
+                  <button class="terms-toggle" id="toggleTermsButton" type="button">展開使用條款、隱私權政策與免責聲明</button>
+                  <div class="terms-panel" id="termsPanel">生物題庫 App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「生物題庫 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供生物題庫、細胞學習、遺傳學、人體生理、生態學、閱讀測驗、AI 解題、學習分析、模擬測驗、語音互動及相關生物教育與學習輔助服務，所有內容僅供教育、學習與參考用途。
+
+二、AI 與學習內容聲明
+
+本 App 部分內容可能由 AI 系統自動生成，包括生物解析、學習建議、語音回覆或其他互動內容。
+
+本公司不保證相關內容之正確性、完整性、即時性、適法性或完全符合特定考試需求。
+
+所有題目、解析、AI 解題與學習建議僅供學習與參考用途，不構成正式教育保證、考試保證或成績保證。
+
+三、使用風險與免責聲明
+
+使用者應自行判斷並承擔使用本 App 所產生之一切風險與責任。
+
+本 App 僅提供教育與學習輔助服務，本公司不保證任何學習成果、考試結果、成績提升或 AI 解題內容之準確性。
+
+使用者因依據本 App 提供之題目、解析、建議、AI 回覆或資訊所作之任何學習安排、考試準備或決策而產生之結果、損失或爭議，均由使用者自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+本 App 之語音、AI、網路及第三方服務功能，可能受網路環境、裝置效能、第三方服務或系統狀況影響，本公司不保證服務之穩定性、即時性或完全無錯誤。
+
+四、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+* 使用者帳號資訊
+* Email
+* 裝置資訊
+* 使用紀錄
+* IP 位址
+* 學習紀錄
+* 作答紀錄
+* 語音內容
+* AI 互動紀錄
+* 崩潰紀錄與分析資料
+
+五、資料用途
+
+蒐集資料主要用於：
+
+* 提供生物題庫與學習服務
+* AI 解題與學習分析
+* 提供個人化學習內容
+* 語音互動與 AI 回覆
+* 改善使用體驗
+* 系統安全維護
+* 客服支援
+* 防止詐騙、濫用或違法行為
+* 提升 AI 與系統服務品質
+
+六、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+* OpenAI
+* Firebase
+* Google Analytics
+* 語音辨識服務
+* 雲端儲存服務
+* AI 模型服務
+
+部分資料可能因服務需求而傳輸至第三方服務供應商。
+
+七、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、語音通訊或儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及裝置安全。
+
+八、使用者責任
+
+使用者不得利用本 App 從事任何違法、侵權、作弊、散布惡意程式或其他損害他人權益之行為。
+
+若因使用者違法或不當行為導致任何損害或法律責任，應由使用者自行負責。
+
+九、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、題庫內容、資料、AI 系統及相關內容，均屬本公司或合法授權人所有。
+
+未經授權不得重製、修改、散布、反向工程、破解或用於商業用途。
+
+十、使用者權利
+
+使用者得依法請求查詢、更正或刪除其個人資料。
+
+十一、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利，修改後內容將公布於本 App，使用者繼續使用即視為同意修改內容。</div>
+                  <label class="terms-consent">
+                    <input id="agreeTerms" type="checkbox">
+                    我已打開並同意使用條款、隱私權政策與免責聲明
+                  </label>
+                </div>
+                <button class="primary" id="finishLogin" type="button">完成註冊</button>
+              </div>
+            </section>
+
+            <section class="page" id="profilePage">
+              <div class="card">
+                <h2>使用者資料</h2>
+                <label>使用者名稱<input id="profileName" placeholder="請輸入使用者名稱"></label>
+                <label>Email<input id="profileEmail" inputmode="email" placeholder="請輸入 Email"></label>
+                <label>電話<input id="profilePhone" readonly disabled></label>
+                <div class="grid-2">
+                  <label>地址縣市<input id="profileCity" placeholder="例如：台北市"></label>
+                  <label>地址區域<input id="profileDistrict" placeholder="例如：大安區"></label>
+                </div>
+                <p class="subline">電話不可自行修改，請聯繫客服進行更改。客服電話：02-1234-5678</p>
+                <div class="grid-2">
+                  <div class="metric"><span>目前方案</span><strong id="profilePlan">免費方案</strong></div>
+                  <div class="metric"><span>剩餘點數</span><strong id="profileCredits">3 點</strong></div>
+                </div>
+                <button class="primary" id="saveProfile" type="button">儲存資料</button>
+              </div>
+            </section>
+
+            <section class="page" id="practicePage">
+              <div class="card">
+                <h2>產生生物題庫</h2>
+                <div class="segment" id="schoolStage">
+                  <button class="active" data-stage="國小">國小</button>
+                  <button data-stage="國中">國中</button>
+                  <button data-stage="高中">高中</button>
+                </div>
+                <label>年級<select id="gradeSelect"></select></label>
+                <label>生物單元<select id="englishUnitSelect"></select></label>
+                <label>題目難易度</label>
+                <div class="segment" id="difficultyLevel">
+                  <button class="active" data-difficulty="易">易</button>
+                  <button data-difficulty="中">中</button>
+                  <button data-difficulty="難">難</button>
+                </div>
+                <button class="primary" id="generateQuestions" type="button">產生題庫</button>
+              </div>
+              <div id="questionList"></div>
+              <div class="card paywall" id="paywall">
+                <h2>點數已用完</h2>
+                <p class="subline">點數已用完 請點選升級</p>
+                <button class="primary" id="goUpgrade" type="button">升級</button>
+              </div>
+            </section>
+
+            <section class="page" id="solverPage">
+              <div class="card">
+                <h2>生物詳解助手</h2>
+                <label>輸入生物題目<textarea id="manualQuestion" placeholder="例如：請說明粒線體在細胞中的功能。"></textarea></label>
+                <button class="primary" id="solveProblem" type="button">產生詳解</button>
+              </div>
+              <div class="card" id="solveResult">
+                <h2>詳解結果</h2>
+                <p class="subline">輸入生物題目後按下產生詳解，這裡會顯示答案、觀念解析、流程與關鍵比較。</p>
+              </div>
+            </section>
+
+            <section class="page" id="tutoringPage">
+              <div class="card">
+                <h2>補習班</h2>
+                <p class="subline">依使用者註冊地址或定位地址排序，點選補習班留下資料，系統會自動以 Email 或簡訊通知補習班。</p>
+                <div class="grid-2">
+                  <label>篩選縣市<select id="tutorCityFilter"></select></label>
+                  <label>篩選區域<select id="tutorDistrictFilter"></select></label>
+                </div>
+                <button class="school-card" type="button" data-school="探索生物補習班" data-email="biology@explore.example" data-phone="02-2345-4411" data-city="台北市" data-district="大安區" data-paid="true"><span class="recommend-badge">★ 推薦 ★</span><strong>探索生物補習班</strong><span>國中到高中生物、會考與學測自然</span><span>地址：台北市大安區和平東路二段 56 號</span><span>Email：biology@explore.example｜電話：02-2345-4411</span></button>
+                <button class="school-card" type="button" data-school="生命科學學院" data-email="contact@life-science.example" data-phone="02-2766-7722" data-city="新北市" data-district="板橋區"><strong>生命科學學院</strong><span>細胞、遺傳、生態與實驗題型</span><span>地址：新北市板橋區縣民大道二段 118 號</span><span>Email：contact@life-science.example｜電話：02-2766-7722</span></button>
+                <button class="school-card" type="button" data-school="晨曦自然家教中心" data-email="hello@dawn-biology.example" data-phone="02-2555-8899" data-city="桃園市" data-district="桃園區"><strong>晨曦自然家教中心</strong><span>一對一生物、觀念補強、升學規劃</span><span>地址：桃園市桃園區中華路 28 號</span><span>Email：hello@dawn-biology.example｜電話：02-2555-8899</span></button>
+              </div>
+              <div class="card contact-form" id="tutorContactForm">
+                <h2 id="selectedTutorTitle">補習班洽談</h2>
+                <label>姓名<input id="tutorContactName" placeholder="請輸入姓名"></label>
+                <label>電話<input id="tutorContactPhone" inputmode="tel" placeholder="請輸入電話"></label>
+                <label>要洽談的問題<textarea id="tutorContactQuestion" placeholder="請輸入想洽談的課程、年級或學習問題"></textarea></label>
+                <button class="primary" id="sendTutorContact" type="button">送出</button>
+                <p class="subline" id="tutorContactResult"></p>
+              </div>
+            </section>
+
+            <section class="page" id="plansPage">
+              <div class="card">
+                <h2>升級方案</h2>
+                <p class="subline">目前剩餘：<strong id="pointsSummary">3 點</strong></p>
+                <div class="plans">
+                  <button class="plan" data-plan="Basic" data-price="NTD$99" data-points="30">Basic<br>NTD$99<br>每月 30 次</button>
+                  <button class="plan" data-plan="Plus" data-price="NTD$399" data-points="150">Plus<br>NTD$399<br>每月 150 次</button>
+                  <button class="plan" data-plan="Pro" data-price="NTD$599" data-points="300">Pro<br>NTD$599<br>每月 300 次</button>
+                  <button class="plan" data-plan="VIP" data-price="NTD$999" data-points="1000">VIP<br>NTD$999<br>每月 1000 次</button>
+                </div>
+                <button class="primary" id="confirmPlan" type="button">確認方案並前往付款</button>
+              </div>
+            </section>
+
+            <section class="page" id="paymentPage">
+              <div class="card">
+                <h2>信用卡付費</h2>
+                <p class="subline" id="paymentPlan">請先選擇方案。</p>
+                <label>持卡人<input id="cardName" value="Clay Tseng"></label>
+                <label>卡號<input id="cardNumber" value="4242 4242 4242 4242" inputmode="numeric"></label>
+                <div class="grid-2">
+                  <label>有效期限<input id="cardExp" value="12/29"></label>
+                  <label>CVV<input id="cardCvv" value="123" inputmode="numeric"></label>
+                </div>
+                <button class="primary" id="payNow" type="button">確認付款</button>
+              </div>
+            </section>
+
+            <section class="page" id="settingsPage">
+              <div class="card">
+                <h2>設定</h2>
+                <label>App 背景
+                  <select id="themeSelect">
+                    <option value="dark">深色藍黑</option>
+                    <option value="green">護眼綠</option>
+                    <option value="light">明亮白</option>
+                  </select>
+                </label>
+                <label>字體大小
+                  <select id="fontSizeSelect">
+                    <option value="normal">標準</option>
+                    <option value="small">小</option>
+                    <option value="large">大</option>
+                  </select>
+                </label>
+                <label>語言
+                  <select id="languageSelect">
+                    <option value="zh">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                </label>
+              </div>
+              <div class="card">
+                <h2>聯繫客服</h2>
+                <p class="subline">問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。</p>
+                <p class="subline">Email：support@app-service.example</p>
+              </div>
+            </section>
+          </section>
+        </div>
+
+        <nav class="nav" aria-label="main navigation">
+          <button class="active" data-page="practicePage">題庫</button>
+          <button data-page="solverPage">詳解</button>
+          <button data-page="tutoringPage">補習班</button>
+          <button data-page="plansPage">升級</button>
+          <button data-page="settingsPage">設定</button>
+        </nav>
+      </div>
+    </section>
+
+    <aside class="brief">
+      <h2>生物題庫 iOS App</h2>
+      <p>學生可依國小、國中、高中與年級選擇生物單元，產生真正分級的生物題目。易題重基本辨識，中題重生命現象與流程，難題重實驗分析、系統整合與推論。</p>
+    </aside>
+  </main>
+
+  <script>
+    const pages = [...document.querySelectorAll(".page")];
+    const navButtons = [...document.querySelectorAll(".nav button")];
+    const screen = document.querySelector(".screen");
+    const title = document.querySelector("#title");
+    const userNameButton = document.querySelector("#userNameButton");
+    const pointsButton = document.querySelector("#pointsButton");
+    const creditAlert = document.querySelector("#creditAlert");
+    const creditAlertText = document.querySelector("#creditAlertText");
+    const creditAlertUpgrade = document.querySelector("#creditAlertUpgrade");
+    const appStatus = document.querySelector("#appStatus");
+    const studentName = document.querySelector("#studentName");
+    const studentPhone = document.querySelector("#studentPhone");
+    const studentEmail = document.querySelector("#studentEmail");
+    const studentCity = document.querySelector("#studentCity");
+    const studentDistrict = document.querySelector("#studentDistrict");
+    const profileName = document.querySelector("#profileName");
+    const profileEmail = document.querySelector("#profileEmail");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profileCity = document.querySelector("#profileCity");
+    const profileDistrict = document.querySelector("#profileDistrict");
+    const saveProfile = document.querySelector("#saveProfile");
+    const profilePlan = document.querySelector("#profilePlan");
+    const profileCredits = document.querySelector("#profileCredits");
+    const smsCode = document.querySelector("#smsCode");
+    const smsHint = document.querySelector("#smsHint");
+    const sendSms = document.querySelector("#sendSms");
+    const finishLogin = document.querySelector("#finishLogin");
+    const toggleTermsButton = document.querySelector("#toggleTermsButton");
+    const termsPanel = document.querySelector("#termsPanel");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const schoolStage = document.querySelector("#schoolStage");
+    const gradeSelect = document.querySelector("#gradeSelect");
+    const englishUnitSelect = document.querySelector("#englishUnitSelect");
+    const difficultyLevel = document.querySelector("#difficultyLevel");
+    const generateQuestions = document.querySelector("#generateQuestions");
+    const questionList = document.querySelector("#questionList");
+    const paywall = document.querySelector("#paywall");
+    const manualQuestion = document.querySelector("#manualQuestion");
+    const solveProblem = document.querySelector("#solveProblem");
+    const solveResult = document.querySelector("#solveResult");
+    const planButtons = [...document.querySelectorAll(".plan")];
+    const pointsSummary = document.querySelector("#pointsSummary");
+    const confirmPlan = document.querySelector("#confirmPlan");
+    const paymentPlan = document.querySelector("#paymentPlan");
+    const payNow = document.querySelector("#payNow");
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSizeSelect = document.querySelector("#fontSizeSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const tutorCityFilter = document.querySelector("#tutorCityFilter");
+    const tutorDistrictFilter = document.querySelector("#tutorDistrictFilter");
+    const schoolCards = [...document.querySelectorAll(".school-card")];
+    const tutorContactForm = document.querySelector("#tutorContactForm");
+    const selectedTutorTitle = document.querySelector("#selectedTutorTitle");
+    const tutorContactName = document.querySelector("#tutorContactName");
+    const tutorContactPhone = document.querySelector("#tutorContactPhone");
+    const sendTutorContact = document.querySelector("#sendTutorContact");
+    const tutorContactResult = document.querySelector("#tutorContactResult");
+
+    let smsToken = "";
+    let loggedIn = false;
+    let termsOpened = false;
+    let credits = 3;
+    let currentPlan = "免費方案";
+    let selectedStage = "國小";
+    let selectedDifficulty = "易";
+    let selectedPlan = null;
+    let selectedTutor = null;
+
+    const gradeMap = {
+      "國小": ["1 年級", "2 年級", "3 年級", "4 年級", "5 年級", "6 年級"],
+      "國中": ["1 年級", "2 年級", "3 年級"],
+      "高中": ["1 年級", "2 年級", "3 年級"]
+    };
+
+    const unitMap = {
+      "國小": ["動植物特徵", "人體器官", "生態環境", "生命週期"],
+      "國中": ["細胞構造", "消化循環", "遺傳演化", "生態系"],
+      "高中": ["細胞代謝", "遺傳分子", "人體恆定", "生物多樣性"]
+    };
+
+    const pageTitles = {
+      loginPage: "生物題庫",
+      profilePage: "使用者資料",
+      practicePage: "生物題庫",
+      solverPage: "生物詳解",
+      tutoringPage: "補習班",
+      plansPage: "升級方案",
+      paymentPage: "信用卡付費",
+      settingsPage: "設定"
+    };
+
+    function showPage(pageId) {
+      const protectedPages = ["profilePage", "practicePage", "solverPage", "tutoringPage", "plansPage", "paymentPage", "settingsPage"];
+      if (!loggedIn && protectedPages.includes(pageId)) {
+        appStatus.textContent = "請先完成註冊後才能使用 App。";
+        pageId = "loginPage";
+      }
+      if (pageId === "tutoringPage") sortTutorSchools();
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      title.textContent = pageTitles[pageId] || "生物題庫";
+    }
+
+    function updateCredits() {
+      pointsButton.textContent = `${credits} 點`;
+      pointsSummary.textContent = `${credits} 點`;
+      profileCredits.textContent = `${credits} 點`;
+      profilePlan.textContent = currentPlan;
+      paywall.classList.toggle("show", credits <= 0);
+      creditAlert.classList.toggle("show", credits <= 0);
+      creditAlertText.textContent = "點數已用完 請點選升級";
+    }
+
+    function consumeCredit() {
+      if (!loggedIn) {
+        appStatus.textContent = "請先完成註冊後才能使用 App。";
+        showPage("loginPage");
+        return false;
+      }
+      if (credits <= 0) {
+        appStatus.textContent = "點數已用完 請點選升級";
+        showPage("plansPage");
+        return false;
+      }
+      credits -= 1;
+      updateCredits();
+      return true;
+    }
+
+    function renderGrades() {
+      const currentGrade = gradeSelect.value;
+      gradeSelect.innerHTML = gradeMap[selectedStage]
+        .map(grade => `<option value="${grade}">${grade}</option>`)
+        .join("");
+      if (gradeMap[selectedStage].includes(currentGrade)) gradeSelect.value = currentGrade;
+    }
+
+    function renderUnits() {
+      const currentUnit = englishUnitSelect.value;
+      englishUnitSelect.innerHTML = unitMap[selectedStage]
+        .map(unit => `<option value="${unit}">${unit}</option>`)
+        .join("");
+      if (unitMap[selectedStage].includes(currentUnit)) englishUnitSelect.value = currentUnit;
+    }
+
+    function gradeNumber() {
+      return Number(gradeSelect.value.match(/\d+/)?.[0] || 1);
+    }
+
+    function geminiPromptForBiologyQuestions(stage, grade, unit, difficulty) {
+      return [
+        "你是生物題庫 iOS app 的內部產題服務。",
+        `請產生 ${stage}${grade}、生物單元「${unit}」、難度「${difficulty}」的 3 題生物題。`,
+        "易：名詞、構造或功能辨識；中：生命現象流程、因果與比較；難：實驗分析、系統整合、資料判讀與推論。",
+        "每題回傳 title、question、solution。solution 必須包含答案、詳細解題步驟、關鍵觀念、流程或比較。"
+      ].join("\n");
+    }
+
+    async function requestInternalGeminiQuestions(stage, grade, unit, difficulty) {
+      const prompt = geminiPromptForBiologyQuestions(stage, grade, unit, difficulty);
+      // Production hook: send this prompt to your backend, where the Gemini API key is stored securely.
+      // Example backend route: POST /api/gemini/biology-questions { prompt }
+      return { prompt, questions: null };
+    }
+
+    function difficultyNote(difficulty) {
+      return {
+        "易": "基礎辨識：重點是認出構造、功能、名詞與基本生命現象。",
+        "中": "應用理解：需要說明流程、比較構造功能，並連結因果關係。",
+        "難": "整合挑戰：需要分析實驗、解讀資料，或整合多個生物系統推論。"
+      }[difficulty];
+    }
+
+    function biologyQuestions(stage, grade, unit, difficulty) {
+      const baseTitle = `${stage}${grade} · ${difficulty} · ${unit}`;
+      const set = items => items.map((item, index) => ({
+        title: `${baseTitle} · 題目 ${index + 1}`,
+        question: item.question,
+        answer: item.answer,
+        solution: `${difficultyNote(difficulty)}<br><br><strong>答案</strong><br>${item.answer}<br><br><strong>詳細解題過程</strong><br>${item.steps}`
+      }));
+
+      const banks = {
+        "動植物特徵": {
+          "易": set([
+            { question: "下列哪一項是植物通常具有、動物通常沒有的構造？（A）葉綠體（B）細胞膜（C）細胞核", answer: "A 葉綠體", steps: "葉綠體能行光合作用，多數植物細胞具有；動物細胞沒有葉綠體。細胞膜與細胞核則動植物細胞都可能具有。" },
+            { question: "植物的根主要功能是什麼？", answer: "吸收水分和礦物質，並固定植物體。", steps: "根在土壤中延伸，能吸水、吸收礦物質，也幫助植物站立穩定。" },
+            { question: "魚類用什麼構造在水中呼吸？", answer: "鰓", steps: "魚的鰓能從水中取得溶解氧，並排出二氧化碳。" }
+          ]),
+          "中": set([
+            { question: "為什麼仙人掌的葉演化成刺狀？", answer: "減少水分散失並保護植物。", steps: "沙漠環境缺水，葉片縮小成刺可降低蒸散面積；刺也能降低被動物啃食的機會。" },
+            { question: "鳥類的翅膀和魚類的鰭都能幫助移動，兩者功能相同嗎？", answer: "都是運動構造，但適應的環境不同。", steps: "鳥翼適合空氣中飛行，魚鰭適合水中游動；功能都是移動，但形態受環境影響。" },
+            { question: "植物的花為什麼常有顏色或香味？", answer: "吸引昆蟲或其他動物協助傳粉。", steps: "花的顏色與香味可吸引傳粉者，幫助花粉從雄蕊傳到雌蕊，提高繁殖成功率。" }
+          ]),
+          "難": set([
+            { question: "若某植物生活在乾旱環境，請推論它可能有哪些構造適應，並說明理由。", answer: "可能有厚角質層、針狀葉、發達根系或儲水莖。", steps: "乾旱環境的主要壓力是缺水，因此構造會朝減少散水、增加吸水或儲水發展。" },
+            { question: "蝙蝠翅膀與鳥翅都能飛行，這能否直接表示兩者親緣最近？", answer: "不能。", steps: "相似功能可能來自相似環境壓力，屬趨同演化；判斷親緣仍需比較骨骼、胚胎或 DNA 等證據。" },
+            { question: "同一棵植物的向光性如何幫助生存？", answer: "讓葉片獲得更多光照，提高光合作用效率。", steps: "光合作用需要光能；植物朝光生長可增加能量取得，進而幫助生長與繁殖。" }
+          ])
+        },
+        "人體器官": {
+          "易": set([
+            { question: "肺的主要功能是什麼？", answer: "進行氣體交換。", steps: "肺能讓氧氣進入血液，並讓二氧化碳從血液排出。" },
+            { question: "心臟的主要功能是什麼？", answer: "推動血液循環。", steps: "心臟像幫浦，收縮時把血液送到全身或肺部。" },
+            { question: "胃主要負責哪一類消化？", answer: "初步消化蛋白質並攪拌食物。", steps: "胃液含胃酸和酵素，可幫助蛋白質消化，也會把食物攪拌成食糜。" }
+          ]),
+          "中": set([
+            { question: "運動時呼吸和心跳都會加快，原因是什麼？", answer: "肌肉需要更多氧氣與養分，也要排出更多二氧化碳。", steps: "運動增加細胞呼吸速率；呼吸加快取得氧氣，心跳加快運送氧氣與養分。" },
+            { question: "小腸為什麼適合吸收養分？", answer: "小腸很長，且有絨毛增加表面積。", steps: "表面積越大，吸收效率越高；小腸絨毛能讓消化後的小分子進入血液或淋巴。" },
+            { question: "腎臟如何協助維持體內環境穩定？", answer: "過濾血液、排出代謝廢物並調節水分與鹽分。", steps: "腎臟形成尿液，移除尿素等廢物，同時調節水與離子濃度。" }
+          ]),
+          "難": set([
+            { question: "若一個人紅血球數量不足，為什麼容易疲倦？", answer: "血液攜氧能力下降，細胞呼吸產生能量減少。", steps: "紅血球中的血紅素運送氧氣；氧氣不足會降低細胞呼吸效率，使肌肉和器官較容易疲勞。" },
+            { question: "胰島素分泌不足會如何影響血糖？", answer: "血糖容易偏高。", steps: "胰島素促進葡萄糖進入細胞並儲存；不足時葡萄糖留在血液中，造成血糖升高。" },
+            { question: "請整合消化、循環與呼吸系統說明細胞如何獲得能量。", answer: "消化提供葡萄糖，呼吸提供氧氣，循環運送兩者到細胞進行細胞呼吸。", steps: "食物分解成養分，肺取得氧氣，血液運送到細胞，粒線體利用葡萄糖和氧產生能量。" }
+          ])
+        },
+        "生態環境": {
+          "易": set([
+            { question: "食物鏈中，植物通常扮演什麼角色？", answer: "生產者。", steps: "植物能行光合作用製造有機養分，因此是生產者。" },
+            { question: "以草、兔、狐狸組成食物鏈，正確順序為何？", answer: "草 → 兔 → 狐狸", steps: "兔吃草，狐狸吃兔，箭頭表示能量或物質流向捕食者。" },
+            { question: "分解者的功能是什麼？", answer: "分解生物遺體和排遺，使養分回到環境。", steps: "細菌和真菌常是分解者，能促進物質循環。" }
+          ]),
+          "中": set([
+            { question: "若某地區兔子大量減少，狐狸族群可能如何變化？", answer: "可能下降。", steps: "兔子是狐狸食物來源之一；獵物減少會使狐狸可取得能量下降，族群可能跟著減少。" },
+            { question: "外來種為什麼可能破壞生態平衡？", answer: "可能缺乏天敵，競爭或捕食本土生物。", steps: "外來種若繁殖快，會搶食物、空間或直接捕食本土物種。" },
+            { question: "能量在食物鏈中為什麼會逐級減少？", answer: "生物會消耗能量進行生命活動，且部分能量以熱散失。", steps: "每一營養階層只有部分能量能傳到下一階層，因此高階消費者能量較少。" }
+          ]),
+          "難": set([
+            { question: "若湖泊優養化導致藻類暴增，魚類為何可能大量死亡？", answer: "藻類死亡後被分解者分解，消耗水中氧氣，造成魚缺氧。", steps: "營養鹽增加使藻類增生；藻類死亡後分解作用旺盛，溶氧下降，魚類無法呼吸。" },
+            { question: "移除一個頂級掠食者可能如何影響整個生態系？", answer: "可能造成獵物暴增，進一步影響植物與其他物種。", steps: "頂級掠食者控制獵物數量；移除後會引發營養階層連鎖反應。" },
+            { question: "為什麼生物多樣性高的生態系通常較穩定？", answer: "物種功能較多元，部分物種減少時其他物種可能補位。", steps: "多樣性高代表食物網複雜，能量路徑較多，對單一干擾的抵抗力較高。" }
+          ])
+        },
+        "細胞構造": {
+          "易": set([
+            { question: "細胞膜的主要功能是什麼？", answer: "控制物質進出細胞。", steps: "細胞膜包圍細胞，具有選擇性通透，能調節細胞內外物質交換。" },
+            { question: "細胞核主要負責什麼？", answer: "儲存遺傳物質並控制細胞活動。", steps: "細胞核含 DNA，能調控蛋白質製造與細胞功能。" },
+            { question: "粒線體常被稱為細胞的什麼？", answer: "能量工廠。", steps: "粒線體進行細胞呼吸，產生 ATP，供細胞活動使用。" }
+          ]),
+          "中": set([
+            { question: "植物細胞比動物細胞多哪些常見構造？", answer: "細胞壁、葉綠體與較大的液泡。", steps: "細胞壁提供支持；葉綠體行光合作用；液泡儲存水分與物質。" },
+            { question: "若細胞缺乏粒線體，最直接會影響什麼？", answer: "能量供應。", steps: "粒線體是細胞呼吸主要場所；缺乏粒線體會使 ATP 產量下降。" },
+            { question: "為什麼紅血球成熟後沒有細胞核仍能運輸氧氣？", answer: "紅血球主要功能靠血紅素運氧，不需進行複雜的細胞控制。", steps: "無核能留下更多空間容納血紅素，提高運氧效率，但壽命也有限。" }
+          ]),
+          "難": set([
+            { question: "為什麼分泌蛋白旺盛的細胞通常具有較發達的粗糙內質網與高基氏體？", answer: "粗糙內質網合成蛋白質，高基氏體修飾、分類與運輸蛋白質。", steps: "分泌蛋白需要先在核糖體合成，再經內質網與高基氏體加工包裝，所以相關胞器較發達。" },
+            { question: "若把植物細胞放入高濃度鹽水，細胞可能發生什麼變化？", answer: "水分外流，細胞質膜可能與細胞壁分離，形成質離現象。", steps: "高濃度環境水勢較低，水由細胞內流向外界，導致細胞失水。" },
+            { question: "請比較細胞膜與細胞壁在功能上的差異。", answer: "細胞膜控制物質進出；細胞壁提供支持與保護。", steps: "細胞膜具有選擇性通透；細胞壁較堅硬，主要維持形狀並防止過度膨脹。" }
+          ])
+        },
+        "遺傳演化": {
+          "易": set([
+            { question: "DNA 的主要功能是什麼？", answer: "儲存遺傳訊息。", steps: "DNA 上的基因可決定蛋白質合成，進而影響生物性狀。" },
+            { question: "子代為什麼會同時像父親與母親？", answer: "因為子代分別從父母各得到一半遺傳物質。", steps: "有性生殖中，精子與卵結合，形成含雙親遺傳訊息的受精卵。" },
+            { question: "演化的基本意義是什麼？", answer: "族群的遺傳特徵隨世代改變。", steps: "演化不是個體短時間改變，而是族群在多代中的基因頻率改變。" }
+          ]),
+          "中": set([
+            { question: "若棕色眼睛為顯性 B，藍色眼睛為隱性 b，父母皆為 Bb，子代可能基因型比例為何？", answer: "BB:Bb:bb = 1:2:1。", steps: "父母各可產生 B 或 b 配子，組合為 BB、Bb、Bb、bb。" },
+            { question: "自然選擇為什麼不是生物主動想變就變？", answer: "變異先存在，環境篩選較適合的個體。", steps: "突變和遺傳重組造成差異；環境使某些性狀較容易存活繁殖。" },
+            { question: "抗藥性細菌如何形成？", answer: "少數具抗藥性的細菌存活並繁殖，使抗藥性比例上升。", steps: "抗生素殺死敏感細菌，抗藥性細菌留下，經多代後族群抗藥性增加。" }
+          ]),
+          "難": set([
+            { question: "若某昆蟲族群中深色個體在污染環境中較不易被捕食，長期可能發生什麼現象？", answer: "深色個體比例增加。", steps: "污染環境使深色較具保護色，存活與繁殖機會較高，相關遺傳特徵在族群中增加。" },
+            { question: "為什麼近親繁殖可能提高遺傳疾病風險？", answer: "近親帶有相同隱性有害基因的機率較高。", steps: "若父母都帶相同隱性等位基因，子代得到兩個隱性基因並發病的機率上升。" },
+            { question: "化石、比較解剖與 DNA 序列如何共同支持演化？", answer: "它們從時間、形態與分子層面提供共同祖先與親緣關係證據。", steps: "化石呈現歷史順序；同源構造顯示共同來源；DNA 越相似通常親緣越近。" }
+          ])
+        }
+      };
+
+      const fallback = {
+        "易": set([
+          { question: `請回答一題 ${unit} 的基礎辨識題。`, answer: "依基本生物概念判斷。", steps: "先辨認構造、功能或名詞，再連結到生命現象。" },
+          { question: `請判斷下列敘述與 ${unit} 有關的基本概念。`, answer: "依觀念判斷。", steps: "找出題目中的關鍵構造、流程或生物角色。" },
+          { question: `請完成一題 ${unit} 的簡單應用。`, answer: "合理答案即可。", steps: "先確認題目問的是構造、功能、流程或因果。" }
+        ]),
+        "中": set([
+          { question: `請解一題 ${unit} 的現象應用題。`, answer: "依生物流程與因果判斷。", steps: "先找輸入、過程與結果，再說明原因。" },
+          { question: `請比較兩個 ${unit} 構造或現象。`, answer: "依功能與環境差異比較。", steps: "比較功能、發生位置、目的與結果。" },
+          { question: `請說明一個 ${unit} 相關現象的原因。`, answer: "需連結構造與功能。", steps: "先指出相關構造，再解釋它如何造成觀察到的現象。" }
+        ]),
+        "難": set([
+          { question: `請分析一題較難的 ${unit} 實驗或資料題。`, answer: "需整合變因與結果。", steps: "先找操縱變因、控制變因與應變變因，再由結果推論。" },
+          { question: `請針對 ${unit} 建立一個生物系統解釋。`, answer: "需整合多個層次。", steps: "從細胞、器官、個體或生態層次連結原因與結果。" },
+          { question: `請從觀察資料推論 ${unit} 的最佳解釋。`, answer: "依證據推論。", steps: "找出資料趨勢，排除與資料不符的解釋。" }
+        ])
+      };
+
+      return banks[unit]?.[difficulty] || fallback[difficulty];
+    }
+
+    function makeQuestions() {
+      const grade = gradeSelect.value;
+      const unit = englishUnitSelect.value;
+      requestInternalGeminiQuestions(selectedStage, grade, unit, selectedDifficulty);
+      return [
+        ...biologyQuestions(selectedStage, grade, unit, selectedDifficulty),
+        ...biologyExtraQuestions(selectedStage, grade, unit, selectedDifficulty)
+      ];
+    }
+
+    function biologyExtraQuestions(stage, grade, unit, difficulty) {
+      const baseTitle = `${stage}${grade} · ${difficulty} · ${unit} · 補充題`;
+      const set = items => items.map((item, index) => ({
+        title: `${baseTitle} ${index + 1}`,
+        question: item.question,
+        answer: item.answer,
+        solution: `${difficultyNote(difficulty)}<br><br><strong>答案</strong><br>${item.answer}<br><br><strong>詳細解題過程</strong><br>${item.steps}`
+      }));
+      const banks = {
+        "動植物特徵": set([
+          { question: "植物葉片上的氣孔主要和哪一項功能有關？", answer: "氣體交換與水分散失調節。", steps: "氣孔可讓二氧化碳進入、氧氣排出，也會影響蒸散作用。" },
+          { question: "哺乳類通常用哪一種器官進行主要氣體交換？", answer: "肺。", steps: "哺乳類以肺泡進行氧氣與二氧化碳交換。" },
+          { question: "種子外殼的主要功能是什麼？", answer: "保護胚並幫助度過不利環境。", steps: "種皮可保護內部胚，讓種子等待適合環境再萌發。" }
+        ]),
+        "人體器官": set([
+          { question: "血液中的紅血球主要負責什麼功能？", answer: "運輸氧氣。", steps: "紅血球含血紅素，可與氧結合並將氧運到組織。" },
+          { question: "肝臟在人體中常見的重要功能之一是什麼？", answer: "代謝物質並協助解毒。", steps: "肝臟可處理養分、代謝藥物與毒素，也會製造膽汁。" },
+          { question: "肺泡壁薄且周圍有微血管，主要有利於什麼？", answer: "提升氣體交換效率。", steps: "薄壁與豐富微血管可縮短擴散距離，提高交換效率。" }
+        ]),
+        "生態環境": set([
+          { question: "食物網比單一食物鏈更能表示什麼？", answer: "生物之間複雜的攝食關係。", steps: "自然環境中一種生物可能有多種食物來源與天敵。" },
+          { question: "棲地破壞最直接可能造成什麼影響？", answer: "生物可利用的生存空間減少。", steps: "棲地消失會使食物、繁殖地與庇護場所下降。" },
+          { question: "資源回收與減少污染主要有助於什麼？", answer: "降低環境負擔並維持生態品質。", steps: "減少廢棄物和污染物可降低對生物與環境的壓力。" }
+        ]),
+        "生命週期": set([
+          { question: "蝴蝶完全變態的正確階段順序為何？", answer: "卵 → 幼蟲 → 蛹 → 成蟲。", steps: "完全變態昆蟲會經過卵、幼蟲、蛹、成蟲四階段。" },
+          { question: "青蛙從蝌蚪變成成蛙時，呼吸構造主要如何改變？", answer: "由鰓呼吸逐漸轉為用肺和皮膚呼吸。", steps: "蝌蚪生活在水中主要用鰓，成蛙可用肺與皮膚交換氣體。" },
+          { question: "植物開花結果和哪一項生命功能最相關？", answer: "繁殖。", steps: "花與果實和產生種子、延續後代有關。" }
+        ]),
+        "細胞構造": set([
+          { question: "核糖體的主要功能是什麼？", answer: "合成蛋白質。", steps: "核糖體依照遺傳訊息將胺基酸連接成蛋白質。" },
+          { question: "葉綠體主要出現在何種細胞中？", answer: "能行光合作用的植物細胞。", steps: "葉綠體含葉綠素，可吸收光能進行光合作用。" },
+          { question: "液泡在植物細胞中常見的重要功能是什麼？", answer: "儲存水分與物質並維持膨壓。", steps: "大液泡可儲存水、離子與其他物質，也有助支撐細胞。" }
+        ]),
+        "消化循環": set([
+          { question: "血液循環將小腸吸收的養分運送到哪裡？", answer: "全身細胞。", steps: "養分進入血液後會隨循環送到各組織細胞使用。" },
+          { question: "消化酵素的主要功能是什麼？", answer: "分解大分子食物。", steps: "酵素可把澱粉、蛋白質、脂質等分解成較小分子。" },
+          { question: "微血管壁很薄主要有利於什麼？", answer: "物質交換。", steps: "薄壁可讓氧氣、養分與廢物更容易在血液和組織間交換。" }
+        ]),
+        "遺傳演化": set([
+          { question: "基因位於細胞中的哪一種遺傳物質上？", answer: "DNA。", steps: "基因是 DNA 上具有功能的片段，可影響性狀。" },
+          { question: "有性生殖相較無性生殖，通常較能增加什麼？", answer: "子代遺傳變異。", steps: "有性生殖會混合雙親遺傳物質，使子代差異增加。" },
+          { question: "自然選擇中，被環境保留下來的是什麼個體？", answer: "較能適應環境並成功繁殖的個體。", steps: "適應度較高者較容易留下後代，使相關性狀比例上升。" }
+        ]),
+        "生態系": set([
+          { question: "生態系包含生物因子和哪一類因子？", answer: "非生物因子。", steps: "光、水、溫度、土壤等非生物因子也會影響生物生存。" },
+          { question: "食物網中若某物種消失，可能造成什麼？", answer: "影響多個族群的數量變化。", steps: "食物網彼此連結，單一物種改變可能牽動捕食者與獵物。" },
+          { question: "生態系中的物質循環通常需要哪一類生物參與？", answer: "分解者。", steps: "分解者將遺體與排遺分解，讓養分回到環境。" }
+        ]),
+        "細胞代謝": set([
+          { question: "細胞呼吸主要產生哪一種細胞可直接使用的能量分子？", answer: "ATP。", steps: "細胞呼吸分解養分並產生 ATP，供細胞活動使用。" },
+          { question: "光合作用主要把光能轉換成哪一類能量？", answer: "化學能。", steps: "植物將光能儲存在葡萄糖等有機物的化學鍵中。" },
+          { question: "酵素活性通常會受到哪一類因素影響？", answer: "溫度與酸鹼值。", steps: "過高溫度或不適合的 pH 可能改變酵素構形，影響反應速率。" }
+        ]),
+        "遺傳分子": set([
+          { question: "DNA 雙股之間的配對規則中，A 通常和哪一個鹼基配對？", answer: "T。", steps: "DNA 中 A 與 T 配對，C 與 G 配對。" },
+          { question: "蛋白質合成時，mRNA 主要提供什麼？", answer: "胺基酸排列的訊息。", steps: "mRNA 的密碼子會決定蛋白質中胺基酸的排列順序。" },
+          { question: "突變可能造成什麼結果？", answer: "遺傳訊息改變。", steps: "突變是 DNA 序列改變，可能影響蛋白質與性狀。" }
+        ]),
+        "人體恆定": set([
+          { question: "人體流汗主要有助於維持哪一項恆定？", answer: "體溫恆定。", steps: "汗液蒸發會帶走熱量，幫助身體降溫。" },
+          { question: "血糖過高時，胰島素通常會造成什麼效果？", answer: "促進血糖下降。", steps: "胰島素促進葡萄糖進入細胞或儲存，使血糖降低。" },
+          { question: "腎臟調節水分與鹽分主要有助於維持什麼？", answer: "體內環境穩定。", steps: "腎臟調整尿液成分，維持水分、離子和廢物濃度平衡。" }
+        ]),
+        "生物多樣性": set([
+          { question: "物種多樣性高通常代表什麼？", answer: "同一區域內物種種類較多。", steps: "物種數越多，代表群落組成越豐富。" },
+          { question: "保育棲地對生物多樣性有何重要性？", answer: "提供生物生存與繁殖空間。", steps: "棲地是生物取得食物、躲避天敵與繁殖的基礎。" },
+          { question: "基因多樣性高通常對族群有何好處？", answer: "提高面對環境變化的適應潛力。", steps: "遺傳差異越多，族群中可能存在較能適應新環境的個體。" }
+        ])
+      };
+      return banks[unit] || set([
+        { question: `${unit} 中，最重要的生物概念通常應如何判斷？`, answer: "依構造、功能與因果關係判斷。", steps: "先找題目中的構造或流程，再判斷功能與結果。" },
+        { question: `${unit} 題目中，若要比較兩個現象，應優先看什麼？`, answer: "功能、位置、條件與結果。", steps: "生物比較題通常要從條件與因果差異下手。" },
+        { question: `${unit} 的應用題若出現資料，應先分析什麼？`, answer: "變因與資料趨勢。", steps: "先看操縱變因、應變變因，再依結果推論。" }
+      ]);
+    }
+
+    function normalizeQuizAnswer(value) {
+      return String(value || "").toLowerCase().replace(/[。．.，,\s]/g, "").trim();
+    }
+
+    function escapeQuizText(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function shuffledItems(items) {
+      return [...items].sort(() => Math.random() - 0.5);
+    }
+
+    function uniqueQuestionKey(item) {
+      return normalizeQuizAnswer(item.question);
+    }
+
+    function makeQuizVariant(item, variantIndex) {
+      const stems = [
+        "延伸題：請依同一生物概念判斷，",
+        "變化題：請換一個觀察角度思考，",
+        "應用題：請依同一生命流程選出答案，"
+      ];
+      return {
+        ...item,
+        title: `${item.title} · 延伸 ${variantIndex}`,
+        question: `${stems[variantIndex % stems.length]}${item.question}`
+      };
+    }
+
+    function expandQuizItems(items) {
+      const pool = shuffledItems(items);
+      const picked = [];
+      const seen = new Set();
+      pool.forEach(item => {
+        const key = uniqueQuestionKey(item);
+        if (seen.has(key) || picked.length >= 5) return;
+        seen.add(key);
+        picked.push(item);
+      });
+      let variantIndex = 1;
+      while (picked.length < 5 && pool.length) {
+        const variant = makeQuizVariant(pool[(variantIndex - 1) % pool.length], variantIndex);
+        const key = uniqueQuestionKey(variant);
+        if (!seen.has(key)) {
+          seen.add(key);
+          picked.push(variant);
+        }
+        variantIndex += 1;
+      }
+      return picked.slice(0, 5).map((source, index) => ({ ...source, title: `${source.title} · 第 ${index + 1} 題` }));
+    }
+
+    function parseInlineChoices(question) {
+      return [...String(question || "").matchAll(/[（(]([A-D])[）)]\s*([^（(]+)/g)]
+        .map(match => `${match[1]}. ${match[2].trim()}`);
+    }
+
+    function cleanChoiceText(value) {
+      return String(value || "")
+        .replace(/^[A-D][.、\s]+/i, "")
+        .trim();
+    }
+
+    function uniqueQuizChoices(choices) {
+      const seen = new Set();
+      return choices.filter(choice => {
+        const key = normalizeQuizAnswer(cleanChoiceText(choice));
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function matchedBiologyChoices(item, correct) {
+      const question = String(item.question || "");
+      const exactChoices = {
+        "吸收水分和礦物質，並固定植物體。": ["吸收水分和礦物質，並固定植物體。", "製造花粉並吸引昆蟲", "進行氣體交換並推動血液", "儲存遺傳物質並控制細胞活動"],
+        "鰓": ["鰓", "肺", "氣孔", "皮膚角質層"],
+        "減少水分散失並保護植物。": ["減少水分散失並保護植物。", "增加葉面積以快速散水", "幫助植物在水中呼吸", "讓植物主動捕食昆蟲"],
+        "都是運動構造，但適應的環境不同。": ["都是運動構造，但適應的環境不同。", "兩者完全相同且構造無差異", "鳥翼用於水中游動，魚鰭用於飛行", "兩者都主要用來吸收養分"],
+        "吸引昆蟲或其他動物協助傳粉。": ["吸引昆蟲或其他動物協助傳粉。", "降低所有細胞呼吸速率", "讓根吸收更多礦物質", "防止葉綠體製造養分"],
+        "可能有厚角質層、針狀葉、發達根系或儲水莖。": ["可能有厚角質層、針狀葉、發達根系或儲水莖。", "葉片薄大且氣孔永遠全開", "完全沒有根系也不儲水", "只靠動物細胞膜保護"],
+        "不能。": ["不能。", "一定能。", "只要都會飛就代表同種。", "親緣只能靠顏色判斷。"],
+        "讓葉片獲得更多光照，提高光合作用效率。": ["讓葉片獲得更多光照，提高光合作用效率。", "讓根離開土壤吸收氧氣", "降低葉綠體數量", "讓花粉停止傳播"],
+        "進行氣體交換。": ["進行氣體交換。", "推動血液循環。", "過濾血液形成尿液。", "儲存遺傳訊息。"],
+        "推動血液循環。": ["推動血液循環。", "進行氣體交換。", "製造膽汁。", "吸收水分和礦物質。"],
+        "初步消化蛋白質並攪拌食物。": ["初步消化蛋白質並攪拌食物。", "負責主要氣體交換", "控制物質進出細胞", "製造遺傳物質"],
+        "肌肉需要更多氧氣與養分，也要排出更多二氧化碳。": ["肌肉需要更多氧氣與養分，也要排出更多二氧化碳。", "肌肉不需要能量，因此呼吸變慢", "血液停止運送氧氣", "肺只負責消化蛋白質"],
+        "小腸很長，且有絨毛增加表面積。": ["小腸很長，且有絨毛增加表面積。", "小腸沒有表面積且不接觸養分", "小腸主要負責打氣進肺", "小腸只儲存 DNA"],
+        "過濾血液、排出代謝廢物並調節水分與鹽分。": ["過濾血液、排出代謝廢物並調節水分與鹽分。", "把氧氣直接轉成葡萄糖", "讓所有骨骼收縮", "製造花粉並吸引昆蟲"],
+        "血液攜氧能力下降，細胞呼吸產生能量減少。": ["血液攜氧能力下降，細胞呼吸產生能量減少。", "血糖一定快速下降到零", "小腸絨毛停止增加表面積", "葉綠體無法行光合作用"],
+        "血糖容易偏高。": ["血糖容易偏高。", "血糖一定完全消失", "血液無法攜帶氧氣", "尿液無法形成"],
+        "消化提供葡萄糖，呼吸提供氧氣，循環運送兩者到細胞進行細胞呼吸。": ["消化提供葡萄糖，呼吸提供氧氣，循環運送兩者到細胞進行細胞呼吸。", "只有呼吸系統單獨製造所有養分", "循環系統只負責傳粉", "細胞不需要氧氣也不需要葡萄糖"],
+        "生產者。": ["生產者。", "初級消費者。", "分解者。", "頂級掠食者。"],
+        "草 → 兔 → 狐狸": ["草 → 兔 → 狐狸", "狐狸 → 兔 → 草", "兔 → 草 → 狐狸", "草 → 狐狸 → 兔"],
+        "分解生物遺體和排遺，使養分回到環境。": ["分解生物遺體和排遺，使養分回到環境。", "只負責捕食頂級掠食者", "讓所有能量百分之百傳遞", "製造紅血球攜帶氧氣"],
+        "可能下降。": ["可能下降。", "一定立刻增加到無限多", "完全不可能改變", "變成生產者"],
+        "可能缺乏天敵，競爭或捕食本土生物。": ["可能缺乏天敵，競爭或捕食本土生物。", "一定能提高所有本土物種數量", "只會增加水中氧氣", "與食物鏈完全無關"],
+        "生物會消耗能量進行生命活動，且部分能量以熱散失。": ["生物會消耗能量進行生命活動，且部分能量以熱散失。", "能量每一階都會完整保留", "分解者會創造無限能量", "高階消費者能量最多"],
+        "藻類死亡後被分解者分解，消耗水中氧氣，造成魚缺氧。": ["藻類死亡後被分解者分解，消耗水中氧氣，造成魚缺氧。", "藻類死亡後會直接製造更多氧氣", "魚類因為沒有細胞核而死亡", "狐狸族群增加造成魚死亡"],
+        "可能造成獵物暴增，進一步影響植物與其他物種。": ["可能造成獵物暴增，進一步影響植物與其他物種。", "所有族群一定完全不變", "植物會立刻變成掠食者", "只影響單一個體不影響族群"],
+        "物種功能較多元，部分物種減少時其他物種可能補位。": ["物種功能較多元，部分物種減少時其他物種可能補位。", "物種越少食物網越複雜", "只有一種物種最穩定", "多樣性與穩定度完全無關"],
+        "控制物質進出細胞。": ["控制物質進出細胞。", "儲存遺傳物質並控制細胞活動。", "進行光合作用。", "提供植物細胞支持與保護。"],
+        "儲存遺傳物質並控制細胞活動。": ["儲存遺傳物質並控制細胞活動。", "控制物質進出細胞。", "進行細胞呼吸產生 ATP。", "分解生物遺體。"],
+        "能量工廠。": ["能量工廠。", "遺傳資料庫。", "細胞外骨架。", "傳粉構造。"],
+        "細胞壁、葉綠體與較大的液泡。": ["細胞壁、葉綠體與較大的液泡。", "細胞膜、細胞核與粒線體。", "紅血球、肺泡與腎元。", "鰓、翅膀與消化道。"],
+        "能量供應。": ["能量供應。", "花粉傳播。", "魚類呼吸。", "植物根系固定。"],
+        "紅血球主要功能靠血紅素運氧，不需進行複雜的細胞控制。": ["紅血球主要功能靠血紅素運氧，不需進行複雜的細胞控制。", "紅血球沒有血紅素也能運氧", "紅血球用葉綠體製造氧氣", "紅血球主要負責傳粉"],
+        "粗糙內質網合成蛋白質，高基氏體修飾、分類與運輸蛋白質。": ["粗糙內質網合成蛋白質，高基氏體修飾、分類與運輸蛋白質。", "細胞壁負責合成所有分泌蛋白", "葉綠體修飾並包裝分泌蛋白", "鰓負責運輸蛋白質到細胞外"],
+        "水分外流，細胞質膜可能與細胞壁分離，形成質離現象。": ["水分外流，細胞質膜可能與細胞壁分離，形成質離現象。", "水分大量流入，細胞一定爆裂", "葉綠體變成粒線體", "細胞核直接消失且不影響細胞"],
+        "細胞膜控制物質進出；細胞壁提供支持與保護。": ["細胞膜控制物質進出；細胞壁提供支持與保護。", "細胞膜只提供硬度；細胞壁只儲存 DNA", "兩者功能完全相同", "細胞壁控制所有物質進出且沒有支持功能"],
+        "儲存遺傳訊息。": ["儲存遺傳訊息。", "進行氣體交換。", "推動血液循環。", "分解生物遺體。"],
+        "因為子代分別從父母各得到一半遺傳物質。": ["因為子代分別從父母各得到一半遺傳物質。", "因為子代只得到母親的遺傳物質", "因為性狀完全不受遺傳影響", "因為所有子代都會完全相同"],
+        "族群的遺傳特徵隨世代改變。": ["族群的遺傳特徵隨世代改變。", "個體想改變就能立刻改變基因", "生物停止繁殖的過程", "細胞膜控制物質進出的能力"],
+        "BB:Bb:bb = 1:2:1。": ["BB:Bb:bb = 1:2:1。", "BB:Bb:bb = 1:1:1。", "BB:Bb:bb = 2:1:1。", "所有子代一定都是 bb。"],
+        "變異先存在，環境篩選較適合的個體。": ["變異先存在，環境篩選較適合的個體。", "生物能依意願立即改變 DNA", "環境會讓所有個體變得完全一樣", "自然選擇只發生在單一細胞膜上"],
+        "少數具抗藥性的細菌存活並繁殖，使抗藥性比例上升。": ["少數具抗藥性的細菌存活並繁殖，使抗藥性比例上升。", "抗生素讓所有細菌立刻變健康", "細菌不會繁殖也不會演化", "抗藥性與環境篩選無關"],
+        "深色個體比例增加。": ["深色個體比例增加。", "深色個體一定全部消失", "昆蟲變成植物細胞", "族群遺傳特徵不可能改變"],
+        "近親帶有相同隱性有害基因的機率較高。": ["近親帶有相同隱性有害基因的機率較高。", "近親繁殖一定消除所有隱性基因", "遺傳疾病只由食物鏈決定", "DNA 不會傳給子代"],
+        "它們從時間、形態與分子層面提供共同祖先與親緣關係證據。": ["它們從時間、形態與分子層面提供共同祖先與親緣關係證據。", "三者都只能證明天氣變化", "化石和 DNA 與演化完全無關", "只看外表顏色就能取代所有證據"]
+      };
+      const exactKey = Object.keys(exactChoices).find(key => normalizeQuizAnswer(correct) === normalizeQuizAnswer(key));
+      if (exactKey) return exactChoices[exactKey];
+      if (/細胞|膜|核|粒線體|葉綠體|細胞壁/.test(question)) return [correct, "細胞膜、細胞核與粒線體。", "只描述外觀但沒有功能差異", "與細胞構造無關的器官功能"];
+      if (/生態|食物鏈|族群|外來種|分解者|掠食/.test(question)) return [correct, "能量在每一階層完整保留", "只影響單一個體，不影響族群", "與食物網和環境互動無關"];
+      if (/肺|心臟|胃|小腸|腎臟|血球|胰島素/.test(question)) return [correct, "只負責儲存遺傳訊息", "進行光合作用製造養分", "與人體器官功能相反"];
+      if (/DNA|遺傳|演化|自然選擇|抗藥性|基因/.test(question)) return [correct, "個體可依意願立刻改變基因", "性狀完全不會遺傳", "環境不會影響族群比例"];
+      return [correct, "不是正確生物概念", "只描述現象但沒有正確原因", "忽略關鍵構造或生命流程"];
+    }
+
+    function buildQuizChoices(item, index) {
+      const inlineChoices = parseInlineChoices(item.question);
+      if (inlineChoices.length >= 2) {
+        const choices = uniqueQuizChoices(inlineChoices);
+        while (choices.length < 4) choices.push(`${String.fromCharCode(65 + choices.length)}. 以上皆非`);
+        return choices.slice(0, 4);
+      }
+      const correct = item.answer || "正確答案";
+      const choices = uniqueQuizChoices(matchedBiologyChoices(item, correct)).slice(0, 4);
+      const shift = index % choices.length;
+      return choices.slice(shift).concat(choices.slice(0, shift));
+    }
+
+    function normalizeInlineAnswer(item) {
+      const inlineChoices = parseInlineChoices(item.question);
+      if (inlineChoices.length < 2) return item;
+      const matched = inlineChoices.find(choice => normalizeQuizAnswer(choice) === normalizeQuizAnswer(item.answer))
+        || inlineChoices.find(choice => normalizeQuizAnswer(item.answer).startsWith(normalizeQuizAnswer(choice[0])));
+      return matched ? { ...item, answer: matched } : item;
+    }
+
+    function renderQuestions() {
+      if (!consumeCredit()) return;
+      const quizItems = expandQuizItems(makeQuestions()).map(normalizeInlineAnswer);
+      questionList.innerHTML = `
+        <div class="card" id="scoreCard" style="display:none;"></div>
+        ${quizItems.map((item, index) => `
+          <article class="question-card" data-answer="${escapeQuizText(item.answer || "正確答案")}">
+            <strong>${index + 1}. ${item.title}</strong>
+            <p>${item.question}</p>
+            <div class="quiz-options" style="display:grid;gap:8px;margin-top:10px;">
+              ${buildQuizChoices(item, index).map(choice => `
+                <label class="secondary" style="display:flex;align-items:center;gap:8px;padding:10px;color:var(--ink);">
+                  <input class="quiz-answer" type="radio" name="quiz-${index}" value="${escapeQuizText(choice)}" style="width:auto;min-height:auto;">
+                  <span>${escapeQuizText(choice)}</span>
+                </label>
+              `).join("")}
+            </div>
+            <div class="solution">${item.solution}</div>
+          </article>
+        `).join("")}
+        <button class="primary" id="submitQuiz" type="button" style="width:100%;margin:4px 0 12px;">提交答案並計分</button>
+      `;
+      document.querySelector("#submitQuiz").addEventListener("click", () => {
+        const cards = [...questionList.querySelectorAll(".question-card")];
+        const selectedAnswers = cards.map((card, index) => card.querySelector(`input[name="quiz-${index}"]:checked`));
+        if (selectedAnswers.some(input => !input)) {
+          appStatus.textContent = "請先答完所有 5 題，再提交計分。";
+          return;
+        }
+        let score = 0;
+        selectedAnswers.forEach(input => {
+          const card = input.closest(".question-card");
+          const expected = card.dataset.answer;
+          const isCorrect = normalizeQuizAnswer(input.value) === normalizeQuizAnswer(expected);
+          card.classList.toggle("correct", isCorrect);
+          card.classList.toggle("incorrect", !isCorrect);
+          if (isCorrect) score += 20;
+        });
+        questionList.querySelector("#scoreCard").style.display = "grid";
+        const tutorHint = score < 60 ? `<p class="subline">分數低於 60 分，建議點選補習班尋求專業教師協助。</p><button class="secondary" id="scoreTutorButton" type="button">前往補習班</button>` : "";
+        questionList.querySelector("#scoreCard").innerHTML = `<h2>總分：${score} / 100</h2><p class="subline">已完成 5 題作答，詳解已解鎖。</p>${tutorHint}`;
+        questionList.querySelector("#scoreTutorButton")?.addEventListener("click", () => showPage("tutoringPage"));
+        questionList.querySelectorAll(".solution").forEach(solution => solution.classList.add("show"));
+        questionList.querySelectorAll(".quiz-answer").forEach(input => input.disabled = true);
+        document.querySelector("#submitQuiz").disabled = true;
+        appStatus.textContent = `已完成計分：${score} / 100 · 詳解已解鎖`;
+      });
+      appStatus.textContent = `已產生 ${selectedStage}${gradeSelect.value} ${englishUnitSelect.value} ${selectedDifficulty} 生物題庫 5 題 · 每題 20 分`;
+    }
+
+    function solveUploadedProblem() {
+      if (!consumeCredit()) return;
+      const text = manualQuestion.value.trim() || "請說明粒線體在細胞中的功能。";
+      solveResult.innerHTML = `
+        <h2>詳解結果</h2>
+        <p><strong>題目：</strong>${text}</p>
+        <p><strong>答案判斷：</strong>先判斷題目屬於細胞、人體、生態、遺傳、演化或實驗分析類型。</p>
+        <p><strong>解析步驟：</strong>找出生物構造、功能、流程與因果關係，再用觀念連結答案。</p>
+        <p><strong>範例解析：</strong>粒線體是細胞呼吸的主要場所，可將養分中的能量轉換成 ATP，供細胞活動使用。</p>
+      `;
+      appStatus.textContent = `已產出生物詳解 · 剩餘 ${credits} 點`;
+    }
+
+    function syncProfileFields() {
+      profileName.value = studentName.value.trim() || "學生";
+      profileEmail.value = studentEmail.value.trim();
+      profilePhone.value = studentPhone.value.trim();
+      profileCity.value = studentCity.value.trim();
+      profileDistrict.value = studentDistrict.value.trim();
+    }
+
+    function userLocation() {
+      return {
+        city: (profileCity.value || studentCity.value || "").trim(),
+        district: (profileDistrict.value || studentDistrict.value || "").trim()
+      };
+    }
+
+    function sortTutorSchools() {
+      const { city, district } = userLocation();
+      const container = document.querySelector("#tutoringPage .card");
+      schoolCards
+        .map((card, index) => ({ card, index }))
+        .sort((a, b) => {
+          const paid = item => item.card.dataset.paid === "true" ? 100 : 0;
+          const score = item => paid(item) + (item.card.dataset.city === city ? 2 : 0) + (item.card.dataset.district === district ? 1 : 0);
+          return score(b) - score(a) || a.index - b.index;
+        })
+        .forEach(item => container.appendChild(item.card));
+      applyTutorFilters();
+    }
+
+    function populateTutorFilters() {
+      const currentCity = tutorCityFilter.value;
+      const currentDistrict = tutorDistrictFilter.value;
+      const cities = [...new Set(schoolCards.map(card => card.dataset.city))];
+      tutorCityFilter.innerHTML = `<option value="">全部縣市</option>${cities.map(city => `<option value="${city}">${city}</option>`).join("")}`;
+      tutorCityFilter.value = cities.includes(currentCity) ? currentCity : "";
+      const districts = [...new Set(schoolCards
+        .filter(card => !tutorCityFilter.value || card.dataset.city === tutorCityFilter.value)
+        .map(card => card.dataset.district))];
+      tutorDistrictFilter.innerHTML = `<option value="">全部區域</option>${districts.map(district => `<option value="${district}">${district}</option>`).join("")}`;
+      tutorDistrictFilter.value = districts.includes(currentDistrict) ? currentDistrict : "";
+    }
+
+    function applyTutorFilters() {
+      const city = tutorCityFilter.value;
+      const district = tutorDistrictFilter.value;
+      schoolCards.forEach(card => {
+        const visible = (!city || card.dataset.city === city) && (!district || card.dataset.district === district);
+        card.style.display = visible ? "" : "none";
+      });
+    }
+
+    function applyTheme() {
+      screen.classList.remove("theme-green", "theme-light");
+      if (themeSelect.value !== "dark") screen.classList.add(`theme-${themeSelect.value}`);
+    }
+
+    function applyFontSize() {
+      screen.classList.remove("font-small", "font-large");
+      if (fontSizeSelect.value !== "normal") screen.classList.add(`font-${fontSizeSelect.value}`);
+    }
+
+    function applyLanguage() {
+      const lang = languageSelect.value;
+      const copy = {
+        zh: { nav: ["題庫", "詳解", "補習班", "升級", "設定"], titles: { practicePage: "生物題庫", solverPage: "生物詳解", tutoringPage: "補習班", plansPage: "升級方案", paymentPage: "信用卡付費", settingsPage: "設定", profilePage: "使用者資料", loginPage: "生物題庫" }, settings: "設定", theme: "App 背景", font: "字體大小", language: "語言", support: "聯繫客服", supportText: "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。", email: "Email：support@app-service.example" },
+        en: { nav: ["Quiz", "Solution", "Tutors", "Upgrade", "Settings"], titles: { practicePage: "Biology Quiz Bank", solverPage: "Biology Solution", tutoringPage: "Tutoring Centers", plansPage: "Plans", paymentPage: "Credit Card Payment", settingsPage: "Settings", profilePage: "Profile", loginPage: "Biology Bank" }, settings: "Settings", theme: "App Background", font: "Font Size", language: "Language", support: "Contact Support", supportText: "For issue reports or partnership inquiries, contact us by Email.", email: "Email: support@app-service.example" },
+        ja: { nav: ["問題", "解説", "塾", "プラン", "設定"], titles: { practicePage: "生物問題集", solverPage: "生物解説", tutoringPage: "塾", plansPage: "プラン", paymentPage: "カード決済", settingsPage: "設定", profilePage: "プロフィール", loginPage: "生物問題集" }, settings: "設定", theme: "App 背景", font: "文字サイズ", language: "言語", support: "サポート連絡", supportText: "問題報告、提携相談は Email でお問い合わせください。", email: "Email：support@app-service.example" }
+      }[lang];
+      Object.assign(pageTitles, copy.titles);
+      navButtons.forEach((button, index) => { button.textContent = copy.nav[index]; });
+      const activePage = pages.find(page => page.classList.contains("active"));
+      title.textContent = pageTitles[activePage?.id || "practicePage"];
+      const settingsLabels = document.querySelectorAll("#settingsPage .card:first-child label");
+      document.querySelector("#settingsPage .card:first-child h2").textContent = copy.settings;
+      settingsLabels[0].childNodes[0].textContent = copy.theme;
+      settingsLabels[1].childNodes[0].textContent = copy.font;
+      settingsLabels[2].childNodes[0].textContent = copy.language;
+      const supportCard = document.querySelector("#settingsPage .card:nth-of-type(2)");
+      supportCard.querySelector("h2").textContent = copy.support;
+      supportCard.querySelectorAll(".subline")[0].textContent = copy.supportText;
+      supportCard.querySelectorAll(".subline")[1].textContent = copy.email;
+    }
+
+    navButtons.forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
+    pointsButton.addEventListener("click", () => showPage("plansPage"));
+    creditAlertUpgrade.addEventListener("click", () => showPage("plansPage"));
+    userNameButton.addEventListener("click", () => {
+      syncProfileFields();
+      showPage("profilePage");
+    });
+    saveProfile.addEventListener("click", () => {
+      studentName.value = profileName.value.trim() || "學生";
+      studentEmail.value = profileEmail.value.trim();
+      studentCity.value = profileCity.value.trim();
+      studentDistrict.value = profileDistrict.value.trim();
+      sortTutorSchools();
+      userNameButton.textContent = studentName.value;
+      appStatus.textContent = "使用者資料已更新。";
+      showPage("practicePage");
+    });
+    sendSms.addEventListener("click", () => {
+      smsToken = String(Math.floor(1000 + Math.random() * 9000));
+      smsHint.textContent = `已發送 4 位數簡訊驗證碼。原型示範碼：${smsToken}`;
+    });
+    toggleTermsButton.addEventListener("click", () => {
+      termsOpened = true;
+      termsPanel.classList.toggle("show");
+      toggleTermsButton.textContent = termsPanel.classList.contains("show")
+        ? "收合使用條款、隱私權政策與免責聲明"
+        : "展開使用條款、隱私權政策與免責聲明";
+    });
+    finishLogin.addEventListener("click", () => {
+      if (!smsToken) {
+        smsHint.textContent = "請先發送簡訊驗證碼。";
+        return;
+      }
+      if (smsCode.value.trim() !== smsToken) {
+        smsHint.textContent = "簡訊碼輸入錯誤。";
+        return;
+      }
+      if (!studentCity.value.trim() || !studentDistrict.value.trim()) {
+        smsHint.textContent = "請填入地址縣市與區域後再完成註冊。";
+        return;
+      }
+      if (!termsOpened) {
+        smsHint.textContent = "請先展開條文閱讀後再完成註冊。";
+        return;
+      }
+      if (!agreeTerms.checked) {
+        smsHint.textContent = "請勾選我已打開並同意使用條款、隱私權政策與免責聲明。";
+        return;
+      }
+      loggedIn = true;
+      userNameButton.textContent = studentName.value.trim() || "學生";
+      syncProfileFields();
+      sortTutorSchools();
+      appStatus.textContent = "註冊成功，可以開始產生生物題庫。";
+      showPage("practicePage");
+    });
+
+    schoolStage.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedStage = button.dataset.stage;
+        schoolStage.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button));
+        renderGrades();
+        renderUnits();
+      });
+    });
+
+    difficultyLevel.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedDifficulty = button.dataset.difficulty;
+        difficultyLevel.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button));
+      });
+    });
+
+    generateQuestions.addEventListener("click", renderQuestions);
+    solveProblem.addEventListener("click", solveUploadedProblem);
+    document.querySelector("#goUpgrade").addEventListener("click", () => showPage("plansPage"));
+    schoolCards.forEach(card => {
+      card.addEventListener("click", () => {
+        selectedTutor = { school: card.dataset.school, email: card.dataset.email, phone: card.dataset.phone };
+        selectedTutorTitle.textContent = `補習班洽談：${selectedTutor.school}`;
+        tutorContactName.value = profileName.value || studentName.value;
+        tutorContactPhone.value = profilePhone.value || studentPhone.value;
+        tutorContactResult.textContent = "";
+        tutorContactForm.classList.add("show");
+        tutorContactForm.scrollIntoView({ behavior: "smooth", block: "end" });
+      });
+    });
+    sendTutorContact.addEventListener("click", () => {
+      if (!selectedTutor) return;
+      tutorContactResult.textContent = `感謝您的留言，已自動寄送 Email 並簡訊通知 ${selectedTutor.school}。Email：${selectedTutor.email}｜SMS：${selectedTutor.phone}`;
+    });
+    themeSelect.addEventListener("change", applyTheme);
+    fontSizeSelect.addEventListener("change", applyFontSize);
+    languageSelect.addEventListener("change", applyLanguage);
+    tutorCityFilter.addEventListener("change", () => {
+      populateTutorFilters();
+      applyTutorFilters();
+    });
+    tutorDistrictFilter.addEventListener("change", applyTutorFilters);
+
+    planButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        selectedPlan = button;
+        planButtons.forEach(item => item.classList.toggle("active", item === button));
+        paymentPlan.textContent = `已選擇 ${button.dataset.plan} ${button.dataset.price}，每月 ${button.dataset.points} 次。`;
+      });
+    });
+    confirmPlan.addEventListener("click", () => {
+      if (!selectedPlan) {
+        appStatus.textContent = "請先選擇升級方案。";
+        return;
+      }
+      showPage("paymentPage");
+    });
+    payNow.addEventListener("click", () => {
+      if (!selectedPlan) return;
+      currentPlan = `${selectedPlan.dataset.plan} ${selectedPlan.dataset.price}`;
+      credits += Number(selectedPlan.dataset.points);
+      updateCredits();
+      appStatus.textContent = `付款完成，已升級 ${selectedPlan.dataset.plan}。`;
+      showPage("practicePage");
+    });
+
+    renderGrades();
+    renderUnits();
+    populateTutorFilters();
+    sortTutorSchools();
+    updateCredits();
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

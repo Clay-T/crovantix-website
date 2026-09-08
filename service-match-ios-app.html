@@ -1,0 +1,3104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>需求媒合 iOS App</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071017;
+      --panel: #101b26;
+      --panel-2: #172635;
+      --ink: #f7fbff;
+      --muted: #a8b8c8;
+      --line: rgba(255,255,255,.14);
+      --cyan: #5bd8ff;
+      --green: #7df2b4;
+      --amber: #ffd166;
+      --pink: #ff8aa7;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(91,216,255,.22), transparent 34%),
+        radial-gradient(circle at 84% 8%, rgba(125,242,180,.16), transparent 32%),
+        linear-gradient(145deg, #061018, #122131 58%, #071017);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+    }
+
+    body[data-theme="light"] {
+      --bg: #edf7fb;
+      --panel: #ffffff;
+      --panel-2: #e8f4fa;
+      --ink: #102033;
+      --muted: #526373;
+      --line: rgba(16,32,51,.14);
+      background: linear-gradient(145deg, #e7f7ff, #f7fbff);
+    }
+
+    body[data-theme="warm"] {
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255,138,167,.24), transparent 34%),
+        radial-gradient(circle at 84% 8%, rgba(255,209,102,.18), transparent 32%),
+        linear-gradient(145deg, #160d12, #241827 58%, #100c12);
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .phone {
+      width: min(430px, 100%);
+      height: min(900px, calc(100vh - 28px));
+      min-height: 760px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 34px;
+      padding: 12px;
+      background: #05080d;
+      box-shadow: 0 28px 90px rgba(0,0,0,.5);
+    }
+
+    .screen {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(16,27,38,.98), rgba(7,16,23,.98));
+    }
+
+    .island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 112px;
+      height: 28px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #03050a;
+      z-index: 4;
+    }
+
+    .status {
+      height: 46px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 22px 8px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .app {
+      height: calc(100% - 46px);
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 76px;
+      overflow: hidden;
+    }
+
+    .app.font-small { font-size: 14px; }
+    .app.font-large { font-size: 18px; }
+    .app.font-small h1 { font-size: 25px; }
+    .app.font-large h1 { font-size: 31px; }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0 12px;
+    }
+
+    .pill {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 13px;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .pill.primary {
+      border: 0;
+      color: #061018;
+      background: linear-gradient(135deg, #d9f8ff, var(--cyan));
+    }
+
+    #userButton { margin-left: auto; }
+
+    .pill.shop-cta {
+      min-height: 42px;
+      padding: 0 15px;
+      border: 2px solid rgba(255, 209, 102, .9);
+      color: #061018;
+      background: linear-gradient(135deg, #fff1a8, var(--amber) 42%, var(--cyan));
+      box-shadow: 0 0 0 4px rgba(255, 209, 102, .14), 0 10px 26px rgba(91, 216, 255, .2);
+    }
+
+    .pill.has-shop-alert {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      min-height: 34px;
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .page-history {
+      display: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin: 0 0 12px;
+    }
+
+    .page-history.show { display: grid; }
+
+    .page-history button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .page-history button:disabled {
+      opacity: .42;
+      cursor: default;
+    }
+
+    .content {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .page { display: none; }
+    .page.active { display: grid; gap: 12px; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(16,27,38,.9);
+    }
+
+    body[data-theme="light"] .card { background: rgba(255,255,255,.92); }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .label-row strong {
+      font-size: 19px;
+      letter-spacing: 0;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      outline: none;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    input, select {
+      min-height: 46px;
+    }
+
+    textarea {
+      min-height: 108px;
+      resize: none;
+      line-height: 1.45;
+    }
+
+    select,
+    select option {
+      appearance: auto;
+      color: #061018;
+      background: #fff;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .sms-row {
+      display: grid;
+      grid-template-columns: 1fr 128px;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .terms {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .2s ease;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .terms.open {
+      max-height: 260px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 8px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .check-row input { width: 16px; height: 16px; padding: 0; }
+
+    .primary-button,
+    .secondary-button {
+      border: 0;
+      border-radius: 8px;
+      min-height: 46px;
+      padding: 10px 14px;
+      color: #061018;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      font-weight: 950;
+      font-size: 14px;
+      line-height: 1.2;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .secondary-button {
+      color: var(--ink);
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--line);
+    }
+
+    .primary-button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .sms-row .secondary-button {
+      height: 46px;
+      padding: 0 10px;
+      align-self: end;
+      white-space: nowrap;
+    }
+
+    .photo-box .secondary-button {
+      font-size: 14px;
+    }
+
+    .accepted-button {
+      color: #061018;
+      background: linear-gradient(135deg, var(--green), var(--amber));
+      border-color: transparent;
+    }
+
+    .photo-box {
+      display: grid;
+      gap: 10px;
+      border: 1px dashed rgba(91,216,255,.42);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(91,216,255,.05);
+    }
+
+    .preview {
+      display: grid;
+      place-items: center;
+      min-height: 170px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .preview img,
+    .preview video {
+      width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .photo-modal-image {
+      width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.06);
+      display: block;
+    }
+
+    .case-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .case-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(255,255,255,.05);
+      display: grid;
+      gap: 8px;
+    }
+
+    .case-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      font-weight: 950;
+    }
+
+    .case-actions {
+      display: grid;
+      justify-items: end;
+      gap: 6px;
+    }
+
+    .icon-button {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background: rgba(91,216,255,.12);
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .icon-button.locked {
+      opacity: .45;
+      filter: grayscale(1);
+    }
+
+    .shop-rating {
+      color: var(--amber);
+      font-weight: 950;
+      letter-spacing: 1px;
+    }
+
+    .shop-detail {
+      display: none;
+    }
+
+    .shop-detail.show {
+      display: grid;
+      gap: 10px;
+    }
+
+    .store-alert {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      top: 52px;
+      display: none;
+      border: 1px solid rgba(125,242,180,.45);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: #061018;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      font-size: 13px;
+      font-weight: 950;
+      text-align: left;
+      z-index: 9;
+      box-shadow: 0 18px 44px rgba(0,0,0,.32);
+      cursor: pointer;
+    }
+
+    .store-alert.show { display: block; }
+
+    .tag {
+      width: fit-content;
+      border-radius: 999px;
+      padding: 4px 9px;
+      color: #061018;
+      background: var(--amber);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .result {
+      display: none;
+      white-space: pre-line;
+      border: 1px solid rgba(91,216,255,.35);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(91,216,255,.08);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .result.show { display: block; }
+
+    .accordion {
+      display: grid;
+      gap: 10px;
+    }
+
+    .accordion-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(255,255,255,.04);
+    }
+
+    .accordion-toggle {
+      width: 100%;
+      border: 0;
+      padding: 13px 12px;
+      color: var(--ink);
+      background: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .accordion-toggle .plus {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #061018;
+      background: var(--cyan);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .accordion-actions {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .unread-badge {
+      min-width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      display: none;
+      place-items: center;
+      color: #fff;
+      background: #ff3b30;
+      font-weight: 950;
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .unread-badge.show { display: grid; }
+
+    .pill .unread-badge {
+      display: grid;
+      flex: 0 0 auto;
+    }
+
+    .accordion-body {
+      display: none;
+      padding: 0 12px 12px;
+    }
+
+    .accordion-item.open .accordion-body { display: grid; gap: 10px; }
+    .accordion-item.open .plus { transform: rotate(45deg); }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      color: var(--muted);
+      background: rgba(255,255,255,.05);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .history-item b {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .history-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .tabbar {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 16px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 4px;
+      min-height: 64px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 8px;
+      background: rgba(5,8,13,.92);
+      backdrop-filter: blur(16px);
+      z-index: 5;
+    }
+
+    .tabbar button {
+      min-width: 0;
+      border: 0;
+      border-radius: 18px;
+      color: var(--muted);
+      background: transparent;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tabbar button.active {
+      color: var(--cyan);
+      background: rgba(91,216,255,.1);
+    }
+
+    .nav-symbol { font-size: 18px; line-height: 1; }
+
+    .toast {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 92px;
+      display: none;
+      border: 1px solid rgba(255,209,102,.45);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(39,29,13,.94);
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+      z-index: 8;
+    }
+
+    .toast.show { display: block; }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: flex-end;
+      padding: 18px;
+      background: rgba(0,0,0,.54);
+      z-index: 10;
+    }
+
+    .modal-backdrop.show { display: flex; }
+
+    .message-modal {
+      width: 100%;
+      max-height: 72%;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(16,27,38,.98);
+      box-shadow: 0 22px 60px rgba(0,0,0,.42);
+      display: grid;
+      gap: 10px;
+    }
+
+    .message-thread {
+      display: grid;
+      gap: 8px;
+      max-height: 190px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .message-bubble {
+      width: fit-content;
+      max-width: 88%;
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: rgba(91,216,255,.14);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .message-bubble.me {
+      justify-self: end;
+      background: rgba(125,242,180,.16);
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body data-crovantix-disable-shared-tabs="true">
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="phone">
+    <section class="screen">
+      <div class="island"></div>
+      <div class="status"><span>9:41</span><span>5G ▪</span></div>
+      <section class="app font-normal" id="app">
+        <div class="toolbar">
+          <button class="pill primary" id="userButton" type="button">尚未註冊</button>
+          <button class="pill" id="statusPill" type="button" hidden>剩餘點數 50</button>
+        </div>
+        <h1 id="pageTitle">需求媒合</h1>
+        <p class="subline" id="appStatus">先完成註冊，即可提出需求或接案。</p>
+        <div class="page-history" id="pageHistoryControls">
+          <button id="historyBack" type="button">上一頁&lt;</button>
+          <button id="historyForward" type="button">下一頁&gt;</button>
+        </div>
+
+        <section class="content">
+          <section class="page active" id="registerPage">
+            <section class="card">
+              <div class="label-row"><strong>登入 / 註冊</strong><span class="tag">首次使用</span></div>
+              <div class="grid-2">
+                <label>姓名<input id="registerName" value="Clay Tseng"></label>
+                <label>性別<select id="registerGender"><option>男</option><option>女</option><option>其他</option></select></label>
+              </div>
+              <label>電話<input id="registerPhone" value="0912-345-678" inputmode="tel"></label>
+              <label>生日<input id="registerBirthday" type="date" value="1990-01-01"></label>
+              <label>Email<input id="registerEmail" value="clay@example.com" inputmode="email"></label>
+              <div class="sms-row">
+                <label>簡訊驗證碼<input id="smsCode" maxlength="4" placeholder="輸入 4 位數" inputmode="numeric"></label>
+                <button class="secondary-button" id="sendSms" type="button">發送驗證碼</button>
+              </div>
+              <p class="hint" id="smsHint">按下發送驗證碼後會產生 4 位數驗證碼。</p>
+              <button class="secondary-button" id="toggleTerms" type="button">展開使用條款、隱私權政策與免責聲明</button>
+              <div class="terms" id="termsBox">
+                <b>需求媒合 App 使用條款、隱私權政策與免責聲明</b><br>
+                歡迎使用「需求媒合 App」（以下稱「本 App」）。本 App 由創微科技有限公司（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。<br><br>
+
+                <b>一、服務內容</b><br>
+                本 App 提供需求發布、案件媒合、商家推薦、服務提供者媒合、AI 智能推薦、訊息交流、語音互動及相關資訊媒合服務。<br>
+                本 App 僅提供資訊展示、需求媒合及雙方聯繫之平台，不直接參與任何交易、契約簽訂、付款、履約或服務提供。<br><br>
+
+                <b>二、平台性質聲明</b><br>
+                本 App 為需求媒合平台，僅協助需求方與服務提供者建立聯繫。<br>
+                本公司並非交易當事人、代理人、仲介人、保證人或服務提供者。<br>
+                本公司不保證：一定成功媒合、一定成交、一定完成服務、一定符合需求、一定獲得報價、一定取得服務品質。<br>
+                所有合作內容、價格、付款方式、履約方式及相關約定，均由雙方自行協議。<br><br>
+
+                <b>三、AI 與媒合內容聲明</b><br>
+                本 App 部分內容可能由 AI 系統自動生成，包括：商家推薦、媒合建議、案件分類、需求整理、AI 回覆、語音互動及其他分析內容。<br>
+                AI 所提供之內容僅供參考。本公司不保證 AI 推薦、媒合結果、分析內容、排序或建議之正確性、完整性、即時性或適用性。<br><br>
+
+                <b>四、媒合與交易免責聲明</b><br>
+                本 App 僅提供資訊媒合平台。本公司不保證媒合成功率、商家品質、接案能力、履約能力、商品品質、服務品質、價格合理性、身分真實性或信用狀況。<br>
+                因媒合後所發生之報價爭議、契約糾紛、付款問題、商品瑕疵、履約遲延、詐騙行為、人身安全、智慧財產權爭議或其他民刑事責任，均由雙方自行協商處理，本公司不負任何直接、間接、附帶或衍生性損害之賠償責任。<br><br>
+
+                <b>五、使用者責任</b><br>
+                使用者應確保所提供之資料、需求及服務內容均為真實、合法且完整。<br>
+                不得利用本 App 從事詐騙、洗錢、非法集資、假需求、假案件、散布不實資訊、惡意騷擾、色情、暴力、賭博、販售違禁品、侵害第三人權利、散布病毒或惡意程式，或其他違反法令或公共秩序善良風俗之行為。<br>
+                若因使用者違法或不當行為造成任何損害或法律責任，應由使用者自行承擔。<br><br>
+
+                <b>六、資料蒐集</b><br>
+                本 App 可能蒐集以下資訊：使用者帳號資訊、姓名、Email、電話、裝置資訊、IP 位址、地區資訊、使用紀錄、需求內容、案件內容、聊天紀錄、語音內容、AI 互動紀錄、崩潰紀錄與分析資料。<br><br>
+
+                <b>七、資料用途</b><br>
+                蒐集資料主要用於：提供需求媒合服務、AI 智慧推薦、商家推薦、案件管理、提供個人化內容、語音互動、客服支援、系統安全維護、防止詐騙及濫用、提升 AI 與平台服務品質、法令遵循及爭議處理。<br><br>
+
+                <b>八、第三方服務</b><br>
+                本 App 可能使用第三方服務，包括但不限於：OpenAI、Firebase、Google Analytics、Google Maps、Firebase Cloud Messaging、雲端儲存服務、AI 模型服務、第三方登入服務、第三方支付服務（如適用）。<br>
+                部分資料可能因提供服務之需要而傳輸至第三方服務供應商。<br><br>
+
+                <b>九、資料安全</b><br>
+                本公司將採取合理之技術及管理措施保護使用者資料。惟網路傳輸、第三方平台或雲端儲存仍可能存在風險，本公司無法保證資料傳輸或儲存之絕對安全。<br>
+                使用者應妥善保管帳號、密碼、驗證碼及個人資料，避免提供予他人使用。<br><br>
+
+                <b>十、智慧財產權</b><br>
+                本 App 之程式、介面設計、商標、圖像、文字、AI 系統、資料庫、推薦演算法及相關內容，均屬本公司或合法授權人所有。<br>
+                未經本公司書面同意，不得重製、修改、散布、反向工程、破解、出租、販售或用於商業用途。<br>
+                使用者對其自行上傳之需求、案件或其他內容仍保有依法享有之權利。使用者同意授權本公司於提供本 App 服務之必要範圍內蒐集、處理、儲存、分析及展示相關內容。<br><br>
+
+                <b>十一、使用者權利</b><br>
+                依相關法令規定，使用者得請求查詢個人資料、閱覽個人資料、補充或更正資料、停止蒐集、停止處理、停止利用或刪除個人資料。本公司將依法於合理期間內處理。<br><br>
+
+                <b>十二、服務中斷</b><br>
+                本公司得因系統維護、軟體更新、網路異常、雲端服務異常、第三方服務中斷、天災、戰爭、政府命令、駭客攻擊或不可抗力事件暫停或中斷服務。本公司因此不負任何損害賠償責任。<br><br>
+
+                <b>十三、契約終止</b><br>
+                如使用者違反本使用條款、提供不實資料、從事違法行為、惡意影響平台運作、侵害他人權利、散布惡意程式、詐騙或其他重大違規行為，本公司得不經通知立即停止全部或部分服務，並得依法採取必要法律措施。<br><br>
+
+                <b>十四、免責聲明</b><br>
+                本 App 僅提供資訊媒合及 AI 輔助服務。本公司不保證媒合成功、成交結果、履約品質、商品品質、商家資格、需求真實性、AI 推薦結果、系統持續不中斷或資料完全正確。<br>
+                使用者因使用本 App 所產生之一切交易、合作、契約、付款或其他法律關係，均由雙方自行承擔風險與責任。<br><br>
+
+                <b>十五、條款修改</b><br>
+                本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利。修改後內容將公告於本 App 或官方網站，自公告日起生效。使用者於修改後繼續使用本 App，即視為已閱讀、了解並同意接受修訂後之全部內容。
+              </div>
+              <label class="check-row"><input id="agreeTerms" type="checkbox">我已閱讀並同意使用條款、隱私權政策與免責聲明</label>
+              <button class="primary-button" id="finishRegister" type="button">完成註冊</button>
+            </section>
+          </section>
+
+          <section class="page" id="needPage">
+            <section class="card">
+              <div class="label-row"><strong>提出需求</strong><span id="needStatus">尚未送出</span></div>
+              <label>挑選需求類別
+                <select id="needCategory">
+                  <option>🏠 居家生活</option>
+                  <option>🚗 汽車/機車服務</option>
+                  <option>💻 資訊科技</option>
+                  <option>🎨 設計創作</option>
+                  <option>📷 影像影音</option>
+                  <option>📢 行銷廣告</option>
+                  <option>🧑‍🏫 教育</option>
+                  <option>⚖️ 諮詢服務</option>
+                  <option>🏥 健康美容</option>
+                  <option>💼 商業服務</option>
+                  <option>📦 物流搬運</option>
+                  <option>🐶 寵物</option>
+                  <option>❤️ 婚禮活動</option>
+                  <option>🏢 房屋不動產</option>
+                  <option>🤝 其他服務</option>
+                </select>
+              </label>
+              <label>需求目的
+                <select id="needPurpose">
+                  <option>📌 尋找服務</option>
+                  <option>👨‍🔧 尋找接案者</option>
+                  <option>🏢 尋找廠商</option>
+                  <option>🤝 尋找合作夥伴</option>
+                  <option>💼 尋找長期合作</option>
+                  <option>🛒 尋找商品</option>
+                  <option>📦 客製化製作</option>
+                  <option>🚀 專案外包</option>
+                  <option>📈 商業合作</option>
+                  <option>❓ 其他需求</option>
+                </select>
+              </label>
+              <div class="grid-2">
+                <label>📍 縣市<select id="needCity"></select></label>
+                <label>📍 區域<select id="needDistrict"></select></label>
+              </div>
+              <label>💰 預算區間
+                <select id="needBudget">
+                  <option>0-100</option>
+                  <option>101-1000</option>
+                  <option>1001-10000</option>
+                  <option>10000-100000</option>
+                  <option>100000-1000000</option>
+                  <option>1000000以上</option>
+                </select>
+              </label>
+              <label>⏰ 希望完成時間<input id="needDeadlineDate" type="date"></label>
+              <label>需求描述<textarea id="needText" maxlength="220" placeholder="例如：需要裝潢，想重新整理客廳與廚房，預算約 20 萬。"></textarea></label>
+              <div class="photo-box">
+                <div class="label-row"><strong>照片輔助</strong><span>可拍照或挑選照片</span></div>
+                <div class="grid-2">
+                  <label class="secondary-button" style="text-align:center; cursor:pointer;">挑選照片<input id="photoInput" type="file" accept="image/*" hidden></label>
+                  <button class="secondary-button" id="openCamera" type="button">使用相機</button>
+                </div>
+                <div class="preview" id="photoPreview">尚未加入照片</div>
+                <div class="grid-2" id="cameraControls" style="display:none;">
+                  <button class="secondary-button" id="capturePhoto" type="button">拍照</button>
+                  <button class="secondary-button" id="closeCamera" type="button">關閉相機</button>
+                </div>
+              </div>
+              <button class="primary-button" id="submitNeed" type="button">送出需求</button>
+              <div class="result" id="needResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="casePage">
+            <section class="card">
+              <div class="label-row"><strong>接案</strong><span>附近需求</span></div>
+              <div class="grid-2">
+                <label>📍 縣市<select id="caseFilterCity"></select></label>
+                <label>📍 區域<select id="caseFilterDistrict"></select></label>
+              </div>
+              <label>💰 預算區間
+                <select id="caseFilterBudget">
+                  <option value="">全部預算</option>
+                  <option>0-100</option>
+                  <option>101-1000</option>
+                  <option>1001-10000</option>
+                  <option>10000-100000</option>
+                  <option>100000-1000000</option>
+                  <option>1000000以上</option>
+                </select>
+              </label>
+              <div class="grid-2">
+                <label>⏰ 時間排序
+                  <select id="caseSortTime">
+                    <option>完成時間近到遠</option>
+                    <option>完成時間遠到近</option>
+                    <option>發需求時間新到舊</option>
+                    <option>發需求時間舊到新</option>
+                  </select>
+                </label>
+                <label>🏷️ 接案類別
+                  <select id="caseFilterTag">
+                    <option value="">全部分類</option>
+                    <option>🏠 居家生活</option>
+                    <option>🚗 汽車/機車服務</option>
+                    <option>💻 資訊科技</option>
+                    <option>🎨 設計創作</option>
+                    <option>📷 影像影音</option>
+                    <option>📢 行銷廣告</option>
+                    <option>🧑‍🏫 教育</option>
+                    <option>⚖️ 諮詢服務</option>
+                    <option>🏥 健康美容</option>
+                    <option>💼 商業服務</option>
+                    <option>📦 物流搬運</option>
+                    <option>🐶 寵物</option>
+                    <option>❤️ 婚禮活動</option>
+                    <option>🏢 房屋不動產</option>
+                    <option>🤝 其他服務</option>
+                  </select>
+                </label>
+              </div>
+              <button class="secondary-button" id="clearCaseFilters" type="button">清除篩選</button>
+              <div class="case-list" id="caseList"></div>
+            </section>
+          </section>
+
+          <section class="page" id="shopsPage">
+            <section class="card">
+              <div class="label-row"><strong>找店家</strong><span>店家篩選</span></div>
+              <div class="grid-2">
+                <label>📍 縣市<select id="shopFilterCity"></select></label>
+                <label>📍 區域<select id="shopFilterDistrict"></select></label>
+              </div>
+              <label>💰 預算區間
+                <select id="shopFilterBudget">
+                  <option value="">全部預算</option>
+                  <option>0-100</option>
+                  <option>101-1000</option>
+                  <option>1001-10000</option>
+                  <option>10000-100000</option>
+                  <option>100000-1000000</option>
+                  <option>1000000以上</option>
+                </select>
+              </label>
+              <label>🏷️ 需求分類
+                <select id="shopFilterCategory">
+                  <option value="">全部分類</option>
+                  <option>🏠 居家生活</option>
+                  <option>🚗 汽車/機車服務</option>
+                  <option>💻 資訊科技</option>
+                  <option>🎨 設計創作</option>
+                  <option>📷 影像影音</option>
+                  <option>📢 行銷廣告</option>
+                  <option>🧑‍🏫 教育</option>
+                  <option>⚖️ 諮詢服務</option>
+                  <option>🏥 健康美容</option>
+                  <option>💼 商業服務</option>
+                  <option>📦 物流搬運</option>
+                  <option>🐶 寵物</option>
+                  <option>❤️ 婚禮活動</option>
+                  <option>🏢 房屋不動產</option>
+                  <option>🤝 其他服務</option>
+                </select>
+              </label>
+              <button class="primary-button" id="searchShopsButton" type="button">搜尋</button>
+              <button class="secondary-button" id="clearShopFilters" type="button">清除篩選</button>
+              <div class="case-list" id="shopList"></div>
+            </section>
+            <section class="card shop-detail" id="shopDetail"></section>
+          </section>
+
+          <section class="page" id="reportPage">
+            <section class="card">
+              <div class="label-row"><strong>問題回報</strong><span id="reportStatus">尚未送出</span></div>
+              <label>回報者姓名<input id="reportName" value="Clay Tseng"></label>
+              <label>Email<input id="reportEmail" value="clay@example.com" inputmode="email"></label>
+              <label>問題類型<select id="reportType"><option>功能異常</option><option>提需求問題</option><option>接案問題</option><option>帳號問題</option><option>其他</option></select></label>
+              <label>問題內容<textarea id="reportText" maxlength="300" placeholder="請描述遇到的問題。"></textarea></label>
+              <button class="primary-button" id="submitReport" type="button">送出問題回報</button>
+              <div class="result" id="reportResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="upgradePage">
+            <section class="card">
+              <div class="label-row"><strong>升級方案</strong><span id="planStatus">目前方案：免費</span></div>
+              <div class="result show">
+                點數使用規則：
+                提出需求不扣點數。
+                我要接案扣除 20 點。
+                店家接案扣除 20 點。
+                媒合扣除 5 點。
+                建立店家扣除 50 點。
+                新增服務項目扣除 20 點。
+              </div>
+              <div class="case-list">
+                <button class="case-item" data-plan="Basic" data-points="50" data-price="NT$49/月" type="button">
+                  <div class="case-top"><span>Basic</span><span class="tag">NT$49/月</span></div>
+                  <div class="hint">點數 50，可用於提出需求、接案與建立工作室。</div>
+                </button>
+                <button class="case-item" data-plan="Plus" data-points="250" data-price="NT$199/月" type="button">
+                  <div class="case-top"><span>Plus</span><span class="tag">NT$199/月</span></div>
+                  <div class="hint">點數 250，適合持續刊登需求或接案者。</div>
+                </button>
+                <button class="case-item" data-plan="Pro" data-points="800" data-price="NT$499/月" type="button">
+                  <div class="case-top"><span>Pro</span><span class="tag">NT$499/月</span></div>
+                  <div class="hint">點數 800，適合店家、工作室與多案接洽。</div>
+                </button>
+                <button class="case-item" data-plan="VIP" data-points="2000" data-price="NT$999/月" type="button">
+                  <div class="case-top"><span>VIP</span><span class="tag">NT$999/月</span></div>
+                  <div class="hint">點數 2000，適合工作室與長期合作使用。</div>
+                </button>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="paymentPage">
+            <section class="card">
+              <div class="label-row"><strong>信用卡付費</strong><span id="paymentPlanLabel">尚未選擇</span></div>
+              <label>持卡人姓名<input id="cardName" value="Clay Tseng"></label>
+              <label>信用卡號<input id="cardNumber" value="4242 4242 4242 4242" inputmode="numeric"></label>
+              <div class="grid-2">
+                <label>有效期限<input id="cardExpiry" value="12/30"></label>
+                <label>安全碼<input id="cardCvc" value="123" inputmode="numeric"></label>
+              </div>
+              <button class="primary-button" id="payPlanButton" type="button">確認付款並升級</button>
+              <div class="result" id="paymentResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="settingsPage">
+            <section class="card">
+              <div class="label-row"><strong>設定</strong><span>偏好設定</span></div>
+              <label>App 背景
+                <select id="themeSelect">
+                  <option value="dark">深色</option>
+                  <option value="light">淺色</option>
+                  <option value="warm">暖色</option>
+                </select>
+              </label>
+              <label>字體大小
+                <select id="fontSelect">
+                  <option value="font-small">小</option>
+                  <option value="font-normal" selected>中</option>
+                  <option value="font-large">大</option>
+                </select>
+              </label>
+              <label>語言
+                <select id="languageSelect">
+                  <option>繁體中文</option>
+                  <option>English</option>
+                </select>
+              </label>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong>聯繫客服</strong></div>
+              <p class="hint">問題回報、廣告投放、合作洽談皆可透過 Email 聯繫：support@crovantix.com<br>官網： www.crovantix.com</p>
+            </section>
+          </section>
+
+          <section class="page" id="profilePage">
+            <section class="card">
+              <div class="label-row"><strong>個人中心</strong><span>紀錄與資料</span></div>
+              <div class="result" id="profilePlanStatus"></div>
+              <div class="accordion">
+                <section class="accordion-item" id="needsAccordion">
+                  <button class="accordion-toggle" type="button">
+                    <span>提過的需求</span><span class="plus">＋</span>
+                  </button>
+                  <div class="accordion-body">
+                    <div class="history-list" id="submittedNeedsList"></div>
+                  </div>
+                </section>
+                <section class="accordion-item" id="acceptedAccordion">
+                  <button class="accordion-toggle" type="button">
+                    <span>接過的案</span><span class="plus">＋</span>
+                  </button>
+                  <div class="accordion-body">
+                    <div class="history-list" id="acceptedCasesList"></div>
+                  </div>
+                </section>
+                <section class="accordion-item" id="messagesAccordion">
+                  <button class="accordion-toggle" type="button">
+                    <span>留言</span><span class="accordion-actions"><span class="plus">＋</span><span class="unread-badge" id="messageUnreadBadge">!</span></span>
+                  </button>
+                  <div class="accordion-body">
+                    <div class="history-list" id="messageCenterList"></div>
+                  </div>
+                </section>
+                <section class="accordion-item" id="myStudioAccordion" style="display:none;">
+                  <button class="accordion-toggle" type="button">
+                    <span>我的店家</span><span class="plus">＋</span>
+                  </button>
+                  <div class="accordion-body">
+                    <div class="history-list" id="myStudioList"></div>
+                  </div>
+                </section>
+                <section class="accordion-item" id="studioAccordion">
+                  <button class="accordion-toggle" type="button">
+                    <span>建立店家</span><span class="unread-badge" id="studioCreateBadge">!</span><span class="plus">＋</span>
+                  </button>
+                  <div class="accordion-body">
+                    <div class="label-row"><strong>建立店家</strong></div>
+                    <label>店家名稱<input id="studioName" placeholder="例如：Clay 水電裝修工作室"></label>
+                    <div class="grid-2">
+                      <label>店家縣市<select id="studioCity"></select></label>
+                      <label>店家區域<select id="studioDistrict"></select></label>
+                    </div>
+                    <label>店家網址<input id="studioWebsite" placeholder="例如：https://example.com" inputmode="url"></label>
+                    <p class="hint">如果沒有網址，可透過 Email 聯繫：support@crovantix.com，協助建立店家網站。</p>
+                    <label>服務項目
+                      <select id="studioServiceItem">
+                        <option>🏠 居家生活</option>
+                        <option>🚗 汽車/機車服務</option>
+                        <option>💻 資訊科技</option>
+                        <option>🎨 設計創作</option>
+                        <option>📷 影像影音</option>
+                        <option>📢 行銷廣告</option>
+                        <option>🧑‍🏫 教育</option>
+                        <option>⚖️ 諮詢服務</option>
+                        <option>🏥 健康美容</option>
+                        <option>💼 商業服務</option>
+                        <option>📦 物流搬運</option>
+                        <option>🐶 寵物</option>
+                        <option>❤️ 婚禮活動</option>
+                        <option>🏢 房屋不動產</option>
+                        <option>🤝 其他服務</option>
+                      </select>
+                    </label>
+                    <div class="history-list" id="studioExtraServices"></div>
+                    <button class="secondary-button" id="addStudioServiceButton" type="button">新增服務項目（扣除點數20）</button>
+                    <p class="hint">新增服務項目每次扣除點數 20 點；點數不足會前往升級頁面。</p>
+                    <label>店家可以做的事情<textarea id="studioServices" maxlength="260" placeholder="例如：水電維修、廚房裝修、浴室防水、燈具安裝。"></textarea></label>
+                    <button class="primary-button" id="createStudioButton" type="button">建立店家（扣除點數50）</button>
+                    <div class="result" id="studioResult"></div>
+                  </div>
+                </section>
+                <section class="accordion-item" id="profileAccordion">
+                  <button class="accordion-toggle" type="button">
+                    <span>修改個人資料</span><span class="plus">＋</span>
+                  </button>
+                  <div class="accordion-body">
+                    <label>姓名<input id="profileName" value="Clay Tseng"></label>
+                    <label>電話<input id="profilePhone" value="0912-345-678" inputmode="tel"></label>
+                    <label>Email<input id="profileEmail" value="clay@example.com" inputmode="email"></label>
+                    <label>生日<input id="profileBirthday" type="date" value="1990-01-01"></label>
+                    <label>性別<select id="profileGender"><option>男</option><option>女</option><option>其他</option></select></label>
+                    <div class="sms-row">
+                      <label>修改驗證碼<input id="profileSmsCode" maxlength="4" placeholder="輸入 4 位數" inputmode="numeric"></label>
+                      <button class="secondary-button" id="sendProfileSms" type="button">發送驗證碼</button>
+                    </div>
+                    <p class="hint" id="profileSmsHint">若修改電話或 Email，需先發送並輸入 4 位數驗證碼。</p>
+                    <button class="primary-button" id="saveProfile" type="button">儲存個人資料</button>
+                    <div class="result" id="profileResult"></div>
+                  </div>
+                </section>
+              </div>
+            </section>
+          </section>
+        </section>
+      </section>
+
+      <nav class="tabbar" aria-label="App functions">
+        <button class="active" data-page="needPage" type="button"><span class="nav-symbol">＋</span><span>提需求</span></button>
+        <button data-page="casePage" type="button"><span class="nav-symbol">◈</span><span>接案</span></button>
+        <button data-page="shopsPage" type="button"><span class="nav-symbol">⌕</span><span>找店家</span></button>
+        <button data-page="upgradePage" type="button"><span class="nav-symbol">◇</span><span>升級</span></button>
+        <button data-page="reportPage" type="button"><span class="nav-symbol">!</span><span>問題回報</span></button>
+        <button data-page="settingsPage" type="button"><span class="nav-symbol">⚙</span><span>設定</span></button>
+      </nav>
+      <div class="store-alert" id="storeAlert">收到新的即時通知</div>
+      <div class="toast" id="toast">請先完成註冊</div>
+      <div class="modal-backdrop" id="messageModal">
+        <section class="message-modal">
+          <div class="label-row"><strong id="messageModalTitle">留言</strong><button class="secondary-button" id="closeMessageModal" type="button">關閉</button></div>
+          <div class="message-thread" id="messageThread"></div>
+          <label>輸入留言<textarea id="messageInput" maxlength="220" placeholder="請輸入要給對方的留言。"></textarea></label>
+          <button class="primary-button" id="sendMessageButton" type="button">送出留言</button>
+        </section>
+      </div>
+      <div class="modal-backdrop" id="photoModal">
+        <section class="message-modal">
+          <div class="label-row"><strong id="photoModalTitle">需求照片</strong><button class="secondary-button" id="closePhotoModal" type="button">關閉</button></div>
+          <img class="photo-modal-image" id="casePhotoImage" alt="需求照片">
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const app = document.querySelector("#app");
+    const pages = document.querySelectorAll(".page");
+    const navButtons = document.querySelectorAll(".tabbar button");
+    const pageTitle = document.querySelector("#pageTitle");
+    const appStatus = document.querySelector("#appStatus");
+    const pageHistoryControls = document.querySelector("#pageHistoryControls");
+    const historyBack = document.querySelector("#historyBack");
+    const historyForward = document.querySelector("#historyForward");
+    const userButton = document.querySelector("#userButton");
+    const statusPill = document.querySelector("#statusPill");
+    const toast = document.querySelector("#toast");
+    const registerName = document.querySelector("#registerName");
+    const registerPhone = document.querySelector("#registerPhone");
+    const registerBirthday = document.querySelector("#registerBirthday");
+    const registerEmail = document.querySelector("#registerEmail");
+    const smsCode = document.querySelector("#smsCode");
+    const sendSms = document.querySelector("#sendSms");
+    const smsHint = document.querySelector("#smsHint");
+    const toggleTerms = document.querySelector("#toggleTerms");
+    const termsBox = document.querySelector("#termsBox");
+    const originalTermsHTML = termsBox.innerHTML;
+    const englishTermsHTML = `
+                <b>Service Match App Terms, Privacy Policy, and Disclaimer</b><br>
+                Welcome to Service Match App. This App is provided by Crovantix Technologies Co., Ltd. By using this App, you confirm that you have read, understood, and agreed to these terms, privacy policy, and disclaimer.<br><br>
+
+                <b>1. Services</b><br>
+                This App provides request posting, case matching, vendor recommendations, service provider matching, AI recommendations, messaging, voice interaction, and related information matching services.<br>
+                This App only provides information display and contact matching. It does not directly participate in transactions, contracts, payment, performance, or service delivery.<br><br>
+
+                <b>2. Platform Nature</b><br>
+                The App is a matching platform that helps requesters and service providers connect. The company is not a transaction party, agent, broker, guarantor, or service provider.<br><br>
+
+                <b>3. AI and Matching Content</b><br>
+                Some recommendations, classifications, summaries, AI replies, and analysis may be generated by AI. AI content is for reference only and is not guaranteed to be accurate, complete, timely, or suitable for every case.<br><br>
+
+                <b>4. Matching and Transaction Disclaimer</b><br>
+                The company does not guarantee matching success, vendor quality, service quality, pricing reasonableness, identity authenticity, credit status, or transaction outcome. Any quotation, contract, payment, performance, fraud, safety, IP, civil, or criminal dispute after matching must be handled by both parties themselves.<br><br>
+
+                <b>5. User Responsibility</b><br>
+                Users must provide true, legal, and complete information. Users may not use this App for fraud, money laundering, fake requests, false information, harassment, adult content, violence, gambling, prohibited goods, infringement, malware, or illegal activity.<br><br>
+
+                <b>6. Data Collection</b><br>
+                The App may collect account information, name, Email, phone, device information, IP address, location area, usage records, request content, case content, chat records, voice content, AI interaction records, crash logs, and analytics data.<br><br>
+
+                <b>7. Data Use</b><br>
+                Data is used to provide matching services, AI recommendations, vendor recommendations, case management, personalized content, voice interaction, customer support, security, abuse prevention, AI quality improvement, compliance, and dispute handling.<br><br>
+
+                <b>8. Third-party Services</b><br>
+                The App may use third-party services including OpenAI, Firebase, Google Analytics, Google Maps, Firebase Cloud Messaging, cloud storage, AI model services, third-party login, and payment services where applicable.<br><br>
+
+                <b>9. Data Security</b><br>
+                The company will use reasonable technical and management measures to protect user data, but cannot guarantee absolute security of network transmission, third-party platforms, or cloud storage.<br><br>
+
+                <b>10. Intellectual Property</b><br>
+                The App software, interface, trademarks, images, text, AI systems, database, recommendation algorithms, and related content are owned by the company or licensed rights holders. Unauthorized copying, modification, distribution, reverse engineering, cracking, rental, sale, or commercial use is prohibited.<br><br>
+
+                <b>11. User Rights</b><br>
+                Users may request inquiry, review, supplementation, correction, suspension of collection, suspension of processing, suspension of use, or deletion of personal data according to applicable law.<br><br>
+
+                <b>12. Service Interruption</b><br>
+                The company may suspend or interrupt services due to maintenance, updates, network issues, cloud service issues, third-party outages, disasters, war, government orders, attacks, or force majeure, without liability for damages.<br><br>
+
+                <b>13. Termination</b><br>
+                If users violate these terms, provide false information, conduct illegal activity, disrupt platform operation, infringe rights, distribute malware, commit fraud, or seriously violate rules, the company may stop all or part of the service and take legal action.<br><br>
+
+                <b>14. Disclaimer</b><br>
+                The App only provides information matching and AI assistance. The company does not guarantee successful matching, transaction results, performance quality, product quality, vendor qualifications, request authenticity, AI recommendation results, uninterrupted systems, or complete data accuracy.<br><br>
+
+                <b>15. Amendments</b><br>
+                The company may modify these terms, privacy policy, and disclaimer at any time. Updated content will be announced in the App or official website and becomes effective from the announcement date.
+              `;
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const finishRegister = document.querySelector("#finishRegister");
+    const needCategory = document.querySelector("#needCategory");
+    const needPurpose = document.querySelector("#needPurpose");
+    const needCity = document.querySelector("#needCity");
+    const needDistrict = document.querySelector("#needDistrict");
+    const needBudget = document.querySelector("#needBudget");
+    const needDeadlineDate = document.querySelector("#needDeadlineDate");
+    const needText = document.querySelector("#needText");
+    const photoInput = document.querySelector("#photoInput");
+    const photoPreview = document.querySelector("#photoPreview");
+    const openCamera = document.querySelector("#openCamera");
+    const cameraControls = document.querySelector("#cameraControls");
+    const capturePhoto = document.querySelector("#capturePhoto");
+    const closeCamera = document.querySelector("#closeCamera");
+    const submitNeed = document.querySelector("#submitNeed");
+    const needStatus = document.querySelector("#needStatus");
+    const needResult = document.querySelector("#needResult");
+    const caseList = document.querySelector("#caseList");
+    const reportName = document.querySelector("#reportName");
+    const reportEmail = document.querySelector("#reportEmail");
+    const reportType = document.querySelector("#reportType");
+    const reportText = document.querySelector("#reportText");
+    const submitReport = document.querySelector("#submitReport");
+    const reportStatus = document.querySelector("#reportStatus");
+    const reportResult = document.querySelector("#reportResult");
+    const studioName = document.querySelector("#studioName");
+    const studioCity = document.querySelector("#studioCity");
+    const studioDistrict = document.querySelector("#studioDistrict");
+    const studioWebsite = document.querySelector("#studioWebsite");
+    const studioServiceItem = document.querySelector("#studioServiceItem");
+    const studioExtraServices = document.querySelector("#studioExtraServices");
+    const addStudioServiceButton = document.querySelector("#addStudioServiceButton");
+    const studioServices = document.querySelector("#studioServices");
+    const createStudioButton = document.querySelector("#createStudioButton");
+    const studioCreateBadge = document.querySelector("#studioCreateBadge");
+    const studioResult = document.querySelector("#studioResult");
+    const planStatus = document.querySelector("#planStatus");
+    const profilePlanStatus = document.querySelector("#profilePlanStatus");
+    const paymentPlanLabel = document.querySelector("#paymentPlanLabel");
+    const cardName = document.querySelector("#cardName");
+    const cardNumber = document.querySelector("#cardNumber");
+    const cardExpiry = document.querySelector("#cardExpiry");
+    const cardCvc = document.querySelector("#cardCvc");
+    const payPlanButton = document.querySelector("#payPlanButton");
+    const paymentResult = document.querySelector("#paymentResult");
+    const caseFilterCity = document.querySelector("#caseFilterCity");
+    const caseFilterDistrict = document.querySelector("#caseFilterDistrict");
+    const caseFilterBudget = document.querySelector("#caseFilterBudget");
+    const caseSortTime = document.querySelector("#caseSortTime");
+    const caseFilterTag = document.querySelector("#caseFilterTag");
+    const clearCaseFilters = document.querySelector("#clearCaseFilters");
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSelect = document.querySelector("#fontSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const submittedNeedsList = document.querySelector("#submittedNeedsList");
+    const acceptedCasesList = document.querySelector("#acceptedCasesList");
+    const messageCenterList = document.querySelector("#messageCenterList");
+    const messageUnreadBadge = document.querySelector("#messageUnreadBadge");
+    const myStudioAccordion = document.querySelector("#myStudioAccordion");
+    const myStudioList = document.querySelector("#myStudioList");
+    const profileName = document.querySelector("#profileName");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profileEmail = document.querySelector("#profileEmail");
+    const profileBirthday = document.querySelector("#profileBirthday");
+    const profileGender = document.querySelector("#profileGender");
+    const profileSmsCode = document.querySelector("#profileSmsCode");
+    const sendProfileSms = document.querySelector("#sendProfileSms");
+    const profileSmsHint = document.querySelector("#profileSmsHint");
+    const saveProfile = document.querySelector("#saveProfile");
+    const profileResult = document.querySelector("#profileResult");
+    const messageModal = document.querySelector("#messageModal");
+    const messageModalTitle = document.querySelector("#messageModalTitle");
+    const messageThread = document.querySelector("#messageThread");
+    const messageInput = document.querySelector("#messageInput");
+    const sendMessageButton = document.querySelector("#sendMessageButton");
+    const closeMessageModal = document.querySelector("#closeMessageModal");
+    const photoModal = document.querySelector("#photoModal");
+    const photoModalTitle = document.querySelector("#photoModalTitle");
+    const casePhotoImage = document.querySelector("#casePhotoImage");
+    const closePhotoModal = document.querySelector("#closePhotoModal");
+    const shopFilterCity = document.querySelector("#shopFilterCity");
+    const shopFilterDistrict = document.querySelector("#shopFilterDistrict");
+    const shopFilterBudget = document.querySelector("#shopFilterBudget");
+    const shopFilterCategory = document.querySelector("#shopFilterCategory");
+    const searchShopsButton = document.querySelector("#searchShopsButton");
+    const clearShopFilters = document.querySelector("#clearShopFilters");
+    const shopList = document.querySelector("#shopList");
+    const shopDetail = document.querySelector("#shopDetail");
+    const storeAlert = document.querySelector("#storeAlert");
+
+    let registered = false;
+    let generatedCode = "";
+    let profileGeneratedCode = "";
+    let selectedPhoto = "";
+    let cameraStream = null;
+    let activeMessageKey = "";
+    let activeMessageTitle = "";
+    let credits = 50;
+    let currentPlan = "免費";
+    let currentLanguage = "繁體中文";
+    let selectedPlan = null;
+    let hasUpgraded = false;
+    let pageHistory = ["registerPage"];
+    let pageHistoryIndex = 0;
+    let editingNeedId = "";
+    let matchedNeedId = "";
+    let studioServiceItems = [];
+    let hasSearchedShops = false;
+    const submittedNeeds = [];
+    const acceptedCases = [];
+    const acceptedMessageKeys = new Set();
+    const studios = [
+      {
+        id: "shop-crovantix",
+        name: "Crovantix軟體",
+        address: "台灣 桃園",
+        website: "https://www.crovantix.com",
+        websiteLabel: "www.crovantix.com",
+        serviceItem: "💻 資訊科技",
+        services: "Crovantix Technologies 總部位於台灣，專注於 App 設計與開發、AI 應用解決方案、網頁設計、後端 API、雲端資料庫、會員與訂閱系統、數據分析與廣告投放串接。我們協助中小企業、公司行號、補習班、法律事務所、電商與個人創業者，把想法做成可以上線、可以維護、可以持續擴充的數位產品。",
+        category: "💻 資訊科技",
+        city: "桃園市",
+        district: "桃園區",
+        budget: "10000-100000",
+        owner: "Crovantix",
+        email: "support@crovantix.com",
+        createdAt: "2026-07-19T09:00:00.000Z"
+      },
+      {
+        id: "shop-home-demo",
+        name: "桃園居家修繕店家",
+        address: "桃園市 中壢區",
+        website: "",
+        serviceItem: "🏠 居家生活",
+        services: "水電維修、廚房裝修、浴室防水、燈具安裝。",
+        category: "🏠 居家生活",
+        city: "桃園市",
+        district: "中壢區",
+        budget: "1001-10000",
+        owner: "桃園修繕顧問",
+        email: "home@example.com",
+        createdAt: "2026-07-18T10:30:00.000Z"
+      }
+    ];
+    const shopRequests = [];
+    const shopReviews = {
+      "shop-crovantix": [
+        { stars: 5, user: "Clay Tseng", text: "回覆速度快，需求整理很清楚。", time: "2026/07/19 10:20" },
+        { stars: 5, user: "企業客戶", text: "可以協助規劃 App 與後台資料庫。", time: "2026/07/18 16:10" }
+      ],
+      "shop-home-demo": [
+        { stars: 4, user: "桃園屋主", text: "現場說明完整，報價透明。", time: "2026/07/17 09:45" }
+      ]
+    };
+    let activeShopId = "";
+    let targetShopNeedId = "";
+    const messageThreads = {};
+    const taiwanAreas = {
+      "全台": ["全部區域"],
+      "台北市": ["全部區域", "中正區", "大安區", "信義區", "松山區", "內湖區", "士林區"],
+      "新北市": ["全部區域", "板橋區", "新莊區", "中和區", "永和區", "三重區", "淡水區"],
+      "桃園市": ["全部區域", "桃園區", "中壢區", "平鎮區", "八德區", "龜山區", "蘆竹區"],
+      "台中市": ["全部區域", "西屯區", "北屯區", "南屯區", "北區", "西區", "大里區"],
+      "台南市": ["全部區域", "中西區", "東區", "南區", "北區", "安平區", "永康區"],
+      "高雄市": ["全部區域", "前鎮區", "苓雅區", "左營區", "三民區", "鳳山區", "鼓山區"],
+      "基隆市": ["全部區域", "仁愛區", "中正區", "信義區", "安樂區"],
+      "新竹市": ["全部區域", "東區", "北區", "香山區"],
+      "新竹縣": ["全部區域", "竹北市", "竹東鎮", "新埔鎮", "湖口鄉"],
+      "苗栗縣": ["全部區域", "苗栗市", "頭份市", "竹南鎮", "後龍鎮"],
+      "彰化縣": ["全部區域", "彰化市", "員林市", "鹿港鎮", "和美鎮"],
+      "南投縣": ["全部區域", "南投市", "草屯鎮", "埔里鎮", "竹山鎮"],
+      "雲林縣": ["全部區域", "斗六市", "虎尾鎮", "西螺鎮", "北港鎮"],
+      "嘉義市": ["全部區域", "東區", "西區"],
+      "嘉義縣": ["全部區域", "太保市", "朴子市", "民雄鄉", "水上鄉"],
+      "屏東縣": ["全部區域", "屏東市", "潮州鎮", "東港鎮", "恆春鎮"],
+      "宜蘭縣": ["全部區域", "宜蘭市", "羅東鎮", "礁溪鄉", "冬山鄉"],
+      "花蓮縣": ["全部區域", "花蓮市", "吉安鄉", "玉里鎮", "新城鄉"],
+      "台東縣": ["全部區域", "台東市", "成功鎮", "關山鎮", "卑南鄉"],
+      "澎湖縣": ["全部區域", "馬公市", "湖西鄉", "白沙鄉"],
+      "金門縣": ["全部區域", "金城鎮", "金湖鎮", "金沙鎮"],
+      "連江縣": ["全部區域", "南竿鄉", "北竿鄉", "莒光鄉"]
+    };
+    const demands = [
+      { category: "🏠 居家生活", purpose: "📌 尋找服務", title: "需要裝潢客廳", budget: "100000-1000000", city: "桃園市", district: "桃園區", location: "桃園市 桃園區", deadline: "2026/08/15", tag: "🏠 居家生活", publishedAt: "2026/07/13", detail: "希望協助丈量、報價與施工規劃。", messageKey: "demo-need-renovation" },
+      { category: "🏠 居家生活", purpose: "👨‍🔧 尋找接案者", title: "浴室漏水檢查", budget: "1001-10000", city: "桃園市", district: "中壢區", location: "桃園市 中壢區", deadline: "2026/07/20", tag: "🏠 居家生活", publishedAt: "2026/07/12", detail: "需要可到府檢測並提供維修建議。", messageKey: "demo-need-water" },
+      { category: "💻 資訊科技", purpose: "🚀 專案外包", title: "企業形象網站", budget: "10000-100000", city: "全台", district: "全部區域", location: "全台", deadline: "2026/09/30", tag: "💻 資訊科技", publishedAt: "2026/07/11", detail: "需要首頁、服務、作品集與聯絡表單。", messageKey: "demo-need-website" }
+    ];
+
+    const titleMap = {
+      registerPage: "需求媒合",
+      needPage: "提出需求",
+      casePage: "接案",
+      shopsPage: "找店家",
+      upgradePage: "升級方案",
+      paymentPage: "信用卡付費",
+      reportPage: "問題回報",
+      settingsPage: "設定",
+      profilePage: "個人中心"
+    };
+    const statusMap = {
+      needPage: "描述需要的幫忙、選擇類別，也可以加入照片輔助媒合。",
+      casePage: "查看可接案需求，並送出接案意願。",
+      shopsPage: "依照地區、預算與分類尋找店家，也可以送出需求給店家。",
+      upgradePage: "購買點數方案，付款成功後會立即更新剩餘點數。",
+      paymentPage: "輸入信用卡資料完成付費升級。",
+      reportPage: "回報 App 或媒合流程問題，內容會記錄到後台資料庫。",
+      settingsPage: "調整 App 背景、字體大小與語言。",
+      profilePage: "查看提過的需求、接過的案，或修改個人資料。",
+      registerPage: "先完成註冊，即可提出需求或接案。"
+    };
+    const englishText = {
+      "尚未註冊": "Not Registered",
+      "剩餘點數": "Credits",
+      "需求媒合": "Service Match",
+      "上一頁<": "Previous <",
+      "下一頁>": "Next >",
+      "登入 / 註冊": "Login / Register",
+      "首次使用": "First Use",
+      "姓名": "Name",
+      "性別": "Gender",
+      "男": "Male",
+      "女": "Female",
+      "其他": "Other",
+      "電話": "Phone",
+      "生日": "Birthday",
+      "簡訊驗證碼": "SMS Code",
+      "發送驗證碼": "Send Code",
+      "按下發送驗證碼後會產生 4 位數驗證碼。": "Tap Send Code to generate a 4-digit verification code.",
+      "展開使用條款、隱私權政策與免責聲明": "Expand Terms, Privacy Policy, and Disclaimer",
+      "我已閱讀並同意使用條款、隱私權政策與免責聲明": "I have read and agree to the Terms, Privacy Policy, and Disclaimer",
+      "完成註冊": "Complete Registration",
+      "提出需求": "Post Request",
+      "尚未送出": "Not Submitted",
+      "挑選需求類別": "Choose Category",
+      "需求目的": "Request Purpose",
+      "縣市": "City",
+      "區域": "District",
+      "預算區間": "Budget Range",
+      "希望完成時間": "Desired Completion Date",
+      "需求描述": "Request Description",
+      "照片輔助": "Photo Support",
+      "可拍照或挑選照片": "Take or choose a photo",
+      "挑選照片": "Choose Photo",
+      "使用相機": "Use Camera",
+      "尚未加入照片": "No photo added",
+      "拍照": "Take Photo",
+      "關閉相機": "Close Camera",
+      "送出需求": "Submit Request",
+      "接案": "Accept Jobs",
+      "附近需求": "Nearby Requests",
+      "全部預算": "All Budgets",
+      "時間排序": "Time Sort",
+      "完成時間近到遠": "Completion Soonest",
+      "完成時間遠到近": "Completion Latest",
+      "發需求時間新到舊": "Posted Newest",
+      "發需求時間舊到新": "Posted Oldest",
+      "需求分類": "Request Category",
+      "接案類別": "Job Category",
+      "全部分類": "All Categories",
+      "清除篩選": "Clear Filters",
+      "問題回報": "Report Issue",
+      "回報者姓名": "Reporter Name",
+      "問題類型": "Issue Type",
+      "功能異常": "Feature Bug",
+      "提需求問題": "Request Issue",
+      "接案問題": "Job Issue",
+      "帳號問題": "Account Issue",
+      "問題內容": "Issue Details",
+      "送出問題回報": "Submit Report",
+      "工作室": "Studio",
+      "找店家": "Find Shops",
+      "店家篩選": "Shop Filters",
+      "建立店家": "Create Shop",
+      "店家名稱": "Shop Name",
+      "店家地址": "Shop Address",
+      "店家可以做的事情": "Shop Services",
+      "我有需求": "I Have a Request",
+      "店家新需求": "New Shop Requests",
+      "評價與留言": "Reviews & Messages",
+      "工作室名稱": "Studio Name",
+      "工作室地址": "Studio Address",
+      "工作室可以做的事情": "Studio Services",
+      "點數使用規則：\n                提出需求不扣點數。\n                我要接案扣除 20 點。\n                店家接案扣除 20 點。\n                媒合扣除 5 點。\n                建立店家扣除 50 點。\n                新增服務項目扣除 20 點。": "Credit rules:\n                Posting a request is free.\n                Accepting a job uses 20 credits.\n                Shop acceptance uses 20 credits.\n                Matching uses 5 credits.\n                Creating a shop uses 50 credits.\n                Adding a service item uses 20 credits.",
+      "升級方案": "Upgrade Plans",
+      "目前方案：免費": "Current Plan: Free",
+      "點數 50，可用於提出需求、接案與建立工作室。": "50 credits for posting requests, accepting jobs, and creating a studio.",
+      "點數 250，適合持續刊登需求或接案者。": "250 credits for users who continuously post requests or accept jobs.",
+      "點數 800，適合店家、工作室與多案接洽。": "800 credits for shops, studios, and multiple case inquiries.",
+      "點數 2000，適合工作室與長期合作使用。": "2000 credits for studios and long-term work.",
+      "信用卡付費": "Card Payment",
+      "尚未選擇": "Not Selected",
+      "持卡人姓名": "Cardholder Name",
+      "信用卡號": "Card Number",
+      "有效期限": "Expiry",
+      "安全碼": "CVC",
+      "確認付款並升級": "Pay and Upgrade",
+      "設定": "Settings",
+      "偏好設定": "Preferences",
+      "App 背景": "App Background",
+      "深色": "Dark",
+      "淺色": "Light",
+      "暖色": "Warm",
+      "字體大小": "Font Size",
+      "小": "Small",
+      "中": "Medium",
+      "大": "Large",
+      "語言": "Language",
+      "繁體中文": "Traditional Chinese",
+      "聯繫客服": "Contact Support",
+      "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫：support@crovantix.com": "Issue reports, advertising, and partnership inquiries can contact us by Email: support@crovantix.com",
+      "官網： www.crovantix.com": "Website: www.crovantix.com",
+      "個人中心": "Profile Center",
+      "紀錄與資料": "Records & Profile",
+      "提過的需求": "Posted Requests",
+      "接過的案": "Accepted Jobs",
+      "留言": "Messages",
+      "修改個人資料": "Edit Profile",
+      "修改驗證碼": "Edit Code",
+      "若修改電話或 Email，需先發送並輸入 4 位數驗證碼。": "If phone or Email changes, send and enter a 4-digit code first.",
+      "儲存個人資料": "Save Profile",
+      "輸入留言": "Message",
+      "送出留言": "Send Message",
+      "關閉": "Close",
+      "需求照片": "Request Photo",
+      "提需求": "Post",
+      "升級": "Upgrade",
+      "已送出": "Submitted",
+      "未設定": "Not Set",
+      "未分類": "Uncategorized",
+      "未設定目的": "No Purpose",
+      "目前沒有符合篩選條件的案件。": "No requests match these filters.",
+      "我要接案": "Accept Job",
+      "已送出給需求者": "Sent to requester",
+      "已送出接案意願": "Job intent sent",
+      "尚未接案。": "No accepted jobs yet.",
+      "接案": "Accept",
+      "請先完成註冊": "Please complete registration first.",
+      "免費": "Free",
+      "全部區域": "All Districts",
+      "全台": "All Taiwan",
+      "🏠 居家生活": "🏠 Home & Living",
+      "🚗 汽車/機車服務": "🚗 Auto / Scooter",
+      "💻 資訊科技": "💻 IT",
+      "🎨 設計創作": "🎨 Design",
+      "📷 影像影音": "📷 Photo & Video",
+      "📢 行銷廣告": "📢 Marketing",
+      "🧑‍🏫 教育": "🧑‍🏫 Education",
+      "⚖️ 諮詢服務": "⚖️ Consulting",
+      "🏥 健康美容": "🏥 Health & Beauty",
+      "💼 商業服務": "💼 Business",
+      "📦 物流搬運": "📦 Logistics",
+      "🐶 寵物": "🐶 Pets",
+      "❤️ 婚禮活動": "❤️ Weddings & Events",
+      "🏢 房屋不動產": "🏢 Real Estate",
+      "🤝 其他服務": "🤝 Other Services",
+      "📌 尋找服務": "📌 Find Service",
+      "👨‍🔧 尋找接案者": "👨‍🔧 Find Contractor",
+      "🏢 尋找廠商": "🏢 Find Vendor",
+      "🤝 尋找合作夥伴": "🤝 Find Partner",
+      "💼 尋找長期合作": "💼 Long-term Cooperation",
+      "🛒 尋找商品": "🛒 Find Product",
+      "📦 客製化製作": "📦 Custom Production",
+      "🚀 專案外包": "🚀 Project Outsourcing",
+      "📈 商業合作": "📈 Business Cooperation",
+      "❓ 其他需求": "❓ Other Request"
+    };
+    const chineseText = Object.fromEntries(Object.entries(englishText).map(([zh, en]) => [en, zh]));
+    const placeholders = {
+      "輸入 4 位數": "Enter 4 digits",
+      "例如：需要裝潢，想重新整理客廳與廚房，預算約 20 萬。": "Example: Need renovation for living room and kitchen, budget around NT$200,000.",
+      "請描述遇到的問題。": "Describe the issue you encountered.",
+      "例如：Clay 水電裝修工作室": "Example: Clay Repair Studio",
+      "例如：桃園市桃園區": "Example: Taoyuan District, Taoyuan",
+      "例如：水電維修、廚房裝修、浴室防水、燈具安裝。": "Example: plumbing, kitchen renovation, bathroom waterproofing, lighting installation.",
+      "請輸入要給對方的留言。": "Enter a message for the other party."
+    };
+    const zhPlaceholders = Object.fromEntries(Object.entries(placeholders).map(([zh, en]) => [en, zh]));
+
+    function L(text) {
+      return currentLanguage === "English" ? (englishText[text] || text) : text;
+    }
+
+    function translateTextNode(node) {
+      const trimmed = node.nodeValue.trim();
+      if (!trimmed) return;
+      const dictionary = currentLanguage === "English" ? englishText : chineseText;
+      if (dictionary[trimmed]) {
+        node.nodeValue = node.nodeValue.replace(trimmed, dictionary[trimmed]);
+      }
+    }
+
+    function translateTree(root) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(translateTextNode);
+    }
+
+    function preserveOptionValues() {
+      document.querySelectorAll("option").forEach(option => {
+        if (!option.hasAttribute("value")) option.value = option.textContent.trim();
+      });
+    }
+
+    function translatePlaceholders() {
+      const dictionary = currentLanguage === "English" ? placeholders : zhPlaceholders;
+      document.querySelectorAll("[placeholder]").forEach(field => {
+        const current = field.getAttribute("placeholder");
+        if (dictionary[current]) field.setAttribute("placeholder", dictionary[current]);
+      });
+    }
+
+    function applyLanguage() {
+      preserveOptionValues();
+      document.title = currentLanguage === "English" ? "Service Match iOS App" : "需求媒合 iOS App";
+      termsBox.innerHTML = currentLanguage === "English" ? englishTermsHTML : originalTermsHTML;
+      translateTree(document.querySelector(".screen"));
+      translatePlaceholders();
+      updateCredits();
+      updateUserButtonLabel();
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    function showTopActivityAlert(message, targetPage = "", options = {}) {
+      storeAlert.textContent = message;
+      storeAlert.dataset.targetPage = targetPage;
+      storeAlert.dataset.openStudio = options.openStudio ? "1" : "";
+      storeAlert.classList.add("show");
+      setTimeout(() => storeAlert.classList.remove("show"), 5600);
+      saveRecord("messages", {
+        title: "App最上方即時通知",
+        content: message,
+        targetPage,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    function updateHistoryControls(activePageId) {
+      const showControls = registered && activePageId !== "registerPage";
+      pageHistoryControls.classList.toggle("show", showControls);
+      historyBack.disabled = pageHistoryIndex <= 0;
+      historyForward.disabled = pageHistoryIndex >= pageHistory.length - 1;
+    }
+
+    function showPage(pageId, options = {}) {
+      if (!registered && pageId !== "registerPage") {
+        showToast(L("請先完成註冊"));
+        return;
+      }
+      if (options.record !== false) {
+        const currentPageId = document.querySelector(".page.active")?.id;
+        if (currentPageId !== pageId) {
+          pageHistory = pageHistory.slice(0, pageHistoryIndex + 1);
+          pageHistory.push(pageId);
+          pageHistoryIndex = pageHistory.length - 1;
+        }
+      }
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      pageTitle.textContent = L(titleMap[pageId] || "需求媒合");
+      appStatus.textContent = L(statusMap[pageId] || statusMap.registerPage);
+      if (pageId === "shopsPage") renderShops();
+      updateHistoryControls(pageId);
+    }
+
+    function syncUserFields() {
+      const name = registerName.value.trim() || "使用者";
+      const email = registerEmail.value.trim() || "user@example.com";
+      reportName.value = name;
+      reportEmail.value = email;
+      profileName.value = name;
+      profilePhone.value = registerPhone.value.trim();
+      profileEmail.value = email;
+      profileBirthday.value = registerBirthday.value || "1990-01-01";
+      profileGender.value = document.querySelector("#registerGender").value;
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    function getCurrentUserEmail() {
+      return registerEmail.value.trim().toLowerCase();
+    }
+
+    function isOwnNeed(item) {
+      return Boolean(item?.ownerEmail) && item.ownerEmail.toLowerCase() === getCurrentUserEmail();
+    }
+
+    function getNeedMatches(item) {
+      const sameCategory = shop => shop.category === item.category || shop.serviceItem === item.category || (shop.serviceItems || []).includes(item.category);
+      const sameCity = shop => item.city === "全台" || shop.city === item.city || shop.address.includes(item.city);
+      const keyword = String(item.detail || item.title || "").replace(/[，。,.]/g, " ");
+      const keywordScore = shop => {
+        const text = `${shop.name} ${shop.services} ${shop.category} ${shop.serviceItem || ""}`;
+        return keyword.split(/\s+/).filter(word => word && text.includes(word)).length;
+      };
+      return [...studios]
+        .filter(sameCategory)
+        .map(shop => ({
+          shop,
+          score: 80 + (sameCity(shop) ? 20 : 0) + Math.min(keywordScore(shop) * 5, 15) + (shop.id === "shop-crovantix" && item.category === "💻 資訊科技" ? 10 : 0)
+        }))
+        .sort((left, right) => right.score - left.score || new Date(right.shop.createdAt) - new Date(left.shop.createdAt))
+        .slice(0, 3)
+        .map(entry => entry.shop);
+    }
+
+    function renderMatchedShops(item) {
+      if (matchedNeedId !== item.id) return "";
+      const shops = getNeedMatches(item);
+      return `
+        <div class="result show">
+          <b>媒合店家</b><br>
+          ${shops.length ? shops.map((shop, index) => `
+            <article class="history-item" data-match-shop-open="${shop.id}" style="cursor:pointer;">
+              <div class="case-top">
+                <span>${index + 1}. ${shop.name}</span>
+                <span class="case-actions">
+                  <span class="shop-rating">${getStars(shop.id)}</span>
+                  <button class="icon-button" data-match-shop-message="${shop.id}" data-match-need-message="${item.id}" type="button" aria-label="留言">💬</button>
+                </span>
+              </div>
+              🏷️ ${shop.category} · ${formatShopServiceItems(shop)}<br>
+              📍 ${shop.address}<br>
+              ${shop.website ? `🔗 ${shop.websiteLabel || shop.website}<br>` : "🔗 尚無網址（可透過 Email 聯繫：support@crovantix.com 協助建立。）<br>"}
+              <span class="hint">點選店家可查看詳細資訊，也可按留言圖示與店家聯繫。</span>
+            </article>
+          `).join("") : "目前尚無服務項目與需求類別一致的店家。"}
+        </div>
+      `;
+    }
+
+    function bindMatchedShopActions(scope) {
+      scope.querySelectorAll("[data-match-shop-open]").forEach(card => {
+        card.addEventListener("click", event => {
+          if (event.target.closest("[data-match-shop-message]")) return;
+          showPage("shopsPage");
+          renderShops(card.dataset.matchShopOpen);
+        });
+      });
+      scope.querySelectorAll("[data-match-shop-message]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          const shop = studios.find(item => item.id === button.dataset.matchShopMessage);
+          const need = submittedNeeds.find(item => item.id === button.dataset.matchNeedMessage) || demands.find(item => item.id === button.dataset.matchNeedMessage);
+          if (!shop || !need) return;
+          const messageKey = `match-thread-${need.id}-${shop.id}`;
+          const thread = ensureMessageThread(messageKey, `與店家留言：${shop.name}`);
+          if (thread.messages.length === 1) {
+            thread.messages.push({
+              sender: "系統",
+              text: `已針對「${need.title}」建立店家媒合對話。`,
+              time: new Date().toLocaleString("zh-TW")
+            });
+          }
+          openMessageModal(messageKey, `與店家留言：${shop.name}`);
+          saveRecord("messages", {
+            title: "媒合店家留言",
+            shop,
+            demand: need,
+            requester: registerName.value.trim(),
+            email: registerEmail.value.trim(),
+            createdAt: new Date().toISOString()
+          });
+        });
+      });
+    }
+
+    function getStudioServiceOptions(selectedValue = "") {
+      return [...studioServiceItem.options].map(option => `<option ${option.value === selectedValue ? "selected" : ""}>${option.value}</option>`).join("");
+    }
+
+    function renderStudioExtraServices() {
+      studioExtraServices.innerHTML = studioServiceItems.map((service, index) => `
+        <div class="history-item">
+          <label>新增服務項目 ${index + 1}
+            <select class="studio-extra-service" data-studio-service-index="${index}">
+              ${getStudioServiceOptions(service)}
+            </select>
+          </label>
+        </div>
+      `).join("");
+      studioExtraServices.querySelectorAll("[data-studio-service-index]").forEach(select => {
+        select.addEventListener("change", () => {
+          studioServiceItems[Number(select.dataset.studioServiceIndex)] = select.value;
+        });
+      });
+    }
+
+    function formatShopServiceItems(shop) {
+      return (shop.serviceItems && shop.serviceItems.length ? shop.serviceItems : [shop.serviceItem || shop.category]).join("、");
+    }
+
+    function getUserShops() {
+      const myEmail = registerEmail.value.trim();
+      const myName = registerName.value.trim();
+      return studios.filter(shop => shop.email === myEmail || shop.owner === myName);
+    }
+
+    function updateUserButtonLabel() {
+      if (!registered) {
+        userButton.textContent = L("尚未註冊");
+        userButton.classList.remove("shop-cta", "has-shop-alert");
+        return;
+      }
+      const name = registerName.value.trim() || "使用者";
+      const needsShopAlert = getUserShops().length === 0;
+      userButton.innerHTML = `${escapeHTML(name)}${needsShopAlert ? '<span class="unread-badge show" aria-label="可以建立店家">!</span>' : ""}`;
+      userButton.classList.toggle("shop-cta", needsShopAlert);
+      userButton.classList.toggle("has-shop-alert", needsShopAlert);
+    }
+
+    function saveRecord(type, payload) {
+      if (window.AppDatabase) {
+        window.AppDatabase.save("service-match-ios-app", type, payload);
+      }
+    }
+
+    function updateCredits() {
+      statusPill.textContent = currentLanguage === "English" ? `Credits ${credits}` : `剩餘點數 ${credits}`;
+      statusPill.hidden = false;
+      planStatus.textContent = currentLanguage === "English" ? `Current Plan: ${L(currentPlan)}` : `目前方案：${currentPlan}`;
+    }
+
+    function spendCredits(amount, label) {
+      if (credits < amount) {
+        showToast(currentLanguage === "English" ? `Credits are used up. Please upgrade to continue.` : `點數已使用完，請升級後繼續使用。`);
+        showPage("upgradePage");
+        return false;
+      }
+      credits -= amount;
+      updateCredits();
+      saveRecord("messages", {
+        title: "點數扣除",
+        action: label,
+        points: amount,
+        remainingCredits: credits,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+      return true;
+    }
+
+    function populateCitySelect(citySelect, districtSelect, includeAll = false) {
+      citySelect.innerHTML = Object.keys(taiwanAreas).map(city => `<option>${city}</option>`).join("");
+      if (includeAll) citySelect.value = "全台";
+      updateDistrictSelect(citySelect, districtSelect, includeAll);
+      citySelect.addEventListener("change", () => updateDistrictSelect(citySelect, districtSelect, includeAll));
+    }
+
+    function updateDistrictSelect(citySelect, districtSelect, includeAll = false) {
+      const areas = taiwanAreas[citySelect.value] || ["全部區域"];
+      districtSelect.innerHTML = areas.map(area => `<option>${area}</option>`).join("");
+      if (includeAll) districtSelect.value = "全部區域";
+    }
+
+    function populateDateSelects(yearSelect, monthSelect, daySelect, includeAll = false) {
+      const currentYear = new Date().getFullYear();
+      const yearOptions = Array.from({ length: 7 }, (_, index) => currentYear + index);
+      yearSelect.innerHTML = `${includeAll ? "<option value=\"\">全部年份</option>" : ""}${yearOptions.map(year => `<option>${year}</option>`).join("")}`;
+      monthSelect.innerHTML = `${includeAll ? "<option value=\"\">全部月份</option>" : ""}${Array.from({ length: 12 }, (_, index) => `<option>${index + 1}</option>`).join("")}`;
+      updateDaySelect(yearSelect, monthSelect, daySelect, includeAll);
+      yearSelect.addEventListener("change", () => updateDaySelect(yearSelect, monthSelect, daySelect, includeAll));
+      monthSelect.addEventListener("change", () => updateDaySelect(yearSelect, monthSelect, daySelect, includeAll));
+    }
+
+    function updateDaySelect(yearSelect, monthSelect, daySelect, includeAll = false) {
+      const year = Number(yearSelect.value) || new Date().getFullYear();
+      const month = Number(monthSelect.value) || 1;
+      const days = new Date(year, month, 0).getDate();
+      const previousValue = daySelect.value;
+      daySelect.innerHTML = `${includeAll ? "<option value=\"\">全部日期</option>" : ""}${Array.from({ length: days }, (_, index) => `<option>${index + 1}</option>`).join("")}`;
+      if ([...daySelect.options].some(option => option.value === previousValue)) daySelect.value = previousValue;
+    }
+
+    function formatDate(yearSelect, monthSelect, daySelect) {
+      const year = yearSelect.value;
+      const month = monthSelect.value;
+      const day = daySelect.value;
+      if (!year || !month || !day) return "";
+      return `${year}/${String(month).padStart(2, "0")}/${String(day).padStart(2, "0")}`;
+    }
+
+    function matchesCaseFilters(item) {
+      const city = caseFilterCity.value;
+      const district = caseFilterDistrict.value;
+      const budget = caseFilterBudget.value;
+      const tag = caseFilterTag.value.trim();
+      return (!city || city === "全台" || item.city === city)
+        && (!district || district === "全部區域" || item.district === district)
+        && (!budget || item.budget === budget)
+        && (!tag || item.tag === tag || item.category === tag);
+    }
+
+    function sortCaseEntries(entries) {
+      const sortMode = caseSortTime.value;
+      const timestamp = value => new Date(String(value || "").replaceAll("/", "-")).getTime() || 0;
+      return [...entries].sort((left, right) => {
+        if (sortMode === "完成時間遠到近") return timestamp(right.item.deadline) - timestamp(left.item.deadline);
+        if (sortMode === "發需求時間新到舊") return timestamp(right.item.publishedAt) - timestamp(left.item.publishedAt);
+        if (sortMode === "發需求時間舊到新") return timestamp(left.item.publishedAt) - timestamp(right.item.publishedAt);
+        return timestamp(left.item.deadline) - timestamp(right.item.deadline);
+      });
+    }
+
+    function renderCases() {
+      const filteredDemands = sortCaseEntries(demands
+        .map((item, index) => ({ item, index }))
+        .filter(entry => matchesCaseFilters(entry.item)));
+      caseList.innerHTML = filteredDemands.length ? filteredDemands.map(({ item, index }) => {
+        const messageKey = item.messageKey || `case-${index}`;
+        const ownNeed = isOwnNeed(item);
+        return `
+          <article class="case-item">
+            <div class="case-top">
+              <span>${item.title}</span>
+              <span class="case-actions">
+                <span class="tag">${L(item.category)}</span>
+                ${item.photo ? `<button class="icon-button" data-photo-open="${index}" type="button" aria-label="查看照片">🖼</button>` : ""}
+                ${ownNeed ? "" : `<button class="icon-button ${acceptedMessageKeys.has(messageKey) ? "" : "locked"}" data-message-open="${index}" type="button" aria-label="留言">💬</button>`}
+              </span>
+            </div>
+            <div class="hint">${L(item.purpose || "📌 尋找服務")}</div>
+            <div class="hint">📅 ${currentLanguage === "English" ? "Posted" : "發佈需求日期"} ${item.publishedAt || L("未設定")}</div>
+            <div class="hint">📍 ${currentLanguage === "English" ? "Location" : "地區"}: ${L(item.location)}</div>
+            <div class="hint">💰 ${currentLanguage === "English" ? "Budget" : "預算區間"}: ${item.budget}</div>
+            <div class="hint">⏰ ${currentLanguage === "English" ? "Desired Completion" : "希望完成時間"}: ${item.deadline || L("未設定")}</div>
+            <div class="hint">${item.detail}</div>
+            ${ownNeed
+              ? `<button class="secondary-button" data-case-match="${item.id}" type="button">媒合（扣除點數5）</button>${renderMatchedShops(item)}`
+              : `<button class="${acceptedMessageKeys.has(messageKey) ? "secondary-button accepted-button" : "secondary-button"}" data-accept="${index}" type="button">${acceptedMessageKeys.has(messageKey) ? L("已送出給需求者") : "我要接案（扣除點數20）"}</button>`}
+          </article>
+        `;
+      }).join("") : `<div class="history-item">${L("目前沒有符合篩選條件的案件。")}</div>`;
+      caseList.querySelectorAll("[data-message-open]").forEach(button => {
+        button.addEventListener("click", () => {
+          const item = demands[Number(button.dataset.messageOpen)];
+          const messageKey = item.messageKey || `case-${button.dataset.messageOpen}`;
+          if (!acceptedMessageKeys.has(messageKey)) {
+            showToast(currentLanguage === "English" ? "Please accept this job before messaging the requester." : "請先按下我要接案才可以留言給提出需求者");
+            return;
+          }
+          openMessageModal(messageKey, `與提出需求者留言：${item.title}`);
+        });
+      });
+      caseList.querySelectorAll("[data-photo-open]").forEach(button => {
+        button.addEventListener("click", () => {
+          const item = demands[Number(button.dataset.photoOpen)];
+          if (!item || !item.photo) return;
+          photoModalTitle.textContent = `${L("需求照片")}：${item.title}`;
+          casePhotoImage.src = item.photo;
+          photoModal.classList.add("show");
+        });
+      });
+      caseList.querySelectorAll("[data-accept]").forEach(button => {
+        button.addEventListener("click", () => {
+          const item = demands[Number(button.dataset.accept)];
+          const messageKey = item.messageKey || `case-${button.dataset.accept}`;
+          if (acceptedMessageKeys.has(messageKey)) {
+            showToast(L("已送出接案意願"));
+            return;
+          }
+          if (!spendCredits(20, "我要接案")) return;
+          acceptedMessageKeys.add(messageKey);
+          button.textContent = L("已送出給需求者");
+          button.classList.add("accepted-button");
+          const thread = ensureMessageThread(messageKey, `與提出需求者留言：${item.title}`);
+          thread.messages.push({
+            sender: "提出需求者",
+            text: "已收到你的接案意願，可在這裡繼續確認需求細節。",
+            time: new Date().toLocaleString("zh-TW")
+          });
+          thread.unread = (thread.unread || 0) + 1;
+          acceptedCases.unshift({
+            ...item,
+            messageKey,
+            time: new Date().toLocaleString("zh-TW")
+          });
+          showTopActivityAlert(`新接案：已送出「${item.title}」給需求者`, "profilePage");
+          renderCases();
+          renderProfileHistory();
+          saveRecord("messages", {
+            title: "接案意願",
+            content: item.title,
+            category: item.category,
+            role: "接案者",
+            caseTitle: item.title,
+            caseMessageKey: messageKey,
+            requester: registerName.value.trim(),
+            email: registerEmail.value.trim(),
+            createdAt: new Date().toISOString()
+          });
+        });
+      });
+      caseList.querySelectorAll("[data-case-match]").forEach(button => {
+        button.addEventListener("click", () => {
+          if (!spendCredits(5, "媒合")) return;
+          matchedNeedId = button.dataset.caseMatch;
+          renderCases();
+        });
+      });
+      bindMatchedShopActions(caseList);
+    }
+
+    function getStars(shopId) {
+      const reviews = shopReviews[shopId] || [];
+      if (!reviews.length) return "☆☆☆☆☆";
+      const average = Math.round(reviews.reduce((sum, review) => sum + Number(review.stars || 0), 0) / reviews.length);
+      return "★★★★★".slice(0, average) + "☆☆☆☆☆".slice(0, 5 - average);
+    }
+
+    function getShopCity(address) {
+      return Object.keys(taiwanAreas).find(city => address.includes(city)) || "全台";
+    }
+
+    function getShopDistrict(address, city) {
+      const districts = taiwanAreas[city] || ["全部區域"];
+      return districts.find(district => district !== "全部區域" && address.includes(district)) || "全部區域";
+    }
+
+    function inferShopCategory(services) {
+      if (/水電|裝修|防水|燈具|居家|清潔|修繕/.test(services)) return "🏠 居家生活";
+      if (/網站|App|AI|資料庫|系統|後端|程式|軟體/.test(services)) return "💻 資訊科技";
+      if (/攝影|影片|剪輯|照片/.test(services)) return "📷 影像影音";
+      if (/行銷|廣告|社群|投放/.test(services)) return "📢 行銷廣告";
+      return "🤝 其他服務";
+    }
+
+    function matchesShopFilters(shop) {
+      const city = shopFilterCity.value;
+      const district = shopFilterDistrict.value;
+      const budget = shopFilterBudget.value;
+      const category = shopFilterCategory.value;
+      return (!city || city === "全台" || shop.city === city)
+        && (!district || district === "全部區域" || shop.district === district)
+        && (!budget || shop.budget === budget)
+        && (!category || shop.category === category);
+    }
+
+    function renderShops(preferredShopId = activeShopId) {
+      if (!hasSearchedShops && !preferredShopId) {
+        shopList.innerHTML = `<div class="history-item">請先選擇篩選項目，按下搜尋後會在下方顯示符合條件的店家。</div>`;
+        shopDetail.classList.remove("show");
+        shopDetail.innerHTML = "";
+        return;
+      }
+      const filteredShops = studios.filter(matchesShopFilters);
+      shopList.innerHTML = filteredShops.length ? filteredShops.map(shop => `
+        <article class="case-item" data-shop-card="${shop.id}">
+          <div class="case-top">
+            <span>${shop.name}</span>
+            <span class="case-actions">
+              <span class="shop-rating">${getStars(shop.id)}</span>
+              <button class="icon-button" data-review-open="${shop.id}" type="button" aria-label="評價與留言">★</button>
+            </span>
+          </div>
+          <div class="hint">${shop.category} · 📍 ${shop.address}</div>
+          <div class="hint">${shop.website ? `網址：${shop.websiteLabel || shop.website}` : "尚無網址（可透過 Email 聯繫：support@crovantix.com 協助建立。）"}</div>
+          <div class="hint">${formatShopServiceItems(shop)} · 💰 ${shop.budget}</div>
+          <div class="hint">${shop.services}</div>
+          <button class="secondary-button" data-shop-need-message="${shop.id}" type="button">我有需求（扣除點數5）</button>
+        </article>
+      `).join("") : `<div class="history-item">目前沒有符合篩選條件的店家。</div>`;
+
+      shopList.querySelectorAll("[data-shop-card]").forEach(card => {
+        card.addEventListener("click", event => {
+          if (event.target.closest("[data-review-open]")) return;
+          if (event.target.closest("[data-shop-need-message]")) return;
+          openShopDetail(card.dataset.shopCard);
+        });
+      });
+      shopList.querySelectorAll("[data-review-open]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          openShopDetail(button.dataset.reviewOpen, true);
+        });
+      });
+      shopList.querySelectorAll("[data-shop-need-message]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          const shop = studios.find(item => item.id === button.dataset.shopNeedMessage);
+          if (shop) openShopNeedMessage(shop);
+        });
+      });
+
+      if (preferredShopId && studios.some(shop => shop.id === preferredShopId)) {
+        openShopDetail(preferredShopId);
+      } else {
+        shopDetail.classList.remove("show");
+        shopDetail.innerHTML = "";
+      }
+    }
+
+    function openShopDetail(shopId, scrollToReviews = false) {
+      activeShopId = shopId;
+      const shop = studios.find(item => item.id === shopId);
+      if (!shop) return;
+      const reviews = [...(shopReviews[shopId] || [])].sort((a, b) => new Date(String(b.time).replaceAll("/", "-")) - new Date(String(a.time).replaceAll("/", "-")));
+      shopDetail.innerHTML = `
+        <div class="label-row"><strong>${shop.name}</strong><span class="shop-rating">${getStars(shop.id)}</span></div>
+        <div class="hint">📍 ${shop.address}</div>
+        <div class="hint">${shop.website ? `🔗 <a href="${shop.website}" target="_blank" rel="noopener" style="color:var(--cyan);">${shop.websiteLabel || "店家網址"}</a>` : "🔗 尚無店家網址，可透過 Email 聯繫：support@crovantix.com 協助建立。"}</div>
+        <div class="hint">🏷️ ${shop.category} · ${formatShopServiceItems(shop)} · 💰 ${shop.budget}</div>
+        <div class="result show">${shop.services}</div>
+        <button class="primary-button" id="shopNeedButton" type="button">我有需求（扣除點數5）</button>
+        <section class="accordion-item open" id="shopReviewSection">
+          <button class="accordion-toggle" type="button">
+            <span>評價與留言</span><span class="plus">＋</span>
+          </button>
+          <div class="accordion-body">
+            <label>星號評價
+              <select id="shopReviewStars">
+                <option value="5">★★★★★ 5</option>
+                <option value="4">★★★★☆ 4</option>
+                <option value="3">★★★☆☆ 3</option>
+                <option value="2">★★☆☆☆ 2</option>
+                <option value="1">★☆☆☆☆ 1</option>
+              </select>
+            </label>
+            <label>留言評價<textarea id="shopReviewText" maxlength="180" placeholder="留下你對店家的評價。"></textarea></label>
+            <button class="secondary-button" id="submitShopReview" type="button">送出評價</button>
+            <div class="history-list">
+              ${reviews.length ? reviews.map(review => `
+                <article class="history-item">
+                  <b><span class="shop-rating">${"★★★★★".slice(0, review.stars)}${"☆☆☆☆☆".slice(0, 5 - review.stars)}</span> ${review.user}</b>
+                  ${review.time}<br>${review.text}
+                </article>
+              `).join("") : `<div class="history-item">尚無評價。</div>`}
+            </div>
+          </div>
+        </section>
+      `;
+      shopDetail.classList.add("show");
+      shopDetail.querySelector("#shopNeedButton").addEventListener("click", () => {
+        openShopNeedMessage(shop);
+      });
+      shopDetail.querySelector("#submitShopReview").addEventListener("click", () => submitShopReview(shop));
+      shopDetail.querySelectorAll(".accordion-toggle").forEach(button => {
+        button.addEventListener("click", () => button.closest(".accordion-item").classList.toggle("open"));
+      });
+      requestAnimationFrame(() => {
+        (scrollToReviews ? shopDetail.querySelector("#shopReviewSection") : shopDetail).scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    function openShopNeedMessage(shop) {
+      if (!spendCredits(5, "我有需求")) return;
+      const messageKey = `shop-direct-${shop.id}-${getCurrentUserEmail() || "guest"}`;
+      const thread = ensureMessageThread(messageKey, `與店家留言：${shop.name}`);
+      if (thread.messages.length === 1) {
+        thread.messages.push({
+          sender: "系統",
+          text: `已建立與「${shop.name}」的需求留言，請輸入你的需求內容。`,
+          time: new Date().toLocaleString("zh-TW")
+        });
+      }
+      openMessageModal(messageKey, `與店家留言：${shop.name}`);
+      saveRecord("messages", {
+        title: "找店家我有需求",
+        shop,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    function addShopRequest(shop, detail) {
+      const request = {
+        id: `shop-request-${Date.now()}`,
+        shopId: shop.id,
+        shopName: shop.name,
+        title: `給 ${shop.name} 的需求`,
+        detail,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        accepted: false,
+        messageKey: `shop-thread-${Date.now()}`,
+        time: new Date().toLocaleString("zh-TW")
+      };
+      shopRequests.unshift(request);
+      ensureMessageThread(request.messageKey, `與店家留言：${shop.name}`);
+      showStoreAlert(request);
+      saveRecord("questions", {
+        title: "送出店家需求",
+        shop,
+        request,
+        requester: request.requester,
+        email: request.email,
+        createdAt: new Date().toISOString()
+      });
+      return request;
+    }
+
+    function showStoreAlert(request) {
+      storeAlert.dataset.shopId = request.shopId;
+      showTopActivityAlert(`新需求：${request.shopName} 收到 ${request.requester} 的需求`, "profilePage", { openStudio: true });
+    }
+
+    function acceptShopRequest(requestId) {
+      const request = shopRequests.find(item => item.id === requestId);
+      if (!request || request.accepted) return;
+      if (!spendCredits(20, "店家接案")) return;
+      request.accepted = true;
+      const thread = ensureMessageThread(request.messageKey, `與需求者留言：${request.title}`);
+      thread.messages.push({
+        sender: "店家",
+        text: "店家已接案，可以開始溝通需求細節。",
+        time: new Date().toLocaleString("zh-TW")
+      });
+      thread.unread = (thread.unread || 0) + 1;
+      if (document.querySelector("#shopsPage").classList.contains("active")) {
+        renderShops(request.shopId);
+      }
+      renderProfileHistory();
+      saveRecord("messages", {
+        title: "店家接案",
+        request,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    function submitShopReview(shop) {
+      const stars = Number(shopDetail.querySelector("#shopReviewStars").value);
+      const text = shopDetail.querySelector("#shopReviewText").value.trim();
+      if (!text) {
+        showToast("請先輸入評價留言");
+        return;
+      }
+      if (!shopReviews[shop.id]) shopReviews[shop.id] = [];
+      const review = {
+        stars,
+        text,
+        user: registerName.value.trim() || "使用者",
+        time: new Date().toLocaleString("zh-TW")
+      };
+      shopReviews[shop.id].unshift(review);
+      openShopDetail(shop.id, true);
+      renderShops(shop.id);
+      saveRecord("messages", {
+        title: "店家評價",
+        shop,
+        review,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    function renderProfileHistory() {
+      const unreadTotal = Object.values(messageThreads).reduce((sum, thread) => sum + (thread.unread || 0), 0);
+      messageUnreadBadge.classList.toggle("show", unreadTotal > 0);
+      profilePlanStatus.classList.toggle("show", hasUpgraded);
+      profilePlanStatus.textContent = hasUpgraded
+        ? `目前升級方案：${currentPlan}\n剩餘點數：${credits}`
+        : "";
+      const myShops = getUserShops();
+      studioCreateBadge.classList.toggle("show", registered && myShops.length === 0);
+      updateUserButtonLabel();
+      myStudioAccordion.style.display = myShops.length ? "" : "none";
+      myStudioList.innerHTML = myShops.length
+        ? myShops.map(shop => {
+          const requests = shopRequests.filter(request => request.shopId === shop.id);
+          return `
+            <article class="history-item">
+              <b>${shop.name}</b>
+              📍 ${shop.address}<br>
+              ${shop.website ? `🔗 ${shop.websiteLabel || shop.website}<br>` : "🔗 尚無網址（可透過 Email 聯繫：support@crovantix.com 協助建立。）<br>"}
+              🏷️ ${shop.category} · ${formatShopServiceItems(shop)}<br>
+              ${shop.services}
+              <br><br><b>新需求</b>
+              ${requests.length ? requests.map(request => `
+                <div class="history-item">
+                  <b>${request.title}</b>
+                  ${request.time}<br>${request.detail}<br>
+                  <button class="${request.accepted ? "secondary-button accepted-button" : "secondary-button"}" data-shop-accept="${request.id}" type="button">${request.accepted ? "已接案" : "接案（扣除點數20）"}</button>
+                  ${request.accepted ? `<button class="icon-button" data-shop-message="${request.messageKey}" data-shop-message-title="${request.title}" type="button" aria-label="留言">💬</button>` : ""}
+                </div>
+              `).join("") : "目前尚無新需求。"}
+            </article>
+          `;
+        }).join("")
+        : "";
+      submittedNeedsList.innerHTML = submittedNeeds.length
+        ? submittedNeeds.map(item => `
+          <article class="history-item">
+            <b>${item.category} · ${item.title}</b>
+            ${item.time}<br>${item.detail}<br>照片：${item.hasPhoto ? "已附加" : "未附加"}
+            <br>📅 發布日期：${item.publishedAt || item.time}
+            <br>📍 ${item.location} · 💰 ${item.budget} · ⏰ ${item.deadline || "未設定"}
+            <br>🏷️ ${item.tag || "未分類"} · ${item.purpose || "未設定目的"}
+            <div class="history-actions">
+              <button class="secondary-button" data-edit-need="${item.id}" type="button">修改</button>
+              <button class="secondary-button" data-match-need="${item.id}" type="button">媒合（扣除點數5）</button>
+            </div>
+            ${renderMatchedShops(item)}
+          </article>
+        `).join("")
+        : `<div class="history-item">尚未提出需求。</div>`;
+      acceptedCasesList.innerHTML = acceptedCases.length
+        ? acceptedCases.map(item => `
+          <article class="history-item">
+            <b>${item.category} · ${item.title}</b>
+            ${item.time}<br>${item.location} · ${item.budget}<br>${item.detail}
+            <br>📅 發布日期：${item.publishedAt || item.time}
+            <br>⏰ ${item.deadline || "未設定"} · 🏷️ ${item.tag || "未分類"} · ${item.purpose || "未設定目的"}
+            <br><button class="secondary-button" data-message-key="${item.messageKey}" data-message-title="${item.title}" type="button">留言</button>
+          </article>
+        `).join("")
+        : `<div class="history-item">尚未接案。</div>`;
+      messageCenterList.innerHTML = Object.entries(messageThreads).length
+        ? Object.entries(messageThreads).map(([key, thread]) => `
+          <article class="history-item">
+            <b>${thread.title}</b>
+            ${thread.messages.slice(-3).map(message => `${message.time} ${message.sender}：${message.text}`).join("<br>")}
+            <br><button class="secondary-button" data-message-key="${key}" data-message-title="${thread.title}" type="button">開啟對話</button>
+          </article>
+        `).join("")
+        : `<div class="history-item">尚無留言。</div>`;
+      document.querySelectorAll("[data-message-key]").forEach(button => {
+        button.addEventListener("click", () => openMessageModal(button.dataset.messageKey, button.dataset.messageTitle));
+      });
+      submittedNeedsList.querySelectorAll("[data-edit-need]").forEach(button => {
+        button.addEventListener("click", () => editSubmittedNeed(button.dataset.editNeed));
+      });
+      submittedNeedsList.querySelectorAll("[data-match-need]").forEach(button => {
+        button.addEventListener("click", () => {
+          if (!spendCredits(5, "媒合")) return;
+          matchedNeedId = button.dataset.matchNeed;
+          renderProfileHistory();
+        });
+      });
+      bindMatchedShopActions(submittedNeedsList);
+      myStudioList.querySelectorAll("[data-shop-accept]").forEach(button => {
+        button.addEventListener("click", () => acceptShopRequest(button.dataset.shopAccept));
+      });
+      myStudioList.querySelectorAll("[data-shop-message]").forEach(button => {
+        button.addEventListener("click", () => openMessageModal(button.dataset.shopMessage, `與需求者留言：${button.dataset.shopMessageTitle}`));
+      });
+    }
+
+    function editSubmittedNeed(needId) {
+      const item = submittedNeeds.find(need => need.id === needId);
+      if (!item) return;
+      editingNeedId = needId;
+      needCategory.value = item.category;
+      needPurpose.value = item.purpose || needPurpose.value;
+      needCity.value = item.city || "全台";
+      updateDistrictSelect(needCity, needDistrict);
+      needDistrict.value = item.district || "全部區域";
+      needBudget.value = item.budget || needBudget.value;
+      needDeadlineDate.value = String(item.deadline || "").replaceAll("/", "-") || needDeadlineDate.min;
+      needText.value = item.detail || "";
+      selectedPhoto = item.photo || "";
+      photoPreview.innerHTML = selectedPhoto ? `<img src="${selectedPhoto}" alt="需求照片預覽">` : "尚未加入照片";
+      needStatus.textContent = "修改需求";
+      needResult.textContent = "正在修改已提出的需求，送出後會更新個人中心資料。";
+      needResult.classList.add("show");
+      showPage("needPage");
+      requestAnimationFrame(() => needText.focus());
+    }
+
+    function ensureMessageThread(key, title) {
+      if (!messageThreads[key]) {
+        messageThreads[key] = {
+          title,
+          unread: 0,
+          messages: [
+            { sender: "系統", text: "已建立對話，可與提出需求者或提案者留言。", time: new Date().toLocaleString("zh-TW") }
+          ]
+        };
+      }
+      return messageThreads[key];
+    }
+
+    function openMessageModal(key, title) {
+      activeMessageKey = key;
+      activeMessageTitle = title || "留言";
+      ensureMessageThread(key, activeMessageTitle);
+      messageThreads[key].unread = 0;
+      messageModalTitle.textContent = activeMessageTitle;
+      renderMessageThread();
+      renderProfileHistory();
+      messageInput.value = "";
+      messageModal.classList.add("show");
+    }
+
+    function renderMessageThread() {
+      const thread = ensureMessageThread(activeMessageKey, activeMessageTitle);
+      messageThread.innerHTML = thread.messages.map(message => `
+        <div class="message-bubble ${message.sender === "我" ? "me" : ""}">
+          <b>${message.sender}</b><br>${message.text}<br><span class="hint">${message.time}</span>
+        </div>
+      `).join("");
+    }
+
+    navButtons.forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
+
+    historyBack.addEventListener("click", () => {
+      if (pageHistoryIndex <= 0) return;
+      pageHistoryIndex -= 1;
+      showPage(pageHistory[pageHistoryIndex], { record: false });
+    });
+
+    historyForward.addEventListener("click", () => {
+      if (pageHistoryIndex >= pageHistory.length - 1) return;
+      pageHistoryIndex += 1;
+      showPage(pageHistory[pageHistoryIndex], { record: false });
+    });
+
+    closeMessageModal.addEventListener("click", () => {
+      messageModal.classList.remove("show");
+    });
+
+    closePhotoModal.addEventListener("click", () => {
+      photoModal.classList.remove("show");
+      casePhotoImage.removeAttribute("src");
+    });
+
+    sendMessageButton.addEventListener("click", () => {
+      const text = messageInput.value.trim();
+      if (!text || !activeMessageKey) return;
+      const thread = ensureMessageThread(activeMessageKey, activeMessageTitle);
+      const message = {
+        sender: "我",
+        text,
+        time: new Date().toLocaleString("zh-TW")
+      };
+      thread.messages.push(message);
+      messageInput.value = "";
+      renderMessageThread();
+      renderProfileHistory();
+      saveRecord("messages", {
+        title: "留言",
+        threadKey: activeMessageKey,
+        thread: activeMessageTitle,
+        content: text,
+        message,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    [caseFilterDistrict, caseFilterBudget, caseSortTime, caseFilterTag].forEach(input => {
+      input.addEventListener("change", renderCases);
+    });
+
+    searchShopsButton.addEventListener("click", () => {
+      hasSearchedShops = true;
+      renderShops("");
+      requestAnimationFrame(() => shopList.scrollIntoView({ behavior: "smooth", block: "start" }));
+    });
+
+    clearCaseFilters.addEventListener("click", () => {
+      caseFilterCity.value = "全台";
+      updateDistrictSelect(caseFilterCity, caseFilterDistrict, true);
+      caseFilterBudget.value = "";
+      caseSortTime.value = "完成時間近到遠";
+      caseFilterTag.value = "";
+      renderCases();
+    });
+
+    clearShopFilters.addEventListener("click", () => {
+      shopFilterCity.value = "全台";
+      updateDistrictSelect(shopFilterCity, shopFilterDistrict, true);
+      shopFilterBudget.value = "";
+      shopFilterCategory.value = "";
+      hasSearchedShops = false;
+      renderShops("");
+    });
+
+    storeAlert.addEventListener("click", () => {
+      const targetPage = storeAlert.dataset.targetPage || "profilePage";
+      showPage(targetPage);
+      if (storeAlert.dataset.openStudio === "1") {
+        myStudioAccordion.style.display = "";
+        myStudioAccordion.classList.add("open");
+      }
+      storeAlert.classList.remove("show");
+    });
+
+    userButton.addEventListener("click", () => {
+      showPage(registered ? "profilePage" : "registerPage");
+    });
+
+    document.querySelectorAll(".accordion-toggle").forEach(button => {
+      button.addEventListener("click", () => {
+        button.closest(".accordion-item").classList.toggle("open");
+      });
+    });
+
+    sendSms.addEventListener("click", () => {
+      generatedCode = String(Math.floor(1000 + Math.random() * 9000));
+      smsHint.textContent = `已發送 4 位數簡訊驗證碼。原型示範碼：${generatedCode}`;
+    });
+
+    sendProfileSms.addEventListener("click", () => {
+      profileGeneratedCode = String(Math.floor(1000 + Math.random() * 9000));
+      profileSmsHint.textContent = `已發送 4 位數驗證碼。原型示範碼：${profileGeneratedCode}`;
+    });
+
+    toggleTerms.addEventListener("click", () => {
+      termsBox.classList.toggle("open");
+    });
+
+    finishRegister.addEventListener("click", () => {
+      if (!registerName.value.trim() || !registerPhone.value.trim() || !registerBirthday.value || !registerEmail.value.trim()) {
+        smsHint.textContent = "請先填寫姓名、電話、生日與 Email。";
+        return;
+      }
+      if (!generatedCode) {
+        smsHint.textContent = "請先發送簡訊驗證碼。";
+        return;
+      }
+      if (smsCode.value.trim() !== generatedCode) {
+        smsHint.textContent = "簡訊驗證碼輸入錯誤。";
+        return;
+      }
+      if (!termsBox.classList.contains("open")) {
+        smsHint.textContent = "請先展開條文閱讀後再完成註冊。";
+        return;
+      }
+      if (!agreeTerms.checked) {
+        smsHint.textContent = "請勾選同意條文後再完成註冊。";
+        return;
+      }
+      registered = true;
+      syncUserFields();
+      updateUserButtonLabel();
+      appStatus.textContent = "註冊成功，可以開始提出需求或接案。";
+      saveRecord("users", {
+        name: registerName.value.trim(),
+        phone: registerPhone.value.trim(),
+        birthday: registerBirthday.value,
+        email: registerEmail.value.trim(),
+        gender: document.querySelector("#registerGender").value,
+        source: "完成註冊",
+        createdAt: new Date().toISOString()
+      });
+      renderProfileHistory();
+      showPage("needPage");
+    });
+
+    photoInput.addEventListener("change", () => {
+      const file = photoInput.files && photoInput.files[0];
+      if (!file) return;
+      selectedPhoto = URL.createObjectURL(file);
+      photoPreview.innerHTML = `<img src="${selectedPhoto}" alt="需求照片預覽">`;
+    });
+
+    openCamera.addEventListener("click", async () => {
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        photoPreview.innerHTML = `<video id="cameraVideo" autoplay playsinline></video>`;
+        photoPreview.querySelector("video").srcObject = cameraStream;
+        cameraControls.style.display = "grid";
+      } catch (error) {
+        photoPreview.textContent = "目前瀏覽器無法開啟相機，可改用挑選照片。";
+      }
+    });
+
+    capturePhoto.addEventListener("click", () => {
+      const video = photoPreview.querySelector("video");
+      if (!video) return;
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+      selectedPhoto = canvas.toDataURL("image/png");
+      photoPreview.innerHTML = `<img src="${selectedPhoto}" alt="拍照預覽">`;
+      closeCamera.click();
+    });
+
+    closeCamera.addEventListener("click", () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+      cameraStream = null;
+      cameraControls.style.display = "none";
+    });
+
+    submitNeed.addEventListener("click", () => {
+      const detail = needText.value.trim();
+      if (!detail) {
+        needResult.textContent = "請先輸入需求描述。";
+        needResult.classList.add("show");
+        return;
+      }
+      if (!needDeadlineDate.value || needDeadlineDate.value < needDeadlineDate.min) {
+        needResult.textContent = "希望完成時間不可選擇過去日期。";
+        needResult.classList.add("show");
+        return;
+      }
+      const isEditing = Boolean(editingNeedId);
+      const item = {
+        id: editingNeedId || `need-${Date.now()}`,
+        category: needCategory.value,
+        purpose: needPurpose.value,
+        title: detail.slice(0, 18),
+        budget: needBudget.value.trim() || "等待報價",
+        city: needCity.value,
+        district: needDistrict.value,
+        location: needCity.value === "全台" ? "全台" : `${needCity.value} ${needDistrict.value}`,
+        deadline: needDeadlineDate.value.replaceAll("-", "/"),
+        tag: needCategory.value,
+        detail,
+        hasPhoto: Boolean(selectedPhoto),
+        photo: selectedPhoto,
+        publishedAt: new Date().toLocaleDateString("zh-TW"),
+        time: new Date().toLocaleString("zh-TW"),
+        owner: registerName.value.trim(),
+        ownerEmail: registerEmail.value.trim(),
+        messageKey: isEditing
+          ? (submittedNeeds.find(need => need.id === editingNeedId)?.messageKey || `need-thread-${Date.now()}`)
+          : `need-thread-${Date.now()}`
+      };
+      const demandIndex = demands.findIndex(need => need.id === item.id);
+      const submittedIndex = submittedNeeds.findIndex(need => need.id === item.id);
+      if (isEditing && demandIndex >= 0) {
+        Object.assign(demands[demandIndex], item);
+      } else {
+        demands.unshift(item);
+      }
+      if (isEditing && submittedIndex >= 0) {
+        Object.assign(submittedNeeds[submittedIndex], item);
+      } else {
+        submittedNeeds.unshift(item);
+      }
+      const targetShop = targetShopNeedId ? studios.find(shop => shop.id === targetShopNeedId) : null;
+      let shopRequest = null;
+      if (targetShop && !isEditing) {
+        shopRequest = addShopRequest(targetShop, detail);
+        targetShopNeedId = "";
+      }
+      editingNeedId = "";
+      matchedNeedId = "";
+      renderCases();
+      renderShops(targetShop?.id || activeShopId);
+      renderProfileHistory();
+      needStatus.textContent = "已送出";
+      needResult.textContent = `${isEditing ? "已更新需求。" : "已送出需求。"}\n可以至個人中心查看需求\n類別：${item.category}\n目的：${item.purpose}\n地區：${item.location}\n預算：${item.budget}\n希望完成時間：${item.deadline}\n需求分類：${item.tag}\n發布日期：${item.publishedAt}\n內容：${detail}\n照片：${selectedPhoto ? "已附加" : "未附加"}\n系統會媒合適合的接案者。`;
+      if (targetShop && shopRequest) {
+        needResult.textContent += `\n\n已同步送出給店家：${targetShop.name}`;
+      }
+      needResult.classList.add("show");
+      showTopActivityAlert(`${isEditing ? "需求已更新" : "新需求"}：${item.title}`, "casePage");
+      requestAnimationFrame(() => {
+        needResult.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      saveRecord("questions", {
+        title: "提出需求",
+        demand: item,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+      saveRecord("messages", {
+        title: "提出需求",
+        demand: item,
+        category: item.category,
+        purpose: item.purpose,
+        location: item.location,
+        budget: item.budget,
+        deadline: item.deadline,
+        tag: item.tag,
+        publishedAt: item.publishedAt,
+        content: detail,
+        hasPhoto: Boolean(selectedPhoto),
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    submitReport.addEventListener("click", () => {
+      const detail = reportText.value.trim();
+      if (!detail) {
+        reportResult.textContent = "請先輸入問題內容。";
+        reportResult.classList.add("show");
+        return;
+      }
+      reportStatus.textContent = "已送出";
+      reportResult.textContent = "感謝您的回報，已將問題提送至客服support@crovantix.com";
+      reportResult.classList.add("show");
+      saveRecord("messages", {
+        title: "問題回報",
+        type: reportType.value,
+        content: detail,
+        requester: reportName.value.trim(),
+        email: reportEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+      saveRecord("emails", {
+        to: "support@crovantix.com",
+        subject: `需求媒合 App 問題回報：${reportType.value}`,
+        body: detail,
+        requester: reportName.value.trim(),
+        email: reportEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    addStudioServiceButton.addEventListener("click", () => {
+      if (!spendCredits(20, "新增店家服務項目")) return;
+      studioServiceItems.push(studioServiceItem.value);
+      renderStudioExtraServices();
+      studioResult.textContent = "已新增服務項目欄位，並扣除點數 20 點。";
+      studioResult.classList.add("show");
+    });
+
+    createStudioButton.addEventListener("click", () => {
+      const name = studioName.value.trim();
+      const city = studioCity.value;
+      const district = studioDistrict.value;
+      const address = city === "全台" ? "全台" : `${city} ${district}`;
+      const website = studioWebsite.value.trim();
+      const serviceItem = studioServiceItem.value;
+      const serviceItems = [...new Set([serviceItem, ...studioServiceItems])];
+      const services = studioServices.value.trim();
+      if (!name || !city || !district || !services) {
+        studioResult.textContent = "請先填寫店家名稱、縣市、區域與可提供的服務。";
+        studioResult.classList.add("show");
+        return;
+      }
+      const normalizedName = name.replace(/\s+/g, "").toLowerCase();
+      const ownerEmail = registerEmail.value.trim();
+      const duplicatedStudio = studios.some(shop =>
+        shop.name.replace(/\s+/g, "").toLowerCase() === normalizedName
+        && shop.address === address
+        && shop.email === ownerEmail
+      );
+      if (duplicatedStudio) {
+        studioResult.textContent = "店家已建立";
+        studioResult.classList.add("show");
+        return;
+      }
+      if (!spendCredits(50, "建立工作室")) return;
+      const studio = {
+        id: `shop-${Date.now()}`,
+        name,
+        address,
+        website,
+        serviceItem,
+        serviceItems,
+        services,
+        category: serviceItem,
+        city,
+        district,
+        budget: "10000-100000",
+        owner: registerName.value.trim(),
+        email: ownerEmail,
+        createdAt: new Date().toISOString()
+      };
+      studios.unshift(studio);
+      shopReviews[studio.id] = [];
+      studioResult.textContent = `店家已建立。\n名稱：${name}\n地址：${address}\n網址：${website || "尚無網址（可透過 Email 聯繫：support@crovantix.com 協助建立。）"}\n服務項目：${serviceItems.join("、")}\n服務：${services}`;
+      studioResult.classList.add("show");
+      studioServiceItems = [];
+      renderStudioExtraServices();
+      showTopActivityAlert(`新店家：${name} 已建立`, "shopsPage");
+      renderShops("");
+      renderProfileHistory();
+      saveRecord("users", {
+        title: "建立店家",
+        studio,
+        remainingCredits: credits
+      });
+      saveRecord("messages", {
+        title: "建立店家",
+        content: services,
+        studio,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    document.querySelectorAll("[data-plan]").forEach(card => {
+      card.addEventListener("click", () => {
+        selectedPlan = {
+          name: card.dataset.plan,
+          points: Number(card.dataset.points),
+          price: card.dataset.price
+        };
+        paymentPlanLabel.textContent = `${selectedPlan.name} ${selectedPlan.price} / ${selectedPlan.points} 點`;
+        paymentResult.classList.remove("show");
+        showPage("paymentPage");
+      });
+    });
+
+    payPlanButton.addEventListener("click", () => {
+      if (!selectedPlan) {
+        paymentResult.textContent = "請先選擇升級方案。";
+        paymentResult.classList.add("show");
+        return;
+      }
+      if (!cardName.value.trim() || !cardNumber.value.trim() || !cardExpiry.value.trim() || !cardCvc.value.trim()) {
+        paymentResult.textContent = "請完整填寫信用卡資料。";
+        paymentResult.classList.add("show");
+        return;
+      }
+      credits += selectedPlan.points;
+      currentPlan = selectedPlan.name;
+      hasUpgraded = true;
+      updateCredits();
+      renderProfileHistory();
+      paymentResult.textContent = `付款成功，已升級 ${selectedPlan.name}，新增 ${selectedPlan.points} 點。`;
+      paymentResult.classList.add("show");
+      saveRecord("users", {
+        title: "升級方案",
+        plan: currentPlan,
+        addedPoints: selectedPlan.points,
+        remainingCredits: credits,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        paidAt: new Date().toISOString()
+      });
+      saveRecord("messages", {
+        title: "信用卡付費升級",
+        plan: currentPlan,
+        price: selectedPlan.price,
+        addedPoints: selectedPlan.points,
+        remainingCredits: credits,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    themeSelect.addEventListener("change", () => {
+      document.body.dataset.theme = themeSelect.value;
+    });
+
+    fontSelect.addEventListener("change", () => {
+      app.classList.remove("font-small", "font-normal", "font-large");
+      app.classList.add(fontSelect.value);
+    });
+
+    languageSelect.addEventListener("change", () => {
+      currentLanguage = languageSelect.value;
+      const activePage = document.querySelector(".page.active")?.id || "registerPage";
+      renderCases();
+      renderProfileHistory();
+      showPage(activePage);
+      applyLanguage();
+    });
+
+    saveProfile.addEventListener("click", () => {
+      const nextPhone = profilePhone.value.trim() || registerPhone.value;
+      const nextEmail = profileEmail.value.trim() || registerEmail.value;
+      const contactChanged = nextPhone !== registerPhone.value.trim() || nextEmail !== registerEmail.value.trim();
+      if (contactChanged && !profileGeneratedCode) {
+        profileSmsHint.textContent = "修改電話或 Email 前，請先發送驗證碼。";
+        return;
+      }
+      if (contactChanged && profileSmsCode.value.trim() !== profileGeneratedCode) {
+        profileSmsHint.textContent = "修改驗證碼輸入錯誤。";
+        return;
+      }
+      registerName.value = profileName.value.trim() || registerName.value;
+      registerPhone.value = nextPhone;
+      registerEmail.value = nextEmail;
+      registerBirthday.value = profileBirthday.value || registerBirthday.value;
+      document.querySelector("#registerGender").value = profileGender.value;
+      syncUserFields();
+      updateUserButtonLabel();
+      profileSmsCode.value = "";
+      profileGeneratedCode = "";
+      profileSmsHint.textContent = "若修改電話或 Email，需先發送並輸入 4 位數驗證碼。";
+      profileResult.textContent = contactChanged ? "驗證成功，個人資料已更新。" : "個人資料已更新。";
+      profileResult.classList.add("show");
+      saveRecord("users", {
+        name: registerName.value.trim(),
+        phone: registerPhone.value.trim(),
+        email: registerEmail.value.trim(),
+        birthday: registerBirthday.value,
+        gender: document.querySelector("#registerGender").value,
+        source: "修改個人資料",
+        updatedAt: new Date().toISOString()
+      });
+    });
+
+    populateCitySelect(needCity, needDistrict);
+    needCity.value = "桃園市";
+    updateDistrictSelect(needCity, needDistrict);
+    needDistrict.value = "桃園區";
+    populateCitySelect(caseFilterCity, caseFilterDistrict, true);
+    caseFilterCity.addEventListener("change", renderCases);
+    populateCitySelect(shopFilterCity, shopFilterDistrict, true);
+    populateCitySelect(studioCity, studioDistrict);
+    studioCity.value = "桃園市";
+    updateDistrictSelect(studioCity, studioDistrict);
+    studioDistrict.value = "桃園區";
+    needDeadlineDate.min = new Date().toISOString().slice(0, 10);
+    needDeadlineDate.value = needDeadlineDate.min;
+    updateCredits();
+    renderCases();
+    renderShops();
+    renderProfileHistory();
+  </script>
+  <script src="app-database.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

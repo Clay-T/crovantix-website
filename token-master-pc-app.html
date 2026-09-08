@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Token大師 PC版</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071019;
+      --panel: #111c28;
+      --panel-2: #182638;
+      --ink: #f8fbff;
+      --muted: #a9b8c7;
+      --line: rgba(255,255,255,.14);
+      --cyan: #59d8ff;
+      --mint: #61e7bd;
+      --amber: #ffd166;
+      --danger: #ff5d6c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 16% 8%, rgba(89,216,255,.22), transparent 32rem),
+        radial-gradient(circle at 86% 18%, rgba(97,231,189,.14), transparent 30rem),
+        linear-gradient(135deg, #05070c, #0b1420 54%, #071019);
+    }
+
+    button, textarea, input, select { font: inherit; }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      min-height: calc(100vh - 32px);
+      margin: 16px auto;
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(7,16,25,.84);
+      box-shadow: 0 30px 90px rgba(0,0,0,.42);
+    }
+
+    aside {
+      padding: 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(6,12,20,.72);
+    }
+
+    .brand {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .brand strong {
+      font-size: 25px;
+      line-height: 1;
+    }
+
+    .brand span,
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 750;
+    }
+
+    nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav-button {
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--muted);
+      background: transparent;
+      text-align: left;
+      padding: 0 12px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .nav-button.active,
+    .nav-button:hover {
+      color: #061018;
+      border-color: rgba(89,216,255,.52);
+      background: linear-gradient(135deg, var(--cyan), var(--mint));
+    }
+
+    .status-card {
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.05);
+    }
+
+    main {
+      min-width: 0;
+      padding: 22px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 14px;
+      color: var(--ink);
+      background: rgba(255,255,255,.07);
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      background: rgba(17,28,40,.78);
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .label-row strong {
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .label-row span {
+      color: var(--mint);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    textarea, input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(4,12,20,.82);
+      outline: none;
+      font-size: 14px;
+      font-weight: 780;
+    }
+
+    textarea {
+      min-height: 158px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    select option {
+      color: #061018;
+      background: #fff;
+    }
+
+    .primary-button,
+    .secondary-button {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 16px;
+      color: #061018;
+      background: linear-gradient(135deg, var(--cyan), var(--mint));
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .secondary-button {
+      color: var(--ink);
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--line);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .tool-list {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .tool-option {
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      font-weight: 900;
+    }
+
+    .tool-option input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--cyan);
+    }
+
+    .stat {
+      display: grid;
+      gap: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: rgba(255,255,255,.05);
+      min-height: 86px;
+    }
+
+    .stat b {
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .ai-window {
+      overflow: hidden;
+      border: 1px solid rgba(89,216,255,.28);
+      border-radius: 12px;
+      background: #0b121c;
+    }
+
+    .ai-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+    }
+
+    .refine-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-top: 1px solid var(--line);
+      background: rgba(4,12,20,.78);
+    }
+
+    .refine-toolbar input {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .result {
+      display: none;
+      white-space: pre-wrap;
+      border: 1px solid rgba(97,231,189,.38);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(97,231,189,.08);
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 820;
+    }
+
+    .result.show { display: block; }
+
+    .history-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,.05);
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 760;
+    }
+
+    .history-item b {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .version-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .version-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .version-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .overlay-demo {
+      position: relative;
+      min-height: 240px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background:
+        linear-gradient(135deg, rgba(89,216,255,.08), transparent),
+        rgba(255,255,255,.04);
+    }
+
+    .floating-refine {
+      position: absolute;
+      right: 24px;
+      bottom: 24px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.34);
+    }
+
+    @media (max-width: 840px) {
+      .shell { grid-template-columns: 1fr; }
+      aside { border-right: 0; border-bottom: 1px solid var(--line); }
+      nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2, .grid-3, .tool-list { grid-template-columns: 1fr; }
+      header { display: grid; }
+    }
+  </style>
+</head>
+<body>
+  <section class="shell">
+    <aside>
+      <div class="brand">
+        <strong>Token大師 PC版</strong>
+        <span>Crovantix Technologies</span>
+      </div>
+      <nav aria-label="Main navigation">
+        <button class="nav-button active" data-page="dashboardPage" type="button">總覽</button>
+        <button class="nav-button" data-page="refinePage" type="button">AI 對話框精簡</button>
+        <button class="nav-button" data-page="toolsPage" type="button">AI Tools</button>
+        <button class="nav-button" data-page="statsPage" type="button">統計</button>
+        <button class="nav-button" data-page="settingsPage" type="button">設定</button>
+      </nav>
+      <div class="status-card">
+        <div class="label-row"><strong>常駐狀態</strong><span id="daemonStatus">執行中</span></div>
+        <p class="muted">PC 安裝版會在使用者同意後常駐，於支援的 AI tool 輸入框旁提供「精簡」按鈕。</p>
+      </div>
+    </aside>
+
+    <main>
+      <header>
+        <div>
+          <h1 id="pageTitle">Token大師 PC版</h1>
+          <p class="muted" id="pageDesc">在 ChatGPT、Gemini、Claude 等 AI tool 送出前，先把 request 精簡再送出。</p>
+        </div>
+        <span class="pill" id="activeToolsPill">已啟用 3 個 AI tool</span>
+      </header>
+
+      <section class="page active" id="dashboardPage">
+        <div class="grid-3">
+          <div class="stat"><b id="todayRequests">0</b><span>今日 request</span></div>
+          <div class="stat"><b id="todaySavedPercent">0%</b><span>今日平均節省 token</span></div>
+          <div class="stat"><b id="todaySavedMoney">NT$0.0000</b><span>今日省下費用</span></div>
+        </div>
+        <div class="grid-2" style="margin-top:14px;">
+          <section class="card">
+            <div class="label-row"><strong>桌面整合流程</strong><span>送出前精簡</span></div>
+            <div class="history-list">
+              <div class="history-item"><b>1. 偵測支援的 AI tool 輸入框</b>支援 ChatGPT、Gemini、Claude、Perplexity、Copilot。</div>
+              <div class="history-item"><b>2. 顯示「精簡」按鈕</b>使用者在對話框輸入 request 後，可先按精簡。</div>
+              <div class="history-item"><b>3. 替換為精簡後內容</b>保留語意、限制與輸出格式，再由使用者確認送出。</div>
+            </div>
+          </section>
+          <section class="card">
+            <div class="label-row"><strong>桌面安裝方式</strong><span>Windows / macOS</span></div>
+            <p class="muted">正式版拆成兩種版本，兩者皆支援 macOS 與 Windows；瀏覽器支援 Chrome 與 IE。Chrome 使用瀏覽器外掛，IE 使用 Windows 桌面常駐 Helper / IE 整合模組。</p>
+            <div class="version-list">
+              <div class="version-card">
+                <strong>一般使用者版</strong>
+                <p class="muted">桌面 App + Chrome Extension + IE Helper，本機精簡 prompt，不需要 API Key。適合個人使用 ChatGPT、Gemini、Claude、Perplexity、Copilot 時按「精簡」後再送出。</p>
+                <div class="platforms">
+                  <span class="pill">macOS</span>
+                  <span class="pill">Windows</span>
+                  <span class="pill">Chrome</span>
+                  <span class="pill">IE</span>
+                </div>
+              </div>
+              <div class="version-card">
+                <strong>企業版</strong>
+                <p class="muted">桌面 App + Chrome Extension + IE Helper + 企業級 API Gateway，可串接公司內部 AI 平台、SSO、稽核、用量控管與團隊報表。</p>
+                <div class="platforms">
+                  <span class="pill">macOS</span>
+                  <span class="pill">Windows</span>
+                  <span class="pill">Chrome</span>
+                  <span class="pill">IE</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="refinePage">
+        <div class="grid-2">
+          <section class="card">
+            <div class="label-row"><strong>AI tool 對話框示範</strong><span id="selectedToolLabel">ChatGPT</span></div>
+            <div class="ai-window">
+              <div class="ai-titlebar">
+                <strong id="mockToolTitle">ChatGPT 對話框</strong>
+                <span class="pill">Token大師已啟用</span>
+              </div>
+              <textarea id="aiInput">請幫我根據以下資料產生完整回答，保留重點、避免冗長內容，並依照使用者指定格式輸出。我要比較 ChatGPT、Gemini、Claude 的差異，請問一下可以幫我整理重點嗎？謝謝。</textarea>
+              <div class="refine-toolbar">
+                <select id="toolSelect">
+                  <option>ChatGPT</option>
+                  <option>Gemini</option>
+                  <option>Claude</option>
+                  <option>Perplexity</option>
+                  <option>Copilot</option>
+                </select>
+                <button class="primary-button" id="refineButton" type="button">精簡</button>
+                <button class="secondary-button" id="sendButton" type="button">送出對話</button>
+              </div>
+            </div>
+            <div class="result" id="refineResult"></div>
+          </section>
+          <section class="card">
+            <div class="label-row"><strong>浮動按鈕示意</strong><span>AI 對話匡中</span></div>
+            <div class="overlay-demo">
+              <p class="muted">正式 PC 版會在已啟用的 AI tool 網頁輸入框旁顯示浮動「精簡」按鈕。Chrome 透過外掛顯示；IE 透過 Windows Helper / IE 整合模組顯示。按下後，原本輸入內容會被精簡後文字取代，使用者確認後再送出。</p>
+              <button class="primary-button floating-refine" type="button">精簡</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="toolsPage">
+        <section class="card">
+          <div class="label-row"><strong>選擇要啟用的 AI tools</strong><span id="toolCount">3 個已啟用</span></div>
+          <div class="tool-list">
+            <label class="tool-option"><input class="tool-toggle" type="checkbox" value="ChatGPT" checked>ChatGPT</label>
+            <label class="tool-option"><input class="tool-toggle" type="checkbox" value="Gemini" checked>Gemini</label>
+            <label class="tool-option"><input class="tool-toggle" type="checkbox" value="Claude" checked>Claude</label>
+            <label class="tool-option"><input class="tool-toggle" type="checkbox" value="Perplexity">Perplexity</label>
+            <label class="tool-option"><input class="tool-toggle" type="checkbox" value="Copilot">Copilot</label>
+          </div>
+          <div class="result show" id="toolResult">已啟用的工具會顯示 Token大師「精簡」按鈕。</div>
+        </section>
+      </section>
+
+      <section class="page" id="statsPage">
+        <section class="card">
+          <div class="label-row"><strong>節省統計</strong><span>每日 / 每週 / 每月</span></div>
+          <div class="grid-3">
+            <div class="stat"><b id="dayPercent">0%</b><span>每日 token 節省</span></div>
+            <div class="stat"><b id="weekPercent">0%</b><span>每週 token 節省</span></div>
+            <div class="stat"><b id="monthPercent">0%</b><span>每月 token 節省</span></div>
+            <div class="stat"><b id="dayMoney">NT$0.0000</b><span>每日省下 NT$</span></div>
+            <div class="stat"><b id="weekMoney">NT$0.0000</b><span>每週省下 NT$</span></div>
+            <div class="stat"><b id="monthMoney">NT$0.0000</b><span>每月省下 NT$</span></div>
+          </div>
+        </section>
+        <section class="card" style="margin-top:14px;">
+          <div class="label-row"><strong>使用紀錄</strong><span>最新 10 筆</span></div>
+          <div class="history-list" id="historyList"></div>
+        </section>
+      </section>
+
+      <section class="page" id="settingsPage">
+        <div class="grid-2">
+          <section class="card">
+            <div class="label-row"><strong>常駐設定</strong><span>背景服務</span></div>
+            <label class="tool-option"><input id="daemonToggle" type="checkbox" checked>開啟 PC 背景常駐</label>
+            <p class="muted">關閉後，AI tool 對話框旁不會顯示「精簡」按鈕。</p>
+          </section>
+          <section class="card">
+            <div class="label-row"><strong>企業級API 串接服務</strong><span>Crovantix</span></div>
+            <p class="muted">企業版支援 macOS / Windows 與 Chrome / IE，若公司或企業內部需要建立 Token 優化 API 串接功能，歡迎聯繫 Crovantix 創微科技 www.crovantix.com</p>
+          </section>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <script>
+    const pages = [...document.querySelectorAll(".page")];
+    const navButtons = [...document.querySelectorAll(".nav-button")];
+    const pageTitle = document.querySelector("#pageTitle");
+    const pageDesc = document.querySelector("#pageDesc");
+    const activeToolsPill = document.querySelector("#activeToolsPill");
+    const toolToggles = [...document.querySelectorAll(".tool-toggle")];
+    const toolCount = document.querySelector("#toolCount");
+    const toolResult = document.querySelector("#toolResult");
+    const toolSelect = document.querySelector("#toolSelect");
+    const selectedToolLabel = document.querySelector("#selectedToolLabel");
+    const mockToolTitle = document.querySelector("#mockToolTitle");
+    const aiInput = document.querySelector("#aiInput");
+    const refineButton = document.querySelector("#refineButton");
+    const sendButton = document.querySelector("#sendButton");
+    const refineResult = document.querySelector("#refineResult");
+    const daemonToggle = document.querySelector("#daemonToggle");
+    const daemonStatus = document.querySelector("#daemonStatus");
+    const historyList = document.querySelector("#historyList");
+
+    const stats = {
+      todayRequests: document.querySelector("#todayRequests"),
+      todaySavedPercent: document.querySelector("#todaySavedPercent"),
+      todaySavedMoney: document.querySelector("#todaySavedMoney"),
+      dayPercent: document.querySelector("#dayPercent"),
+      weekPercent: document.querySelector("#weekPercent"),
+      monthPercent: document.querySelector("#monthPercent"),
+      dayMoney: document.querySelector("#dayMoney"),
+      weekMoney: document.querySelector("#weekMoney"),
+      monthMoney: document.querySelector("#monthMoney")
+    };
+
+    const titleMap = {
+      dashboardPage: ["Token大師 PC版", "在 ChatGPT、Gemini、Claude 等 AI tool 送出前，先把 request 精簡再送出。"],
+      refinePage: ["AI 對話框精簡", "模擬在 AI tool 對話框中按下「精簡」後替換目前輸入內容。"],
+      toolsPage: ["AI Tools", "選擇要顯示 Token大師精簡按鈕的 AI tool。"],
+      statsPage: ["統計", "查看每天、每週、每月省下的 token 百分比與 NT$ 金額。"],
+      settingsPage: ["設定", "管理背景常駐與企業級 API 串接服務。"]
+    };
+
+    const ntCostPerThousandTokens = {
+      ChatGPT: 0.09,
+      Gemini: 0.07,
+      Claude: 0.11,
+      Perplexity: 0.08,
+      Copilot: 0.08
+    };
+
+    let records = [];
+
+    function showPage(id) {
+      pages.forEach(page => page.classList.toggle("active", page.id === id));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === id));
+      pageTitle.textContent = titleMap[id][0];
+      pageDesc.textContent = titleMap[id][1];
+      renderStats();
+    }
+
+    function selectedTools() {
+      return toolToggles.filter(input => input.checked).map(input => input.value);
+    }
+
+    function syncTools() {
+      const tools = selectedTools();
+      toolCount.textContent = `${tools.length} 個已啟用`;
+      activeToolsPill.textContent = `已啟用 ${tools.length} 個 AI tool`;
+      toolResult.textContent = tools.length
+        ? `已啟用：${tools.join("、")}。這些工具的對話框旁會顯示「精簡」按鈕。`
+        : "尚未啟用任何 AI tool。";
+    }
+
+    function estimateTokens(text) {
+      const normalized = text.trim();
+      if (!normalized) return 0;
+      const zh = (normalized.match(/[\u4e00-\u9fff]/g) || []).length;
+      const words = normalized.replace(/[\u4e00-\u9fff]/g, " ").split(/\s+/).filter(Boolean).length;
+      return Math.max(1, Math.ceil(zh * 0.85 + words * 1.35));
+    }
+
+    function optimizePrompt(text) {
+      const cleaned = text
+        .replace(/\s+/g, " ")
+        .replace(/請問一下|我想要請你幫我|麻煩你可以幫我|麻煩你|可以幫我|請幫我|如果可以的話|拜託|謝謝/g, "")
+        .replace(/非常非常|真的真的/g, "非常")
+        .replace(/完整回答/g, "回答")
+        .replace(/避免冗長內容/g, "精簡")
+        .replace(/不要太長/g, "精簡")
+        .replace(/並依照使用者指定格式輸出/g, "依指定格式輸出")
+        .trim();
+      const compact = cleaned
+        .replace(/，/g, "；")
+        .replace(/；+/g, "；")
+        .replace(/[；。\s]+$/g, "")
+        .trim();
+      const task = compact.length > 130 ? `${compact.slice(0, 126)}...` : compact;
+      return estimateTokens(task) < estimateTokens(text) && task.replace(/[\s，。；、]/g, "").length >= 8
+        ? task
+        : text.trim();
+    }
+
+    function estimateSavedMoney(tool, savedTokens) {
+      const rate = ntCostPerThousandTokens[tool] || 0.08;
+      return Number(((savedTokens / 1000) * rate).toFixed(6));
+    }
+
+    function formatNTD(value) {
+      return `NT$${Number(value || 0).toFixed(4)}`;
+    }
+
+    function averagePercent(items) {
+      return items.length
+        ? Math.round(items.reduce((sum, item) => sum + item.savedPercent, 0) / items.length)
+        : 0;
+    }
+
+    function recordsWithin(days) {
+      const now = Date.now();
+      const range = days * 24 * 60 * 60 * 1000;
+      return records.filter(item => now - new Date(item.createdAt).getTime() <= range);
+    }
+
+    function renderStats() {
+      const day = recordsWithin(1);
+      const week = recordsWithin(7);
+      const month = recordsWithin(31);
+      const dayMoneyTotal = day.reduce((sum, item) => sum + item.savedMoney, 0);
+      const weekMoneyTotal = week.reduce((sum, item) => sum + item.savedMoney, 0);
+      const monthMoneyTotal = month.reduce((sum, item) => sum + item.savedMoney, 0);
+      stats.todayRequests.textContent = day.length;
+      stats.todaySavedPercent.textContent = `${averagePercent(day)}%`;
+      stats.todaySavedMoney.textContent = formatNTD(dayMoneyTotal);
+      stats.dayPercent.textContent = `${averagePercent(day)}%`;
+      stats.weekPercent.textContent = `${averagePercent(week)}%`;
+      stats.monthPercent.textContent = `${averagePercent(month)}%`;
+      stats.dayMoney.textContent = formatNTD(dayMoneyTotal);
+      stats.weekMoney.textContent = formatNTD(weekMoneyTotal);
+      stats.monthMoney.textContent = formatNTD(monthMoneyTotal);
+      historyList.innerHTML = records.length ? records.slice(0, 10).map(item => `
+        <article class="history-item">
+          <b>${item.tool} · 節省 ${item.savedPercent}% token</b>
+          ${new Date(item.createdAt).toLocaleString("zh-TW")}<br>
+          原始 ${item.beforeTokens} tokens → 精簡後 ${item.afterTokens} tokens，節省 ${item.savedTokens} tokens，估算 ${formatNTD(item.savedMoney)}
+        </article>
+      `).join("") : `<div class="history-item">尚無使用紀錄。請到「AI 對話框精簡」按一次精簡並送出。</div>`;
+    }
+
+    function refineCurrentInput() {
+      if (!daemonToggle.checked) {
+        refineResult.textContent = "背景常駐已關閉，請先到設定頁開啟。";
+        refineResult.classList.add("show");
+        return null;
+      }
+      const tool = toolSelect.value;
+      if (!selectedTools().includes(tool)) {
+        refineResult.textContent = `${tool} 尚未啟用，請先到 AI Tools 頁面勾選。`;
+        refineResult.classList.add("show");
+        return null;
+      }
+      const original = aiInput.value.trim();
+      const optimized = optimizePrompt(original);
+      const beforeTokens = estimateTokens(original);
+      const afterTokens = estimateTokens(optimized);
+      const savedTokens = Math.max(0, beforeTokens - afterTokens);
+      const savedPercent = beforeTokens ? Math.max(0, Math.round((1 - afterTokens / beforeTokens) * 100)) : 0;
+      const savedMoney = estimateSavedMoney(tool, savedTokens);
+      aiInput.value = optimized;
+      refineResult.textContent = `已精簡目前輸入。\n原始：約 ${beforeTokens} tokens\n精簡後：約 ${afterTokens} tokens\n節省：約 ${savedPercent}% / ${savedTokens} tokens`;
+      refineResult.classList.add("show");
+      return { tool, beforeTokens, afterTokens, savedTokens, savedPercent, savedMoney, original, optimized };
+    }
+
+    navButtons.forEach(button => {
+      button.addEventListener("click", () => showPage(button.dataset.page));
+    });
+
+    toolToggles.forEach(input => {
+      input.addEventListener("change", syncTools);
+    });
+
+    toolSelect.addEventListener("change", () => {
+      selectedToolLabel.textContent = toolSelect.value;
+      mockToolTitle.textContent = `${toolSelect.value} 對話框`;
+    });
+
+    refineButton.addEventListener("click", refineCurrentInput);
+
+    sendButton.addEventListener("click", () => {
+      const item = refineCurrentInput();
+      if (!item) return;
+      records.unshift({ ...item, createdAt: new Date().toISOString() });
+      refineResult.textContent += "\n\n已送出對話，並更新統計。";
+      renderStats();
+    });
+
+    daemonToggle.addEventListener("change", () => {
+      daemonStatus.textContent = daemonToggle.checked ? "執行中" : "已關閉";
+    });
+
+    syncTools();
+    renderStats();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2114 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fortune iOS App Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07070b;
+      --ink: #fbf7ef;
+      --muted: #a79e92;
+      --line: rgba(255,255,255,.12);
+      --panel: #14131a;
+      --panel-2: #1d1b25;
+      --panel-3: #292532;
+      --gold: #ffd166;
+      --violet: #bf8cff;
+      --rose: #ff6b9a;
+      --green: #30d158;
+      --red: #ff453a;
+      --blue: #64d2ff;
+      --app-font-size: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      background:
+        radial-gradient(circle at 12% 4%, rgba(191,140,255,.24), transparent 26rem),
+        radial-gradient(circle at 86% 84%, rgba(255,209,102,.14), transparent 24rem),
+        #0a090f;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100vw, 1120px);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 420px minmax(320px, 1fr);
+      gap: 50px;
+      align-items: start;
+      padding: 32px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #37303f, #08070a 34%, #42384b);
+      box-shadow: 0 30px 80px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.16);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255,209,102,.16), transparent 14rem),
+        linear-gradient(180deg, rgba(191,140,255,.12), transparent 32%),
+        var(--bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .island {
+      position: absolute;
+      z-index: 10;
+      top: 11px;
+      left: 50%;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+
+    .status {
+      height: 58px;
+      padding: 12px 26px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: calc(var(--app-font-size) - 1px);
+      font-weight: 750;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .signal {
+      display: flex;
+      gap: 2px;
+      height: 12px;
+      align-items: end;
+    }
+
+    .signal i {
+      display: block;
+      width: 3px;
+      border-radius: 2px;
+      background: #fff;
+    }
+
+    .signal i:nth-child(1) { height: 4px; }
+    .signal i:nth-child(2) { height: 7px; }
+    .signal i:nth-child(3) { height: 9px; }
+    .signal i:nth-child(4) { height: 12px; }
+
+    .battery {
+      width: 24px;
+      height: 12px;
+      border: 1.6px solid #fff;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      background: #fff;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      inset: 2px 5px 2px 2px;
+      background: #fff;
+      border-radius: 2px;
+    }
+
+    .app {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 84px;
+      overflow: hidden;
+      font-size: var(--app-font-size);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 3px;
+    }
+
+    .user-pill {
+      min-width: 0;
+      height: 36px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 13px;
+      color: #160f06;
+      background: linear-gradient(135deg, #fff7d6, #ffd166 52%, #bf8cff);
+      font-weight: 950;
+      font-size: calc(var(--app-font-size) - 1px);
+      cursor: pointer;
+      max-width: 170px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chip {
+      display: inline-grid;
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 6px;
+      min-height: 34px;
+      border: 0;
+      padding: 0 12px;
+      border-radius: 999px;
+      color: #160f06;
+      background: var(--gold);
+      font-size: calc(var(--app-font-size) - 1px);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    h1 {
+      margin: 18px 0 6px;
+      font-size: calc(var(--app-font-size) + 20px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0;
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 1px);
+    }
+
+    .page-controls {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .page-controls button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: rgba(255,255,255,.05);
+      font: inherit;
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .page-controls button:disabled {
+      opacity: .38;
+      cursor: default;
+    }
+
+    .birth-card,
+    .daily-card,
+    .result-card,
+    .paywall-card {
+      margin-top: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background:
+        linear-gradient(145deg, rgba(255,209,102,.13), transparent 48%),
+        var(--panel);
+    }
+
+    .daily-card {
+      border-color: rgba(255,209,102,.42);
+      background:
+        linear-gradient(135deg, rgba(255,209,102,.18), rgba(191,140,255,.16)),
+        var(--panel);
+      box-shadow: 0 10px 26px rgba(0,0,0,.16);
+    }
+
+    .daily-card header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .daily-card header strong {
+      color: var(--gold);
+      font-size: calc(var(--app-font-size) + 2px);
+    }
+
+    .daily-card header span {
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 3px);
+      font-weight: 850;
+    }
+
+    .daily-card .daily-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .daily-toggle {
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,.08);
+      font: inherit;
+      font-size: calc(var(--app-font-size) + 2px);
+      font-weight: 1000;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .daily-card.collapsed .daily-list {
+      display: none;
+    }
+
+    .daily-card.collapsed header {
+      margin-bottom: 0;
+    }
+
+    .daily-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .daily-item {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+      padding: 8px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .daily-item b {
+      color: var(--gold);
+      font-size: calc(var(--app-font-size) - 2px);
+    }
+
+    .daily-item span {
+      color: var(--ink);
+      font-size: calc(var(--app-font-size) - 2px);
+      line-height: 1.45;
+    }
+
+    .birth-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 3px);
+      font-weight: 850;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 40px;
+      border: 0;
+      border-radius: 14px;
+      padding: 0 10px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 14px 0 10px;
+    }
+
+    .section-title strong {
+      font-size: calc(var(--app-font-size) + 1px);
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 2px);
+    }
+
+    .services {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .service {
+      min-height: 74px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 12px;
+      color: inherit;
+      background: var(--panel-2);
+      text-align: left;
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+
+    .service:hover,
+    .service.active {
+      transform: translateY(-1px);
+      border-color: rgba(255,209,102,.58);
+      background: var(--panel-3);
+    }
+
+    .service b {
+      display: block;
+      font-size: calc(var(--app-font-size) + 2px);
+      line-height: 1.05;
+    }
+
+    .service span {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 2px);
+      line-height: 1.25;
+    }
+
+    .content {
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-right: 2px;
+    }
+
+    .content::-webkit-scrollbar { width: 0; }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .mode-panel {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.045);
+    }
+
+    .mode-panel.active {
+      display: block;
+    }
+
+    .name-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .media-actions,
+    .credit-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .primary,
+    .secondary,
+    .danger {
+      min-height: 44px;
+      border: 0;
+      border-radius: 16px;
+      font-size: var(--app-font-size);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .primary {
+      color: #160f06;
+      background: var(--gold);
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: var(--panel-3);
+      border: 1px solid var(--line);
+    }
+
+    .danger {
+      color: #fff;
+      background: var(--red);
+    }
+
+    .result-card {
+      display: none;
+      margin-bottom: 14px;
+    }
+
+    .result-card.show {
+      display: block;
+    }
+
+    .result-card strong,
+    .paywall-card strong {
+      display: block;
+      font-size: calc(var(--app-font-size) + 2px);
+      margin-bottom: 7px;
+    }
+
+    .result-card p,
+    .paywall-card p {
+      margin: 0;
+      color: #d6cec4;
+      font-size: calc(var(--app-font-size) - 1px);
+      line-height: 1.45;
+    }
+
+    .result-card.loading {
+      border-color: rgba(255,209,102,.42);
+    }
+
+    .result-card.loading #resultTitle::after {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-left: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: blink 1s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: .18; }
+    }
+
+    .paywall-card {
+      display: none;
+      margin-bottom: 14px;
+      border-color: rgba(255,209,102,.35);
+    }
+
+    .paywall-card.show {
+      display: block;
+    }
+
+    .credit-option {
+      min-height: 56px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .credit-option.active,
+    .credit-option.current {
+      color: #160f06;
+      background: var(--gold);
+      box-shadow: 0 0 0 4px rgba(255,209,102,.16);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 86px;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .registration-card,
+    .settings-card,
+    .summary-card {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background:
+        linear-gradient(145deg, rgba(191,140,255,.12), transparent 48%),
+        var(--panel);
+    }
+
+    .settings-card h2,
+    .summary-card h2 {
+      margin: 0 0 10px;
+      font-size: calc(var(--app-font-size) + 3px);
+      letter-spacing: 0;
+    }
+
+    .registration-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .verification-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .text-button {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-3);
+      font: inherit;
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .code-hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 2px);
+      line-height: 1.35;
+    }
+
+    .terms-box {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .terms-panel {
+      display: none;
+      max-height: 220px;
+      overflow-y: auto;
+      white-space: pre-line;
+      color: #d6cec4;
+      font-size: calc(var(--app-font-size) - 2px);
+      line-height: 1.55;
+      scrollbar-width: thin;
+    }
+
+    .terms-panel.show {
+      display: block;
+    }
+
+    .terms-consent {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 850;
+    }
+
+    .terms-consent input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--gold);
+    }
+
+    .settings-grid,
+    .profile-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .color-row,
+    .gender-row {
+      display: grid;
+      gap: 8px;
+    }
+
+    .color-row { grid-template-columns: repeat(3, 1fr); }
+
+    .gender-row { grid-template-columns: repeat(2, 1fr); }
+
+    .color-choice,
+    .gender-choice {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .color-choice.active,
+    .gender-choice.active {
+      color: #160f06;
+      background: var(--gold);
+      border-color: transparent;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 8px;
+      color: #d6cec4;
+      font-size: calc(var(--app-font-size) - 1px);
+      line-height: 1.45;
+    }
+
+    .nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 6;
+      height: 74px;
+      padding-bottom: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line);
+      background: rgba(15,13,20,.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 4px;
+      font-size: calc(var(--app-font-size) - 3px);
+      font-weight: 780;
+      cursor: pointer;
+    }
+
+    .nav button.active {
+      color: var(--gold);
+    }
+
+    .nav-symbol {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      font-size: calc(var(--app-font-size) + 2px);
+      line-height: 1;
+    }
+
+    .brief {
+      max-width: 530px;
+    }
+
+    .brief h2 {
+      margin: 0 0 16px;
+      font-size: calc(var(--app-font-size) + 24px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .brief p {
+      margin: 0 0 22px;
+      color: #c7bdb2;
+      font-size: calc(var(--app-font-size) + 3px);
+      line-height: 1.55;
+    }
+
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .spec {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .spec b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: var(--app-font-size);
+    }
+
+    .spec span {
+      color: #b9afa4;
+      font-size: calc(var(--app-font-size) - 1px);
+      line-height: 1.45;
+    }
+
+    @media (max-width: 860px) {
+      .stage {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 24px;
+        padding: 18px 14px 28px;
+      }
+
+      .phone {
+        width: min(390px, calc(100vw - 28px));
+        height: min(844px, calc(100vh - 28px));
+        min-height: 720px;
+      }
+
+      .brief {
+        width: min(390px, calc(100vw - 28px));
+      }
+
+      .specs { grid-template-columns: 1fr; }
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="iPhone fortune app prototype">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status">
+          <span>9:41</span>
+          <span class="status-icons" aria-hidden="true">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span>5G</span>
+            <span class="battery"></span>
+          </span>
+        </div>
+
+        <div class="app">
+          <div class="toolbar">
+            <button class="user-pill" id="userPill" title="使用者名稱">Clay Tseng</button>
+            <button class="chip" id="pointsButton" type="button"><span>✦</span><span id="credits">3 點</span></button>
+          </div>
+
+          <h1>命理</h1>
+          <p class="subline" id="appStatus">首次下載贈送 3 點，可免費試算 3 次</p>
+          <div class="page-controls" id="pageControls">
+            <button id="prevPageButton" type="button">&lt; 上一頁</button>
+            <button id="nextPageButton" type="button">下一頁 &gt;</button>
+          </div>
+
+          <section class="content page active" id="registerPage">
+            <section class="registration-card">
+              <h2>首次註冊</h2>
+              <div class="registration-grid">
+                <label>姓名<input id="registerName" value="Clay Tseng" aria-label="姓名" placeholder="姓名"></label>
+                <label>電話<input id="registerPhone" value="0912-345-678" aria-label="電話" placeholder="電話" inputmode="tel"></label>
+                <label>Email<input id="registerEmail" value="clay.tseng@example.com" aria-label="Email" placeholder="Email" inputmode="email"></label>
+                <label>生日<input id="registerBirthday" value="1992-08-16" aria-label="生日"></label>
+                <label>年齡<input id="registerAge" value="32" aria-label="年齡" placeholder="請輸入年齡" inputmode="numeric"></label>
+                <label>性別
+                  <div class="gender-row" aria-label="註冊性別">
+                    <button class="gender-choice register-gender active" type="button" data-gender="男">男</button>
+                    <button class="gender-choice register-gender" type="button" data-gender="女">女</button>
+                  </div>
+                </label>
+                <label>簡訊驗證碼
+                  <div class="verification-row">
+                    <input id="verificationCodeInput" maxlength="4" aria-label="手機驗證碼" placeholder="輸入 4 位數驗證碼" inputmode="numeric">
+                    <button class="text-button" id="resendCodeButton" type="button">發送驗證碼</button>
+                  </div>
+                </label>
+                <p class="code-hint" id="verificationHint">請先發送 4 位數驗證碼到手機。</p>
+                <div class="terms-box">
+                  <button class="text-button" id="toggleTermsButton" type="button">展開使用條款、隱私權政策與免責聲明</button>
+                  <div class="terms-panel" id="termsPanel">命理 App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「命理 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供命理分析、運勢參考、AI 占卜、星座、塔羅、八字、紫微斗數、數字命理、個人化建議、語音互動及相關娛樂與資訊服務，所有內容僅供一般娛樂、參考與輔助用途。
+
+二、AI 與命理內容聲明
+
+本 App 部分內容可能由 AI 系統自動生成，包括命理分析、運勢建議、占卜結果、語音回覆或其他互動內容。
+
+本公司不保證相關內容之正確性、完整性、即時性、適法性或適用於特定情況。
+
+所有命理、占卜、運勢及 AI 分析內容僅供娛樂與參考用途，不構成任何法律、醫療、投資、財務、心理諮詢或其他專業建議。
+
+三、使用風險與免責聲明
+
+使用者應自行判斷並承擔使用本 App 所產生之一切風險與責任。
+
+本 App 僅提供娛樂、命理與 AI 輔助服務，本公司不保證任何分析結果、運勢內容、占卜建議或 AI 回覆之準確性或實現結果。
+
+使用者因依據本 App 提供之內容、建議、分析、提醒、占卜結果或資訊所作之任何決定、行為、交易、感情互動或人生規劃而產生之損失、損害或爭議，均由使用者自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+本 App 之語音、AI、網路及第三方服務功能，可能受網路環境、裝置效能、第三方服務或系統狀況影響，本公司不保證服務之穩定性、即時性或完全無錯誤。
+
+四、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+* 使用者帳號資訊
+* Email
+* 裝置資訊
+* 使用紀錄
+* IP 位址
+* 出生日期與命理相關資料
+* 語音內容
+* AI 互動紀錄
+* 崩潰紀錄與分析資料
+
+五、資料用途
+
+蒐集資料主要用於：
+
+* 提供命理與 AI 分析服務
+* 提供個人化內容與運勢功能
+* 語音互動與 AI 回覆
+* 改善使用體驗
+* 系統安全維護
+* 客服支援
+* 防止詐騙、濫用或違法行為
+* 提升 AI 與系統服務品質
+
+六、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+* OpenAI
+* Firebase
+* Google Analytics
+* 語音辨識服務
+* 雲端儲存服務
+* AI 模型服務
+
+部分資料可能因服務需求而傳輸至第三方服務供應商。
+
+七、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、語音通訊或儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及裝置安全。
+
+八、使用者責任
+
+使用者不得利用本 App 從事任何違法、侵權、詐騙、騷擾、散布惡意程式或其他損害他人權益之行為。
+
+若因使用者違法或不當行為導致任何損害或法律責任，應由使用者自行負責。
+
+九、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、資料、AI 系統及相關內容，均屬本公司或合法授權人所有。
+
+未經授權不得重製、修改、散布、反向工程、破解或用於商業用途。
+
+十、使用者權利
+
+使用者得依法請求查詢、更正或刪除其個人資料。
+
+十一、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利，修改後內容將公布於本 App，使用者繼續使用即視為同意修改內容。</div>
+                  <label class="terms-consent">
+                    <input id="agreeTerms" type="checkbox">
+                    我已打開並同意使用條款、隱私權政策與免責聲明
+                  </label>
+                </div>
+                <button class="primary" id="completeRegistration" type="button" disabled>完成註冊</button>
+                <div class="summary-list" id="registrationSummary"></div>
+              </div>
+            </section>
+          </section>
+
+          <section class="content page" id="fortunePage">
+            <section class="daily-card" id="dailyBroadcastCard">
+              <header>
+                <div class="daily-title">
+                  <button class="daily-toggle" id="dailyBroadcastToggle" type="button" aria-expanded="true">-</button>
+                  <strong>今日注意事項</strong>
+                </div>
+                <span id="dailyBroadcastTime">每日 07:00 播送</span>
+              </header>
+              <div class="daily-list" id="dailyBroadcastList">
+                <div class="daily-item"><b>工作</b><span>註冊後會依生日自動產生今日提醒。</span></div>
+                <div class="daily-item"><b>感情</b><span>可在設定中修改每日播送時間。</span></div>
+              </div>
+            </section>
+
+            <section class="birth-card">
+              <strong>出生年月日時</strong>
+              <div class="birth-grid">
+                <label>年份<input id="birthYear" inputmode="numeric" value="1992"></label>
+                <label>月份<input id="birthMonth" inputmode="numeric" value="08"></label>
+                <label>日期<input id="birthDay" inputmode="numeric" value="16"></label>
+                <label>時辰<input id="birthHour" inputmode="numeric" value="09"></label>
+              </div>
+            </section>
+
+            <div class="section-title">
+              <strong>選擇命理項目</strong>
+              <span>每次扣 1 點</span>
+            </div>
+
+            <section class="services" aria-label="fortune services">
+              <button class="service active" data-mode="星座"><b>星座</b><span>太陽星座與今日提醒</span></button>
+              <button class="service" data-mode="塔羅牌"><b>塔羅牌</b><span>抽牌解讀目前課題</span></button>
+              <button class="service" data-mode="紫微斗數"><b>紫微斗數</b><span>命盤與宮位分析</span></button>
+              <button class="service" data-mode="八字"><b>八字</b><span>年、月、日、時推演</span></button>
+              <button class="service" data-mode="手相" data-panel="media"><b>手相</b><span>開啟相機或相簿</span></button>
+              <button class="service" data-mode="面相" data-panel="media"><b>面相</b><span>拍照或選照片分析</span></button>
+              <button class="service" data-mode="姓名學" data-panel="name"><b>姓名學</b><span>輸入姓與名啟動</span></button>
+            </section>
+
+            <section class="mode-panel" id="mediaPanel">
+              <strong id="mediaTitle">手相影像</strong>
+              <p class="subline">請選擇來源。此原型只模擬開啟相機或相簿，不會真的上傳照片。</p>
+              <div class="media-actions">
+                <button class="secondary" id="openCamera">開啟相機</button>
+                <button class="secondary" id="openAlbum">開啟相簿</button>
+              </div>
+            </section>
+
+            <section class="mode-panel" id="namePanel">
+              <strong>姓名學資料</strong>
+              <div class="name-grid">
+                <label>姓<input id="lastName" value="陳"></label>
+                <label>名<input id="firstName" value="宇晴"></label>
+              </div>
+            </section>
+
+            <div class="section-title">
+              <strong id="selectedMode">星座</strong>
+              <span id="selectedHint">生日資料已填寫</span>
+            </div>
+
+            <button class="primary" id="calculate">啟動試算</button>
+
+            <section class="result-card" id="resultCard">
+              <strong id="resultTitle">八字分析完成</strong>
+              <p id="resultText">今日適合整理長期計畫，先把節奏放慢，財運與人際會在穩定選擇中變清楚。</p>
+            </section>
+
+            <section class="summary-card">
+              <h2>贊助支持</h2>
+              <p class="subline">若喜歡 Fortune app，可以透過信用卡交易小額贊助，支持後續功能維護與更新。</p>
+              <div class="credit-options">
+                <button class="credit-option donate-option" data-amount="NTD$50">Donate<br>NTD$50</button>
+                <button class="credit-option donate-option" data-amount="NTD$100">Donate<br>NTD$100</button>
+                <button class="credit-option donate-option" data-amount="NTD$300">Donate<br>NTD$300</button>
+              </div>
+            </section>
+
+            <section class="paywall-card" id="paywall">
+              <strong>點數已用完</strong>
+              <p>免費點數已使用完畢。請升級月方案後繼續試算。</p>
+              <button class="primary" id="upgradePlan" style="margin-top:10px;width:100%;">升級</button>
+            </section>
+          </section>
+
+          <section class="content page" id="historyPage">
+            <section class="summary-card">
+              <h2>試算紀錄</h2>
+              <div class="summary-list" id="historyList">
+                <p>尚未產生紀錄。完成一次試算後，結果會出現在這裡。</p>
+              </div>
+            </section>
+          </section>
+
+          <section class="content page" id="pointsPage">
+            <section class="summary-card">
+              <h2>月方案</h2>
+              <div class="summary-list">
+                <p>目前點數：<strong id="pointsSummary">3 點</strong></p>
+                <p>目前方案：<strong id="planSummary">免費體驗</strong></p>
+              </div>
+              <div class="credit-options">
+                <button class="credit-option plan-option" data-plan="Basic" data-price="NTD$99" data-points="30">Basic<br>NTD$99<br>每月 30 次</button>
+                <button class="credit-option plan-option" data-plan="Plus" data-price="NTD$399" data-points="150">Plus<br>NTD$399<br>每月 150 次</button>
+                <button class="credit-option plan-option" data-plan="Pro" data-price="NTD$599" data-points="300">Pro<br>NTD$599<br>每月 300 次</button>
+                <button class="credit-option plan-option" data-plan="VIP" data-price="NTD$999" data-points="1000">VIP<br>NTD$999<br>每月 1000 次</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="content page" id="paymentPage">
+            <section class="summary-card">
+              <h2>信用卡付費</h2>
+              <div class="summary-list">
+                <p id="selectedPlanSummary">請先選擇方案。</p>
+              </div>
+              <div class="card-grid">
+                <label>信用卡號<input id="cardNumber" inputmode="numeric" placeholder="4242 4242 4242 4242"></label>
+                <label>到期<input id="cardExpiry" placeholder="MM/YY"></label>
+              </div>
+              <button class="primary" id="confirmPlanPayment" style="margin-top:10px;width:100%;">確認付款</button>
+            </section>
+          </section>
+
+          <section class="content page" id="settingsPage">
+            <section class="settings-card">
+              <h2>修改系統設定</h2>
+              <div class="settings-grid">
+                <label>App 背景顏色
+                  <div class="color-row">
+                    <button class="color-choice active" type="button" data-theme="mystic">星夜</button>
+                    <button class="color-choice" type="button" data-theme="gold">金色</button>
+                    <button class="color-choice" type="button" data-theme="ocean">藍色</button>
+                  </div>
+                </label>
+                <label>選圖片做為背景
+                  <input id="backgroundImage" type="file" accept="image/*">
+                </label>
+                <label>字體大小
+                  <select id="fontSizeSelect">
+                    <option value="normal">中</option>
+                    <option value="small">小</option>
+                    <option value="large">大</option>
+                  </select>
+                </label>
+                <label>語言
+                  <select id="languageSelect">
+                    <option value="zh-Hant">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                </label>
+                <label>每日播送時間
+                  <input id="dailyBroadcastInput" type="time" value="07:00">
+                </label>
+              </div>
+            </section>
+
+            <section class="settings-card" id="personalSettingsCard">
+              <h2>修改個人設定</h2>
+              <div class="profile-grid">
+                <label>暱稱<input id="profileNickname" value="Clay Tseng"></label>
+                <label>生日<input id="profileBirthday" value="1992-08-16"></label>
+                <label>出生時辰<input id="profileBirthHour" value="09"></label>
+                <label>性別
+                  <div class="gender-row">
+                    <button class="gender-choice active" type="button" data-gender="男">男</button>
+                    <button class="gender-choice" type="button" data-gender="女">女</button>
+                  </div>
+                </label>
+                <label>目前方案<input id="profilePlan" value="免費體驗" readonly></label>
+                <label>剩餘點數<input id="profileCredits" value="3 點" readonly></label>
+                <button class="primary" id="saveProfileSettings">儲存個人設定</button>
+              </div>
+            </section>
+            <section class="settings-card">
+              <h2>聯繫客服</h2>
+              <div class="profile-grid">
+                <label>客服說明<input value="問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。" readonly></label>
+                <label>Email<input value="support@app-service.example" readonly></label>
+              </div>
+            </section>
+          </section>
+        </div>
+
+        <nav class="nav" aria-label="main navigation">
+          <button class="active" data-page="fortunePage"><span class="nav-symbol">✦</span>算命</button>
+          <button data-page="historyPage"><span class="nav-symbol">▣</span>紀錄</button>
+          <button data-page="pointsPage"><span class="nav-symbol">◈</span>點數</button>
+          <button data-page="settingsPage"><span class="nav-symbol">⚙</span>設定</button>
+        </nav>
+      </div>
+    </section>
+
+    <aside class="brief">
+      <h2>命理 App iOS 原型</h2>
+      <p>下載後先輸入出生年月日時，再選擇八字、紫微斗數、星座、塔羅牌、手相、面相或姓名學。按下啟動後由大模型產出結果；正式版應由後端送出 request，再把結果回傳到 app。</p>
+      <div class="specs">
+        <div class="spec"><b>首次流程</b><span>生日輸入、命理項目選擇、下載贈送 3 點。</span></div>
+        <div class="spec"><b>特殊入口</b><span>手相/面相顯示相機與相簿入口，姓名學顯示姓與名欄位。</span></div>
+        <div class="spec"><b>AI 結果</b><span>按下試算後顯示送出 request、分析中、模型回覆結果。</span></div>
+        <div class="spec"><b>付費原型</b><span>信用卡欄位只做 UI；正式版需由後端處理金鑰與付款。</span></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const screen = document.querySelector(".screen");
+    const app = document.querySelector(".app");
+    const userPill = document.querySelector("#userPill");
+    const pointsButton = document.querySelector("#pointsButton");
+    const pages = [...document.querySelectorAll(".page")];
+    const navButtons = [...document.querySelectorAll(".nav button[data-page]")];
+    const nav = document.querySelector(".nav");
+    const toolbar = document.querySelector(".toolbar");
+    const pageControls = document.querySelector("#pageControls");
+    const prevPageButton = document.querySelector("#prevPageButton");
+    const nextPageButton = document.querySelector("#nextPageButton");
+    const registerName = document.querySelector("#registerName");
+    const registerPhone = document.querySelector("#registerPhone");
+    const registerEmail = document.querySelector("#registerEmail");
+    const registerBirthday = document.querySelector("#registerBirthday");
+    const registerAge = document.querySelector("#registerAge");
+    const registerGenderChoices = [...document.querySelectorAll(".register-gender")];
+    const verificationCodeInput = document.querySelector("#verificationCodeInput");
+    const verificationHint = document.querySelector("#verificationHint");
+    const resendCodeButton = document.querySelector("#resendCodeButton");
+    const toggleTermsButton = document.querySelector("#toggleTermsButton");
+    const termsPanel = document.querySelector("#termsPanel");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const completeRegistration = document.querySelector("#completeRegistration");
+    const registrationSummary = document.querySelector("#registrationSummary");
+    const serviceButtons = [...document.querySelectorAll(".service")];
+    const mediaPanel = document.querySelector("#mediaPanel");
+    const namePanel = document.querySelector("#namePanel");
+    const selectedMode = document.querySelector("#selectedMode");
+    const selectedHint = document.querySelector("#selectedHint");
+    const mediaTitle = document.querySelector("#mediaTitle");
+    const creditsLabel = document.querySelector("#credits");
+    const appStatus = document.querySelector("#appStatus");
+    const calculateButton = document.querySelector("#calculate");
+    const resultCard = document.querySelector("#resultCard");
+    const resultTitle = document.querySelector("#resultTitle");
+    const resultText = document.querySelector("#resultText");
+    const paywall = document.querySelector("#paywall");
+    const upgradePlan = document.querySelector("#upgradePlan");
+    const planOptions = [...document.querySelectorAll(".plan-option")];
+    const donateOptions = [...document.querySelectorAll(".donate-option")];
+    const selectedPlanSummary = document.querySelector("#selectedPlanSummary");
+    const confirmPlanPayment = document.querySelector("#confirmPlanPayment");
+    const pointsSummary = document.querySelector("#pointsSummary");
+    const planSummary = document.querySelector("#planSummary");
+    const historyList = document.querySelector("#historyList");
+    const colorChoices = [...document.querySelectorAll(".color-choice")];
+    const backgroundImage = document.querySelector("#backgroundImage");
+    const fontSizeSelect = document.querySelector("#fontSizeSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const dailyBroadcastCard = document.querySelector("#dailyBroadcastCard");
+    const dailyBroadcastToggle = document.querySelector("#dailyBroadcastToggle");
+    const dailyBroadcastInput = document.querySelector("#dailyBroadcastInput");
+    const dailyBroadcastTime = document.querySelector("#dailyBroadcastTime");
+    const dailyBroadcastList = document.querySelector("#dailyBroadcastList");
+    const profileNickname = document.querySelector("#profileNickname");
+    const profileBirthday = document.querySelector("#profileBirthday");
+    const profileBirthHour = document.querySelector("#profileBirthHour");
+    const profilePlan = document.querySelector("#profilePlan");
+    const profileCredits = document.querySelector("#profileCredits");
+    const profileGenderChoices = [...document.querySelectorAll("#personalSettingsCard .gender-choice")];
+    const saveProfileSettings = document.querySelector("#saveProfileSettings");
+    let isRegistered = false;
+    let verificationCode = "";
+    let termsOpened = false;
+    let credits = 3;
+    let currentMode = "星座";
+    let currentPlan = "免費體驗";
+    let selectedPlan = null;
+    let selectedPlanPoints = 0;
+    let selectedPlanPrice = "";
+    let paymentMode = "plan";
+    let latestHistory = [];
+    let currentPageId = "registerPage";
+    let pageHistory = [];
+    let pageFuture = [];
+    let currentLanguage = "zh-Hant";
+    const languageCopy = {
+      "zh-Hant": {
+        titles: { registerPage: "命理註冊", fortunePage: "命理", historyPage: "紀錄", pointsPage: "點數", paymentPage: "付款", settingsPage: "設定" },
+        nav: ["算命", "紀錄", "點數", "設定"],
+        status: {
+          registerPage: "首次下載需完成資料、手機驗證與條文同意後才能使用。",
+          fortunePage: () => `${modeLabel(currentMode)} · 可啟動試算`,
+          historyPage: "查看過去命理試算紀錄",
+          pointsPage: "查看目前點數與儲值說明",
+          paymentPage: "輸入信用卡資料完成方案付款",
+          settingsPage: "調整系統設定與個人資料"
+        },
+        settingsSystem: "修改系統設定",
+        settingsProfile: "修改個人設定",
+        labels: ["App 背景顏色", "選圖片做為背景", "字體大小", "語言", "每日播送時間", "暱稱", "生日", "出生時辰", "性別"],
+        saveProfile: "儲存個人設定",
+        calculate: "啟動試算",
+        prev: "< 上一頁",
+        next: "下一頁 >",
+        languageChanged: label => `語言已切換為 ${label}`
+      },
+      en: {
+        titles: { registerPage: "Register", fortunePage: "Fortune", historyPage: "History", pointsPage: "Points", paymentPage: "Payment", settingsPage: "Settings" },
+        nav: ["Fortune", "History", "Points", "Settings"],
+        status: {
+          registerPage: "Complete profile, phone verification, and terms consent before using the app.",
+          fortunePage: () => `${modeLabel(currentMode)} · Ready`,
+          historyPage: "View previous readings",
+          pointsPage: "View points and plans",
+          paymentPage: "Enter card details to complete payment",
+          settingsPage: "Adjust system and profile settings"
+        },
+        settingsSystem: "System Settings",
+        settingsProfile: "Profile Settings",
+        labels: ["App background color", "Use image as background", "Font size", "Language", "Daily broadcast time", "Nickname", "Birthday", "Birth hour", "Gender"],
+        saveProfile: "Save Profile",
+        calculate: "Start Reading",
+        prev: "< Previous",
+        next: "Next >",
+        languageChanged: label => `Language changed to ${label}`
+      },
+      ja: {
+        titles: { registerPage: "登録", fortunePage: "占い", historyPage: "履歴", pointsPage: "ポイント", paymentPage: "支払い", settingsPage: "設定" },
+        nav: ["占い", "履歴", "ポイント", "設定"],
+        status: {
+          registerPage: "プロフィール、電話認証、規約同意を完了してから利用できます。",
+          fortunePage: () => `${modeLabel(currentMode)} · 試算できます`,
+          historyPage: "過去の試算履歴を見る",
+          pointsPage: "ポイントとプランを見る",
+          paymentPage: "カード情報を入力して支払いを完了",
+          settingsPage: "システム設定と個人情報を調整"
+        },
+        settingsSystem: "システム設定",
+        settingsProfile: "個人設定",
+        labels: ["アプリ背景色", "画像を背景に使う", "文字サイズ", "言語", "毎日の配信時刻", "ニックネーム", "誕生日", "出生時刻", "性別"],
+        saveProfile: "個人設定を保存",
+        calculate: "試算開始",
+        prev: "< 前へ",
+        next: "次へ >",
+        languageChanged: label => `言語を${label}に変更しました`
+      }
+    };
+    const localizedUi = {
+      "zh-Hant": {
+        birthTitle: "出生年月日時",
+        birthLabels: ["年份", "月份", "日期", "時辰"],
+        serviceTitle: "選擇命理項目",
+        perUse: "每次扣 1 點",
+        services: {
+          "星座": ["星座", "太陽星座與今日提醒"],
+          "塔羅牌": ["塔羅牌", "抽牌解讀目前課題"],
+          "紫微斗數": ["紫微斗數", "命盤與宮位分析"],
+          "八字": ["八字", "年、月、日、時推演"],
+          "手相": ["手相", "開啟相機或相簿"],
+          "面相": ["面相", "拍照或選照片分析"],
+          "姓名學": ["姓名學", "輸入姓與名啟動"]
+        },
+        mediaNote: "請選擇來源。此原型只模擬開啟相機或相簿，不會真的上傳照片。",
+        camera: "開啟相機",
+        album: "開啟相簿",
+        nameTitle: "姓名學資料",
+        nameLabels: ["姓", "名"],
+        paywallTitle: "點數已用完",
+        paywallText: "免費點數已使用完畢。請升級月方案後繼續試算。",
+        upgrade: "升級",
+        historyTitle: "試算紀錄",
+        historyEmpty: "尚未產生紀錄。完成一次試算後，結果會出現在這裡。",
+        planTitle: "月方案",
+        currentPoints: "目前點數",
+        currentPlan: "目前方案",
+        freeTrial: "免費體驗",
+        perMonth: count => `每月 ${count} 次`,
+        paymentTitle: "信用卡付費",
+        selectPlanFirst: "請先選擇方案。",
+        cardNumber: "信用卡號",
+        expiry: "到期",
+        confirmPayment: "確認付款",
+        themes: ["星夜", "金色", "藍色"],
+        sizes: ["中", "小", "大"],
+        languages: ["繁體中文", "English", "日本語"],
+        gender: ["男", "女"]
+      },
+      en: {
+        birthTitle: "Birth Date & Time",
+        birthLabels: ["Year", "Month", "Day", "Hour"],
+        serviceTitle: "Choose Reading",
+        perUse: "1 point per reading",
+        services: {
+          "星座": ["Zodiac", "Sun sign and daily guidance"],
+          "塔羅牌": ["Tarot", "Cards for the current theme"],
+          "紫微斗數": ["Zi Wei", "Chart and palace reading"],
+          "八字": ["Ba Zi", "Year, month, day, hour"],
+          "手相": ["Palm", "Camera or album entry"],
+          "面相": ["Face", "Photo-based reading"],
+          "姓名學": ["Name", "Enter surname and given name"]
+        },
+        mediaNote: "Choose a source. This prototype only simulates camera or album access.",
+        camera: "Camera",
+        album: "Album",
+        nameTitle: "Name Data",
+        nameLabels: ["Last name", "First name"],
+        paywallTitle: "Points Used Up",
+        paywallText: "Your free points are used up. Upgrade a monthly plan to continue.",
+        upgrade: "Upgrade",
+        historyTitle: "Reading History",
+        historyEmpty: "No readings yet. Completed readings will appear here.",
+        planTitle: "Monthly Plans",
+        currentPoints: "Current points",
+        currentPlan: "Current plan",
+        freeTrial: "Free Trial",
+        perMonth: count => `${count} readings / month`,
+        paymentTitle: "Card Payment",
+        selectPlanFirst: "Choose a plan first.",
+        cardNumber: "Card number",
+        expiry: "Expiry",
+        confirmPayment: "Confirm Payment",
+        themes: ["Mystic", "Gold", "Ocean"],
+        sizes: ["Medium", "Small", "Large"],
+        languages: ["繁體中文", "English", "日本語"],
+        gender: ["Male", "Female"]
+      },
+      ja: {
+        birthTitle: "生年月日時",
+        birthLabels: ["年", "月", "日", "時刻"],
+        serviceTitle: "占い項目を選択",
+        perUse: "1回につき1ポイント",
+        services: {
+          "星座": ["星座", "太陽星座と今日のヒント"],
+          "塔羅牌": ["タロット", "現在の課題をカードで読む"],
+          "紫微斗數": ["紫微斗数", "命盤と宮位の分析"],
+          "八字": ["四柱推命", "年・月・日・時で推算"],
+          "手相": ["手相", "カメラまたはアルバム"],
+          "面相": ["顔相", "写真から分析"],
+          "姓名學": ["姓名判断", "姓と名を入力"]
+        },
+        mediaNote: "画像の取得元を選択してください。この原型ではカメラ/アルバムを模擬します。",
+        camera: "カメラ",
+        album: "アルバム",
+        nameTitle: "姓名判断データ",
+        nameLabels: ["姓", "名"],
+        paywallTitle: "ポイント不足",
+        paywallText: "無料ポイントを使い切りました。月額プランにアップグレードしてください。",
+        upgrade: "アップグレード",
+        historyTitle: "試算履歴",
+        historyEmpty: "まだ履歴はありません。試算後ここに表示されます。",
+        planTitle: "月額プラン",
+        currentPoints: "現在のポイント",
+        currentPlan: "現在のプラン",
+        freeTrial: "無料体験",
+        perMonth: count => `月 ${count} 回`,
+        paymentTitle: "カード支払い",
+        selectPlanFirst: "先にプランを選択してください。",
+        cardNumber: "カード番号",
+        expiry: "有効期限",
+        confirmPayment: "支払いを確認",
+        themes: ["星夜", "ゴールド", "ブルー"],
+        sizes: ["中", "小", "大"],
+        languages: ["繁體中文", "English", "日本語"],
+        gender: ["男", "女"]
+      }
+    };
+
+    function ui() {
+      return localizedUi[currentLanguage] || localizedUi["zh-Hant"];
+    }
+
+    function modeLabel(mode) {
+      return (ui().services[mode] && ui().services[mode][0]) || mode;
+    }
+
+    function setFirstTextNode(element, text) {
+      const textNode = [...element.childNodes].find(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+      if (textNode) textNode.textContent = text;
+    }
+
+    function updateLocalizedStaticText() {
+      const c = ui();
+      document.querySelector(".birth-card strong").textContent = c.birthTitle;
+      document.querySelectorAll(".birth-grid label").forEach((label, index) => setFirstTextNode(label, c.birthLabels[index]));
+      const sectionTitles = document.querySelectorAll("#fortunePage > .section-title");
+      sectionTitles[0].querySelector("strong").textContent = c.serviceTitle;
+      sectionTitles[0].querySelector("span").textContent = c.perUse;
+      serviceButtons.forEach(button => {
+        const service = c.services[button.dataset.mode];
+        if (!service) return;
+        button.querySelector("b").textContent = service[0];
+        button.querySelector("span").textContent = service[1];
+      });
+      document.querySelector("#mediaPanel .subline").textContent = c.mediaNote;
+      document.querySelector("#openCamera").textContent = c.camera;
+      document.querySelector("#openAlbum").textContent = c.album;
+      document.querySelector("#namePanel strong").textContent = c.nameTitle;
+      document.querySelectorAll("#namePanel label").forEach((label, index) => setFirstTextNode(label, c.nameLabels[index]));
+      selectedMode.textContent = modeLabel(currentMode);
+      document.querySelector("#paywall strong").textContent = c.paywallTitle;
+      document.querySelector("#paywall p").textContent = c.paywallText;
+      upgradePlan.textContent = c.upgrade;
+      document.querySelector("#historyPage h2").textContent = c.historyTitle;
+      if (!latestHistory.length) historyList.innerHTML = `<p>${c.historyEmpty}</p>`;
+      document.querySelector("#pointsPage h2").textContent = c.planTitle;
+      document.querySelector("#pointsPage .summary-list p:nth-child(1)").firstChild.textContent = `${c.currentPoints}：`;
+      document.querySelector("#pointsPage .summary-list p:nth-child(2)").firstChild.textContent = `${c.currentPlan}：`;
+      planOptions.forEach(option => {
+        option.innerHTML = `${option.dataset.plan}<br>${option.dataset.price}<br>${c.perMonth(option.dataset.points)}`;
+      });
+      document.querySelector("#paymentPage h2").textContent = c.paymentTitle;
+      selectedPlanSummary.textContent = selectedPlan
+        ? paymentMode === "donation"
+          ? `Donate ${selectedPlanPrice}，信用卡交易`
+          : `${selectedPlan} ${selectedPlanPrice}，${c.perMonth(selectedPlanPoints)}`
+        : c.selectPlanFirst;
+      const cardLabels = document.querySelectorAll("#paymentPage label");
+      setFirstTextNode(cardLabels[0], c.cardNumber);
+      setFirstTextNode(cardLabels[1], c.expiry);
+      confirmPlanPayment.textContent = c.confirmPayment;
+      document.querySelectorAll(".color-choice").forEach((button, index) => { button.textContent = c.themes[index]; });
+      document.querySelectorAll("#fontSizeSelect option").forEach((option, index) => { option.textContent = c.sizes[index]; });
+      document.querySelectorAll("#languageSelect option").forEach((option, index) => { option.textContent = c.languages[index]; });
+      profileGenderChoices.forEach((button, index) => { button.textContent = c.gender[index]; });
+    }
+
+    function updateCredits() {
+      creditsLabel.textContent = `${credits} 點`;
+      pointsSummary.textContent = `${credits} 點`;
+      planSummary.textContent = currentPlan === "免費體驗" ? ui().freeTrial : currentPlan;
+      profileCredits.value = `${credits} 點`;
+      profilePlan.value = currentPlan === "免費體驗" ? ui().freeTrial : currentPlan;
+      planOptions.forEach(option => option.classList.toggle("current", option.dataset.plan === currentPlan));
+    }
+
+    function updatePageControls() {
+      pageControls.style.display = currentPageId === "fortunePage" || currentPageId === "registerPage" ? "none" : "grid";
+      prevPageButton.disabled = pageHistory.length === 0;
+      nextPageButton.disabled = pageFuture.length === 0;
+    }
+
+    function generateVerificationCode() {
+      verificationCode = String(Math.floor(1000 + Math.random() * 9000));
+      verificationHint.textContent = `已發送 4 位數驗證碼到手機 ${registerPhone.value.trim() || "使用者手機"}。原型示範碼：${verificationCode}`;
+      validateRegistration();
+    }
+
+    function birthdaySeed() {
+      const birthday = profileBirthday.value || registerBirthday.value || "1992-08-16";
+      const today = new Date();
+      return [...`${birthday}-${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`]
+        .reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    }
+
+    function pickDaily(list, offset = 0) {
+      return list[(birthdaySeed() + offset) % list.length];
+    }
+
+    function updateDailyBroadcast(reason = "schedule") {
+      const time = dailyBroadcastInput.value || "07:00";
+      const work = [
+        "適合先完成重要但不急的工作，避免被臨時訊息打亂節奏。",
+        "今天工作重點在溝通確認，重要決策請多留一段緩衝時間。",
+        "適合整理文件、排程與待辦清單，下午後效率會更穩定。",
+        "不要一次承諾太多，先把手上任務收斂到三個重點。"
+      ];
+      const love = [
+        "感情上適合主動關心對方，但不要急著要求立即回應。",
+        "今天適合溫和表達想法，少用猜測，多用確認。",
+        "單身者可多參與熟人介紹或共同興趣活動，互動會比較自然。",
+        "有伴者適合安排簡單陪伴，重點不是形式，而是穩定感。"
+      ];
+      const money = [
+        "財運適合保守規劃，避免衝動購買或臨時投資。",
+        "可檢查訂閱、固定支出與帳單，容易找到可節省的地方。",
+        "今天適合談合作條件，但價格與細節要白紙黑字。",
+        "正財運穩，偏財不宜冒進；先確認風險再行動。"
+      ];
+      const colors = ["金色", "紫色", "湖水藍", "白色", "深綠色", "玫瑰粉", "銀灰色"];
+      const health = [
+        "注意睡眠與肩頸放鬆，避免長時間維持同一姿勢。",
+        "飲食宜清淡，水分補充會影響今天的專注力。",
+        "適合短時間散步或伸展，身體動起來思緒會更清楚。",
+        "避免過度熬夜，晚上適合把明日行程先整理好。"
+      ];
+      dailyBroadcastTime.textContent = `每日 ${time} 播送`;
+      dailyBroadcastList.innerHTML = `
+        <div class="daily-item"><b>工作</b><span>${pickDaily(work, 1)}</span></div>
+        <div class="daily-item"><b>感情</b><span>${pickDaily(love, 2)}</span></div>
+        <div class="daily-item"><b>財運</b><span>${pickDaily(money, 3)}</span></div>
+        <div class="daily-item"><b>幸運色</b><span>${pickDaily(colors, 4)}</span></div>
+        <div class="daily-item"><b>健康</b><span>${pickDaily(health, 5)}</span></div>
+      `;
+      if (reason === "schedule") {
+        appStatus.textContent = `今日注意事項已於 ${time} 播送`;
+      }
+    }
+
+    function checkDailyBroadcastSchedule() {
+      const now = new Date();
+      const current = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const target = dailyBroadcastInput.value || "07:00";
+      const key = `fortune-daily-${now.toISOString().slice(0, 10)}-${target}`;
+      if (isRegistered && current === target && localStorage.getItem(key) !== "sent") {
+        updateDailyBroadcast("schedule");
+        localStorage.setItem(key, "sent");
+      }
+    }
+
+    function validateRegistration() {
+      const hasProfile = registerName.value.trim()
+        && registerPhone.value.trim()
+        && registerEmail.value.trim()
+        && registerBirthday.value.trim()
+        && registerAge.value.trim()
+        && Number(registerAge.value) > 0;
+      const emailLooksOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerEmail.value.trim());
+      const codeEntered = verificationCode && verificationCodeInput.value.trim().length === 4;
+      const termsOk = termsOpened && agreeTerms.checked;
+      completeRegistration.disabled = !(hasProfile && emailLooksOk && codeEntered && termsOk);
+      if (!termsOpened) {
+        appStatus.textContent = "請先展開條文閱讀後再完成註冊。";
+      } else if (!agreeTerms.checked) {
+        appStatus.textContent = "請勾選同意使用條款、隱私權政策與免責聲明。";
+      } else if (!hasProfile || !emailLooksOk) {
+        appStatus.textContent = "請完整填寫姓名、電話、Email、生日與年齡。";
+      } else if (!codeEntered) {
+        appStatus.textContent = "請輸入 4 位數簡訊驗證碼。";
+      } else {
+        appStatus.textContent = "資料已完成，可以送出註冊。";
+      }
+    }
+
+    function showPage(pageId, options = {}) {
+      if (!isRegistered && pageId !== "registerPage") {
+        pageId = "registerPage";
+      }
+      if (pageId === currentPageId) return;
+      if (!options.fromHistory) {
+        pageHistory.push(currentPageId);
+        pageFuture = [];
+      }
+      currentPageId = pageId;
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      nav.style.display = isRegistered ? "grid" : "none";
+      toolbar.style.display = isRegistered ? "flex" : "none";
+      updatePageControls();
+      updatePageText();
+    }
+
+    function updatePageText() {
+      const copy = languageCopy[currentLanguage] || languageCopy["zh-Hant"];
+      document.querySelector("h1").textContent = copy.titles[currentPageId] || copy.titles.fortunePage;
+      const status = copy.status[currentPageId] || copy.status.fortunePage;
+      appStatus.textContent = typeof status === "function" ? status() : status;
+    }
+
+    function applyLanguage(language) {
+      currentLanguage = languageCopy[language] ? language : "zh-Hant";
+      document.documentElement.lang = currentLanguage;
+      const copy = languageCopy[currentLanguage];
+      updateLocalizedStaticText();
+      updateCredits();
+      navButtons.forEach((button, index) => {
+        const textNode = [...button.childNodes].find(node => node.nodeType === Node.TEXT_NODE);
+        if (textNode) textNode.textContent = copy.nav[index];
+      });
+      document.querySelector("#prevPageButton").textContent = copy.prev;
+      document.querySelector("#nextPageButton").textContent = copy.next;
+      document.querySelector("#settingsPage .settings-card:nth-of-type(1) h2").textContent = copy.settingsSystem;
+      document.querySelector("#settingsPage .settings-card:nth-of-type(2) h2").textContent = copy.settingsProfile;
+      const supportCopy = {
+        "zh-Hant": ["聯繫客服", "客服說明", "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。", "Email", "support@app-service.example", "Email"],
+        en: ["Contact Support", "Issue Report", "App issues, points errors, fortune result feedback", "Partnership", "Content, business, and plan cooperation", "Email"],
+        ja: ["サポート連絡", "問題報告", "App の問題、ポイント異常、占い結果の報告", "提携相談", "コンテンツ提携、ビジネス提携、プラン提携", "Email"]
+      }[currentLanguage];
+      const supportCard = document.querySelector("#settingsPage .settings-card:nth-of-type(3)");
+      if (supportCard && supportCopy) {
+        supportCard.querySelector("h2").textContent = supportCopy[0];
+        const labels = supportCard.querySelectorAll("label");
+        labels[0].childNodes[0].textContent = supportCopy[1];
+        labels[0].querySelector("input").value = supportCopy[2];
+        labels[1].childNodes[0].textContent = supportCopy[3];
+        labels[1].querySelector("input").value = supportCopy[4];
+        if (labels[2]) labels[2].childNodes[0].textContent = supportCopy[5];
+      }
+      const settingLabels = document.querySelectorAll("#settingsPage label");
+      copy.labels.forEach((label, index) => {
+        const textNode = [...settingLabels[index].childNodes].find(node => node.nodeType === Node.TEXT_NODE);
+        if (textNode) textNode.textContent = label;
+      });
+      saveProfileSettings.textContent = copy.saveProfile;
+      calculateButton.textContent = copy.calculate;
+      updatePageText();
+    }
+
+    function movePage(offset) {
+      if (offset < 0 && pageHistory.length) {
+        const previousPage = pageHistory.pop();
+        pageFuture.push(currentPageId);
+        showPage(previousPage, { fromHistory: true });
+      } else if (offset > 0 && pageFuture.length) {
+        const nextPage = pageFuture.pop();
+        pageHistory.push(currentPageId);
+        showPage(nextPage, { fromHistory: true });
+      }
+    }
+
+    function showPersonalSettings() {
+      showPage("settingsPage");
+      window.setTimeout(() => {
+        document.querySelector("#personalSettingsCard").scrollIntoView({ block: "start", behavior: "smooth" });
+      }, 0);
+      appStatus.textContent = "修改個人資料、暱稱與生日";
+    }
+
+    function addHistory(detail) {
+      latestHistory.unshift({ mode: currentMode, detail });
+      latestHistory = latestHistory.slice(0, 5);
+      historyList.innerHTML = latestHistory.map(item => `
+        <p><strong>${escapeHtml(item.mode)}</strong><br>${item.detail}</p>
+      `).join("");
+    }
+
+    function applyTheme(theme) {
+      const backgrounds = {
+        mystic: "radial-gradient(circle at 50% 0%, rgba(255,209,102,.16), transparent 14rem), linear-gradient(180deg, rgba(191,140,255,.12), transparent 32%), var(--bg)",
+        gold: "radial-gradient(circle at 20% 0%, rgba(255,209,102,.28), transparent 14rem), linear-gradient(180deg, rgba(255,209,102,.12), transparent 34%), #17110a",
+        ocean: "radial-gradient(circle at 50% 0%, rgba(100,210,255,.22), transparent 14rem), linear-gradient(180deg, rgba(48,209,88,.10), transparent 34%), #061018"
+      };
+      screen.style.background = backgrounds[theme] || backgrounds.mystic;
+    }
+
+    function setMode(button) {
+      currentMode = button.dataset.mode;
+      serviceButtons.forEach(item => item.classList.toggle("active", item === button));
+      selectedMode.textContent = modeLabel(currentMode);
+      mediaPanel.classList.toggle("active", button.dataset.panel === "media");
+      namePanel.classList.toggle("active", button.dataset.panel === "name");
+
+      if (button.dataset.panel === "media") {
+        mediaTitle.textContent = `${modeLabel(currentMode)}影像`;
+        selectedHint.textContent = currentLanguage === "en" ? "Choose camera or album" : currentLanguage === "ja" ? "カメラまたはアルバムを選択" : "請選擇相機或相簿";
+        appStatus.textContent = `${modeLabel(currentMode)} · ${selectedHint.textContent}`;
+      } else if (button.dataset.panel === "name") {
+        selectedHint.textContent = currentLanguage === "en" ? "Enter name" : currentLanguage === "ja" ? "姓名を入力" : "請輸入姓與名";
+        appStatus.textContent = `${modeLabel(currentMode)} · ${selectedHint.textContent}`;
+      } else {
+        selectedHint.textContent = currentLanguage === "en" ? "Birth data ready" : currentLanguage === "ja" ? "生年月日入力済み" : "生日資料已填寫";
+        updatePageText();
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function showResult(detail) {
+      resultCard.classList.add("show");
+      resultCard.classList.remove("loading");
+      paywall.classList.remove("show");
+      resultTitle.textContent = `${currentMode}分析完成`;
+      resultText.innerHTML = detail;
+    }
+
+    function scrollToResult() {
+      window.setTimeout(() => {
+        resultCard.scrollIntoView({ block: "start", behavior: "smooth" });
+      }, 0);
+    }
+
+    function showThinking() {
+      resultCard.classList.add("show", "loading");
+      paywall.classList.remove("show");
+      resultTitle.textContent = `${currentMode}分析中`;
+      resultText.textContent = "正在整理出生資料、命理項目與使用者輸入，等待大模型生成結果…";
+      scrollToResult();
+    }
+
+    function buildAiResult() {
+      const year = escapeHtml(document.querySelector("#birthYear").value || "出生年");
+      const month = escapeHtml(document.querySelector("#birthMonth").value || "月");
+      const day = escapeHtml(document.querySelector("#birthDay").value || "日");
+      const hour = escapeHtml(document.querySelector("#birthHour").value || "時");
+      const lastName = escapeHtml(document.querySelector("#lastName").value || "姓");
+      const firstName = escapeHtml(document.querySelector("#firstName").value || "名");
+      const birth = `${year}/${month}/${day} ${hour}:00`;
+      const fullName = `${lastName}${firstName}`;
+
+      const results = {
+        "八字": `<b>出生資料</b>：${birth}<br><b>五行傾向</b>：今日回覆偏向「木火相生」，適合把想法具體化。<br><b>近期建議</b>：工作上先穩住節奏，避免同時承諾太多；財務宜做長期配置。`,
+        "紫微斗數": `<b>命盤重點</b>：${birth} 顯示主題落在人際與職涯位置。<br><b>宮位解讀</b>：近期適合修正合作規則，也適合重新盤點資源。<br><b>提醒</b>：不要急著做單點判斷，先看整體趨勢。`,
+        "星座": `<b>星象摘要</b>：以 ${birth} 推估，近期需要把情緒與目標分開處理。<br><b>今日運勢</b>：溝通運提升，但重要訊息要再次確認。<br><b>行動</b>：適合安排短會議、整理清單、回覆關鍵訊息。`,
+        "塔羅牌": `<b>抽牌結果</b>：節制、星星、錢幣騎士。<br><b>牌意</b>：事情會往穩定方向走，但需要耐心累積。<br><b>建議</b>：先做一個小而確定的決定，下一步自然會變清楚。`,
+        "手相": `<b>影像來源</b>：已模擬讀取手相照片。<br><b>掌紋重點</b>：生命線能量穩，智慧線偏向分析型。<br><b>建議</b>：近期適合用規劃取代焦慮，避免過度消耗體力。`,
+        "面相": `<b>影像來源</b>：已模擬讀取面相照片。<br><b>面相重點</b>：整體氣色偏向思考與整理期。<br><b>建議</b>：先處理睡眠與節奏，財運會跟著決策品質改善。`,
+        "姓名學": `<b>姓名</b>：${fullName}<br><b>姓名能量</b>：此名偏向溫和累積型，適合以信任建立長期關係。<br><b>建議</b>：若用於品牌或公開身份，可加強記憶點與行動感。`
+      };
+
+      return results[currentMode];
+    }
+
+    async function askGemini() {
+      const prompt = `請用繁體中文針對${currentMode}進行命理分析。出生資料：${document.querySelector("#birthYear").value}/${document.querySelector("#birthMonth").value}/${document.querySelector("#birthDay").value} ${document.querySelector("#birthHour").value}:00。請給重點、近期提醒與行動建議。`;
+      const response = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: prompt, mode: currentMode })
+      });
+      if (!response.ok) throw new Error("Gemini endpoint unavailable");
+      const data = await response.json();
+      return escapeHtml(data.answer || data.text || "").replace(/\n/g, "<br>");
+    }
+
+    serviceButtons.forEach(button => {
+      button.addEventListener("click", () => setMode(button));
+    });
+
+    document.querySelector("#openCamera").addEventListener("click", () => {
+      appStatus.textContent = `${currentMode} · 已開啟相機`;
+      selectedHint.textContent = "相機已開啟";
+    });
+
+    document.querySelector("#openAlbum").addEventListener("click", () => {
+      appStatus.textContent = `${currentMode} · 已開啟相簿`;
+      selectedHint.textContent = "相簿已開啟";
+    });
+
+    calculateButton.addEventListener("click", async () => {
+      if (credits <= 0) {
+        resultCard.classList.remove("show");
+        paywall.classList.add("show");
+        appStatus.textContent = "點數不足，請先升級方案";
+        return;
+      }
+
+      credits -= 1;
+      updateCredits();
+      calculateButton.disabled = true;
+      showThinking();
+      appStatus.textContent = "正在呼叫內部 Google Gemini API…";
+
+      try {
+        const detail = await askGemini();
+        calculateButton.disabled = false;
+        appStatus.textContent = credits === 0 ? "免費點數已用完" : `剩餘 ${credits} 點`;
+        showResult(detail);
+        scrollToResult();
+        if (credits === 0) paywall.classList.add("show");
+        addHistory(detail);
+      } catch (error) {
+        const detail = buildAiResult();
+        calculateButton.disabled = false;
+        appStatus.textContent = credits === 0 ? "免費點數已用完" : `剩餘 ${credits} 點`;
+        showResult(detail);
+        scrollToResult();
+        if (credits === 0) paywall.classList.add("show");
+        addHistory(detail);
+      }
+    });
+
+    navButtons.forEach(button => {
+      button.addEventListener("click", () => showPage(button.dataset.page));
+    });
+
+    [registerName, registerPhone, registerEmail, registerBirthday, registerAge, verificationCodeInput, agreeTerms].forEach(input => {
+      input.addEventListener("input", validateRegistration);
+      input.addEventListener("change", validateRegistration);
+    });
+
+    registerGenderChoices.forEach(button => {
+      button.addEventListener("click", () => {
+        registerGenderChoices.forEach(item => item.classList.toggle("active", item === button));
+        validateRegistration();
+      });
+    });
+
+    resendCodeButton.addEventListener("click", generateVerificationCode);
+
+    toggleTermsButton.addEventListener("click", () => {
+      termsOpened = true;
+      termsPanel.classList.toggle("show");
+      toggleTermsButton.textContent = termsPanel.classList.contains("show")
+        ? "收合使用條款、隱私權政策與免責聲明"
+        : "展開使用條款、隱私權政策與免責聲明";
+      validateRegistration();
+    });
+
+    completeRegistration.addEventListener("click", () => {
+      if (completeRegistration.disabled) return;
+      if (verificationCodeInput.value.trim() !== verificationCode) {
+        appStatus.textContent = "簡訊碼輸入錯誤。";
+        return;
+      }
+      const name = registerName.value.trim() || "使用者";
+      const selectedGender = registerGenderChoices.find(item => item.classList.contains("active"))?.dataset.gender || "男";
+      isRegistered = true;
+      userPill.textContent = name;
+      profileNickname.value = name;
+      profileBirthday.value = registerBirthday.value.trim();
+      profileGenderChoices.forEach(button => button.classList.toggle("active", button.dataset.gender === selectedGender));
+      const [year, month, day] = (registerBirthday.value.trim() || "1992-08-16").split("-");
+      document.querySelector("#birthYear").value = year || "1992";
+      document.querySelector("#birthMonth").value = month || "08";
+      document.querySelector("#birthDay").value = day || "16";
+      updateDailyBroadcast("profile");
+      registrationSummary.innerHTML = `<p>註冊成功<br>姓名：${escapeHtml(name)}<br>電話：${escapeHtml(registerPhone.value.trim())}<br>Email：${escapeHtml(registerEmail.value.trim())}<br>性別：${escapeHtml(selectedGender)}<br>生日：${escapeHtml(registerBirthday.value.trim())}</p>`;
+      appStatus.textContent = "註冊成功，可以開始使用命理 App。";
+      showPage("fortunePage");
+    });
+
+    prevPageButton.addEventListener("click", () => movePage(-1));
+    nextPageButton.addEventListener("click", () => movePage(1));
+
+    userPill.addEventListener("click", () => {
+      updateCredits();
+      showPersonalSettings();
+    });
+    pointsButton.addEventListener("click", () => showPage("pointsPage"));
+    upgradePlan.addEventListener("click", () => showPage("pointsPage"));
+
+    planOptions.forEach(option => {
+      option.addEventListener("click", () => {
+        paymentMode = "plan";
+        selectedPlan = option.dataset.plan;
+        selectedPlanPrice = option.dataset.price;
+        selectedPlanPoints = Number(option.dataset.points);
+        selectedPlanSummary.textContent = `${selectedPlan} ${selectedPlanPrice}，${ui().perMonth(selectedPlanPoints)}`;
+        showPage("paymentPage");
+      });
+    });
+
+    donateOptions.forEach(option => {
+      option.addEventListener("click", () => {
+        paymentMode = "donation";
+        selectedPlan = "Donate";
+        selectedPlanPrice = option.dataset.amount;
+        selectedPlanPoints = 0;
+        selectedPlanSummary.textContent = `Donate ${selectedPlanPrice}，信用卡交易`;
+        showPage("paymentPage");
+      });
+    });
+
+    confirmPlanPayment.addEventListener("click", () => {
+      if (!selectedPlan) {
+        appStatus.textContent = "請先選擇方案";
+        showPage("pointsPage");
+        return;
+      }
+      if (paymentMode === "donation") {
+        appStatus.textContent = `感謝您的贊助支持，已完成 ${selectedPlanPrice} 信用卡交易`;
+        selectedPlan = null;
+        selectedPlanPrice = "";
+        selectedPlanPoints = 0;
+        paymentMode = "plan";
+        showPage("fortunePage");
+        return;
+      }
+      currentPlan = selectedPlan;
+      credits += selectedPlanPoints;
+      updateCredits();
+      paywall.classList.remove("show");
+      appStatus.textContent = `已升級 ${currentPlan}，本月可試算 ${credits} 次`;
+      showPage("pointsPage");
+    });
+
+    colorChoices.forEach(button => {
+      button.addEventListener("click", () => {
+        colorChoices.forEach(item => item.classList.toggle("active", item === button));
+        applyTheme(button.dataset.theme);
+        appStatus.textContent = "背景顏色已更新";
+      });
+    });
+
+    backgroundImage.addEventListener("change", () => {
+      const file = backgroundImage.files && backgroundImage.files[0];
+      if (!file) return;
+      const imageUrl = URL.createObjectURL(file);
+      screen.style.background = `linear-gradient(rgba(7,7,11,.68), rgba(7,7,11,.88)), url("${imageUrl}") center / cover`;
+      appStatus.textContent = "背景圖片已套用";
+    });
+
+    fontSizeSelect.addEventListener("change", () => {
+      const size = fontSizeSelect.value === "large" ? "16px" : fontSizeSelect.value === "small" ? "12px" : "14px";
+      document.documentElement.style.setProperty("--app-font-size", size);
+      appStatus.textContent = "字體大小已更新";
+    });
+
+    languageSelect.addEventListener("change", () => {
+      const label = languageSelect.options[languageSelect.selectedIndex].textContent;
+      applyLanguage(languageSelect.value);
+      appStatus.textContent = languageCopy[currentLanguage].languageChanged(label);
+    });
+
+    dailyBroadcastInput.addEventListener("change", () => {
+      updateDailyBroadcast("profile");
+      appStatus.textContent = `每日播送時間已改為 ${dailyBroadcastInput.value || "07:00"}`;
+    });
+
+    dailyBroadcastToggle.addEventListener("click", () => {
+      const collapsed = dailyBroadcastCard.classList.toggle("collapsed");
+      dailyBroadcastToggle.textContent = collapsed ? "+" : "-";
+      dailyBroadcastToggle.setAttribute("aria-expanded", String(!collapsed));
+    });
+
+    profileGenderChoices.forEach(button => {
+      button.addEventListener("click", () => {
+        profileGenderChoices.forEach(item => item.classList.toggle("active", item === button));
+        appStatus.textContent = `性別已設定為${button.dataset.gender}`;
+      });
+    });
+
+    saveProfileSettings.addEventListener("click", () => {
+      const nickname = profileNickname.value.trim() || "使用者";
+      const gender = profileGenderChoices.find(item => item.classList.contains("active"))?.dataset.gender || "未設定";
+      userPill.textContent = nickname;
+      const [year, month, day] = (profileBirthday.value || "1992-08-16").split("-");
+      document.querySelector("#birthYear").value = year || "1992";
+      document.querySelector("#birthMonth").value = month || "08";
+      document.querySelector("#birthDay").value = day || "16";
+      document.querySelector("#birthHour").value = profileBirthHour.value.trim() || "09";
+      selectedHint.textContent = "個人生日資料已更新";
+      updateDailyBroadcast("profile");
+      appStatus.textContent = `個人設定已儲存，性別：${gender}`;
+    });
+
+    updateDailyBroadcast("profile");
+    setInterval(checkDailyBroadcastSchedule, 30000);
+    updateCredits();
+    nav.style.display = "none";
+    toolbar.style.display = "none";
+    updatePageControls();
+    updatePageText();
+    validateRegistration();
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

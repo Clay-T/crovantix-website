@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>所有作品 | 創微科技 Crovantix Technologies</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070b12;
+      --ink: #f7fbff;
+      --muted: #a9b7c7;
+      --line: rgba(255,255,255,.13);
+      --panel: #101722;
+      --panel-2: #151f2d;
+      --cyan: #55d7ff;
+      --mint: #73f0bc;
+      --violet: #a78bfa;
+      --amber: #ffd166;
+      --danger: #ff718b;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", Arial, sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7,11,18,.82);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      width: min(1180px, calc(100% - 32px));
+      min-height: 64px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-width: 168px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(85,215,255,.18);
+    }
+
+    .brand-text {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand strong {
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      min-height: 34px;
+      display: grid;
+      place-items: center;
+      padding: 0 11px;
+      border-radius: 8px;
+      color: #d8e8f5;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.primary-link {
+      color: #06111b;
+      background: var(--cyan);
+    }
+
+    .language-switch {
+      position: relative;
+    }
+
+    .language-button {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #d8e8f5;
+      background: rgba(255,255,255,.07);
+      font-size: 16px;
+      font-weight: 850;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .language-button:hover,
+    .language-button:focus {
+      border-color: rgba(85,215,255,.72);
+      box-shadow: 0 0 0 3px rgba(85,215,255,.16);
+    }
+
+    .language-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 108px;
+      display: none;
+      gap: 4px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(16,23,34,.96);
+      box-shadow: 0 18px 44px rgba(0,0,0,.36);
+    }
+
+    .language-switch.open .language-menu {
+      display: grid;
+    }
+
+    .language-option {
+      min-height: 34px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 10px;
+      color: #d8e8f5;
+      background: transparent;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .language-option:hover,
+    .language-option.active {
+      color: #06111b;
+      background: var(--cyan);
+    }
+
+    .hero {
+      position: relative;
+      min-height: 92vh;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+
+    #heroCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #07101a;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(7,11,18,.08), rgba(7,11,18,.8) 72%, var(--bg));
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 112px 0 54px;
+    }
+
+    .hero-logo {
+      width: min(420px, 86vw);
+      display: block;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 28px 80px rgba(0,0,0,.34), 0 0 0 1px rgba(255,255,255,.18);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid rgba(85,215,255,.34);
+      border-radius: 8px;
+      color: #c7f2ff;
+      background: rgba(8,23,35,.58);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    h1 {
+      max-width: 900px;
+      margin: 20px 0 14px;
+      font-size: clamp(42px, 8vw, 92px);
+      line-height: .95;
+      letter-spacing: 0;
+    }
+
+    .hero-text {
+      max-width: 680px;
+      margin: 0 0 28px;
+      color: #d4e2ef;
+      font-size: clamp(17px, 2vw, 22px);
+      line-height: 1.55;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      min-height: 48px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 18px;
+      color: var(--ink);
+      background: rgba(255,255,255,.07);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .button.primary {
+      color: #06111b;
+      border-color: transparent;
+      background: var(--cyan);
+    }
+
+    .section {
+      padding: 72px 0;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .section.alt {
+      background: #0a1018;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 26px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .section-head p,
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      min-height: 176px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .card b {
+      display: block;
+      margin-bottom: 10px;
+      color: #ffffff;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .metric {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0f1723;
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--mint);
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .portfolio {
+      display: grid;
+      gap: 14px;
+      min-height: 212px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #121d2a, #0d141e);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portfolio::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 3px;
+      background: var(--accent, var(--cyan));
+    }
+
+    .app-mark {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #06111b;
+      background: var(--accent, var(--cyan));
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .portfolio h3 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .portfolio p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .portfolio a {
+      align-self: end;
+      color: var(--accent, var(--cyan));
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .portfolio-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 104px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .section-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .small-button,
+    .page-button {
+      min-height: 42px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid rgba(85,215,255,.4);
+      border-radius: 8px;
+      padding: 0 16px;
+      color: #06111b;
+      background: var(--cyan);
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .page-button.secondary {
+      color: #d8e8f5;
+      background: rgba(255,255,255,.08);
+      border-color: var(--line);
+    }
+
+    .portfolio-page-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .qr-download {
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 8px;
+      background: rgba(255,255,255,.06);
+    }
+
+    .qr-download img {
+      width: 88px;
+      height: 88px;
+      display: block;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .qr-download span {
+      color: #cfe9f5;
+      font-size: 11px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    .process {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      counter-reset: step;
+    }
+
+    .step {
+      min-height: 168px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
+      counter-increment: step;
+    }
+
+    .step::before {
+      content: "0" counter(step);
+      display: block;
+      margin-bottom: 16px;
+      color: var(--amber);
+      font-weight: 950;
+    }
+
+    .step b {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .step span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .price-card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .price-card.featured {
+      border-color: rgba(85,215,255,.7);
+      background: #112131;
+    }
+
+    .price-card h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .price-card .price {
+      margin: 0 0 14px;
+      color: var(--cyan);
+      font-size: 28px;
+      font-weight: 950;
+    }
+
+    .price-card ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      color: #cad8e8;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .member-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(300px, .98fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .member-panel {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .verification-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .verify-button {
+      min-height: 46px;
+      border: 1px solid rgba(85,215,255,.42);
+      border-radius: 8px;
+      padding: 0 14px;
+      color: #06111b;
+      background: var(--cyan);
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .field-note {
+      min-height: 18px;
+      margin: 0;
+      color: var(--amber);
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1.45;
+    }
+
+    .consent-label {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0b121b;
+      color: #d8e8f5;
+      line-height: 1.5;
+    }
+
+    .gender-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      display: grid;
+      gap: 8px;
+    }
+
+    .choice-button {
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #d8e8f5;
+      background: #0b121b;
+      font-weight: 900;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .choice-button.active {
+      color: #06111b;
+      border-color: transparent;
+      background: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(85,215,255,.16);
+    }
+
+    .membership-plans {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .member-plan {
+      display: grid;
+      gap: 8px;
+      min-height: 190px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0f1723;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .member-plan.free {
+      border-color: rgba(115,240,188,.45);
+    }
+
+    .member-plan.active {
+      border-color: rgba(85,215,255,.75);
+      background: #112131;
+    }
+
+    .member-plan b {
+      color: #fff;
+      font-size: 20px;
+    }
+
+    .member-plan strong {
+      color: var(--cyan);
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .member-plan span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .payment-panel {
+      display: none;
+      margin-top: 16px;
+      padding: 18px;
+      border: 1px solid rgba(85,215,255,.42);
+      border-radius: 8px;
+      background: #0f1723;
+    }
+
+    .payment-panel.open {
+      display: grid;
+      gap: 12px;
+    }
+
+    .payment-title {
+      margin: 0;
+      color: var(--cyan);
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    .contact-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .contact-panel {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .contact-logo {
+      width: 100%;
+      display: block;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .contact-logo-en {
+      display: none;
+    }
+
+    html[lang="en"] .contact-logo-zh {
+      display: none;
+    }
+
+    html[lang="en"] .contact-logo-en {
+      display: block;
+    }
+
+    .contact-panel p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .contact-list div {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0c141f;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #c9d7e8;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      outline: 0;
+      padding: 12px;
+      color: var(--ink);
+      background: #0b121b;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--cyan);
+    }
+
+    textarea {
+      min-height: 132px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-status {
+      min-height: 22px;
+      margin: 0;
+      color: var(--mint);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    details + details { margin-top: 10px; }
+
+    summary {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    details p {
+      margin: 0;
+      padding: 0 16px 16px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    footer {
+      padding: 28px 0;
+      color: var(--muted);
+      background: #05080d;
+    }
+
+    .footer-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .nav-inner { align-items: start; padding: 12px 0; }
+      .nav-links { gap: 4px; }
+      .nav-links a { padding: 0 8px; font-size: 12px; }
+      .section-head,
+      .member-layout,
+      .contact-layout {
+        grid-template-columns: 1fr;
+      }
+      .service-grid,
+      .portfolio-grid,
+      .membership-plans,
+      .pricing-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .process,
+      .metric-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .hero { min-height: 88vh; }
+      .hero-content { padding-top: 120px; }
+      .hero-logo { width: min(320px, 82vw); }
+      .service-grid,
+      .portfolio-grid,
+      .pricing-grid,
+      .membership-plans,
+      .process,
+      .metric-row,
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .verification-row {
+        grid-template-columns: 1fr;
+      }
+      .portfolio-actions {
+        grid-template-columns: 1fr;
+      }
+      .nav-inner { width: min(100% - 20px, 1180px); }
+      .wrap,
+      .hero-content,
+      .footer-inner { width: min(100% - 24px, 1180px); }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="主要導覽">
+    <div class="nav-inner">
+      <a class="brand" href="crovantix-technologies.html#home">
+        <img class="brand-logo" src="crovantix-logo-main.png" alt="Crovantix Technologies logo">
+        <span class="brand-text">
+          <strong>創微科技</strong>
+          <span>Crovantix Technologies</span>
+        </span>
+      </a>
+      <div class="nav-links">
+        <a href="crovantix-technologies.html#home">回首頁</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="section" id="all-work">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>所有作品</h2>
+        <p>完整展示 Crovantix Technologies 已建立的 App 原型與商業化產品情境。</p>
+      </div>
+      <div class="portfolio-grid">
+        <article class="portfolio" style="--accent:#55d7ff">
+          <div class="app-mark">法</div>
+          <h3>法律助理 App</h3>
+          <p>法律問題分類、AI 初步分析、專業律師聯繫、升級方案與免責條款。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E6%B3%95%E5%BE%8B%E5%8A%A9%E7%90%86%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Flawyer" alt="法律助理 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#73f0bc">
+          <div class="app-mark">股</div>
+          <h3>公司股票分析 App</h3>
+          <p>台股公司查詢、K 線圖、營收、EPS、收藏與投資資訊免責流程。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E5%85%AC%E5%8F%B8%E8%82%A1%E7%A5%A8%E5%88%86%E6%9E%90%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fcompany-analysis" alt="公司股票分析 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#ffd166">
+          <div class="app-mark">數</div>
+          <h3>數學題庫 App</h3>
+          <p>數學選擇題、難易度、詳解算式、補習班媒合與點數升級。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E6%95%B8%E5%AD%B8%E9%A1%8C%E5%BA%AB%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fmath-tutor" alt="數學題庫 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#f59e0b">
+          <div class="app-mark">英</div>
+          <h3>英文題庫 App</h3>
+          <p>英文選擇題測驗、分數評估、詳解與補習班推薦功能。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E8%8B%B1%E6%96%87%E9%A1%8C%E5%BA%AB%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fenglish-bank" alt="英文題庫 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#ef4444">
+          <div class="app-mark">文</div>
+          <h3>國文題庫 App</h3>
+          <p>國文選擇題、題目與選項配對、分數與詳解學習流程。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E5%9C%8B%E6%96%87%E9%A1%8C%E5%BA%AB%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fchinese-bank" alt="國文題庫 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#22c55e">
+          <div class="app-mark">生</div>
+          <h3>生物題庫 App</h3>
+          <p>生物選擇題測驗、非重複題庫、正確選項配對與詳解。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E7%94%9F%E7%89%A9%E9%A1%8C%E5%BA%AB%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fbiology-bank" alt="生物題庫 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#a78bfa">
+          <div class="app-mark">語</div>
+          <h3>附近語音通話 App</h3>
+          <p>附近搜尋、好友、群組、留言、封鎖、檢舉、註冊驗證與條款流程。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E9%99%84%E8%BF%91%E8%AA%9E%E9%9F%B3%E9%80%9A%E8%A9%B1%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fvoice-call" alt="附近語音通話 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#38bdf8">
+          <div class="app-mark">A</div>
+          <h3>語音 Agent App</h3>
+          <p>AI 語音助理、新需求流程、使用者資料與設定頁管理。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E8%AA%9E%E9%9F%B3%20Agent%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fvoice-agent" alt="語音 Agent App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#ff718b">
+          <div class="app-mark">秘</div>
+          <h3>個人秘書 App</h3>
+          <p>語音聆聽、AI 對話、點數方案、新需求流程與註冊條款。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E5%80%8B%E4%BA%BA%E7%A7%98%E6%9B%B8%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fsecretary" alt="個人秘書 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#fb7185">
+          <div class="app-mark">我</div>
+          <h3>我的秘書 App</h3>
+          <p>背景學習使用習慣、秘書工作清單、提醒建議與訂閱升級。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E6%88%91%E7%9A%84%E7%A7%98%E6%9B%B8%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fmy-secretary" alt="我的秘書 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#7dd3fc">
+          <div class="app-mark">商</div>
+          <h3>線上交易 App</h3>
+          <p>會員驗證、商品刊登、留言、付款頁、個人頁與交易免責聲明。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E7%B7%9A%E4%B8%8A%E4%BA%A4%E6%98%93%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fonline-market" alt="線上交易 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#34d399">
+          <div class="app-mark">媒</div>
+          <h3>社群媒體助手 App</h3>
+          <p>照片美化、AI 文案、平台帳密驗證、發文預覽與升級功能。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E7%A4%BE%E7%BE%A4%E5%AA%92%E9%AB%94%E5%8A%A9%E6%89%8B%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fsocial-media" alt="社群媒體助手 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#f472b6">
+          <div class="app-mark">愛</div>
+          <h3>愛情大師 App</h3>
+          <p>感情分析、愛情教練、點數扣除、升級方案與註冊條款。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E6%84%9B%E6%83%85%E5%A4%A7%E5%B8%AB%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Flove-master" alt="愛情大師 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#c084fc">
+          <div class="app-mark">命</div>
+          <h3>命理 App</h3>
+          <p>命理分析、點數方案、個人資料設定與多語言設定。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E5%91%BD%E7%90%86%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Ffortune" alt="命理 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#60a5fa">
+          <div class="app-mark">需</div>
+          <h3>需求媒合 App</h3>
+          <p>提需求、接案、工作室、留言、點數扣除與 MySQL 紀錄。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E9%9C%80%E6%B1%82%E5%AA%92%E5%90%88%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fservice-match" alt="需求媒合 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#4ade80">
+          <div class="app-mark">股</div>
+          <h3>股票 App</h3>
+          <p>股票追蹤、資訊整理、設定頁與投資輔助展示流程。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E8%82%A1%E7%A5%A8%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download"><img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fstock" alt="股票 App 下載 QR code"><span>掃描下載 APP</span></div>
+          </div>
+        </article>
+      </div>
+      <div class="portfolio-page-actions">
+        <a class="page-button" href="crovantix-technologies.html#home">回首頁</a>
+      </div>
+    </div>
+  </section>
+
+
+  <footer>
+    <div class="footer-inner">
+      <span>© 2026 創微科技有限公司 Crovantix Technologies</span>
+      <span>App Design · AI App · Cloud Systems · Taoyuan</span>
+    </div>
+  </footer>
+</body>
+</html>

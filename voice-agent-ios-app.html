@@ -1,0 +1,2115 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voice Agent iOS App Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #05080d;
+      --ink: #f8fbff;
+      --muted: #93a2b5;
+      --line: rgba(255,255,255,.12);
+      --panel: #101722;
+      --panel-2: #182231;
+      --panel-3: #233147;
+      --blue: #0a84ff;
+      --cyan: #64d2ff;
+      --green: #30d158;
+      --red: #ff453a;
+      --gold: #ffd166;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(100,210,255,.22), transparent 26rem),
+        radial-gradient(circle at 88% 84%, rgba(48,209,88,.12), transparent 24rem),
+        #08101a;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100vw, 1120px);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 420px minmax(320px, 1fr);
+      gap: 50px;
+      align-items: start;
+      padding: 32px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #303a46, #06080b 34%, #3b4654);
+      box-shadow: 0 30px 80px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.16);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(10,132,255,.18), transparent 14rem),
+        linear-gradient(180deg, rgba(100,210,255,.11), transparent 36%),
+        var(--bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      --font-scale: 1;
+      font-size: calc(14px * var(--font-scale));
+    }
+
+    .screen.theme-sunset {
+      --bg: #160b12;
+      --panel: #22151e;
+      --panel-2: #34202c;
+      --panel-3: #4c2a39;
+      --cyan: #ffb86b;
+      --green: #ff6b8a;
+      background:
+        radial-gradient(circle at 38% 0%, rgba(255,184,107,.28), transparent 15rem),
+        linear-gradient(180deg, rgba(255,107,138,.14), transparent 38%),
+        var(--bg);
+    }
+
+    .screen.theme-forest {
+      --bg: #07110d;
+      --panel: #101d17;
+      --panel-2: #182b22;
+      --panel-3: #254234;
+      --cyan: #7ee2b8;
+      --green: #35d07f;
+      background:
+        radial-gradient(circle at 58% 0%, rgba(126,226,184,.22), transparent 15rem),
+        linear-gradient(180deg, rgba(53,208,127,.11), transparent 38%),
+        var(--bg);
+    }
+
+    .screen.theme-photo {
+      --bg: #0b0d12;
+      background:
+        linear-gradient(rgba(5,8,13,.78), rgba(5,8,13,.9)),
+        url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80") center/cover;
+    }
+
+    .screen.font-small { --font-scale: .92; }
+    .screen.font-large { --font-scale: 1.12; }
+
+    .island {
+      position: absolute;
+      z-index: 10;
+      top: 11px;
+      left: 50%;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+
+    .status {
+      height: 58px;
+      padding: 12px 26px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: calc(13px * var(--font-scale));
+      font-weight: 750;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .signal {
+      display: flex;
+      gap: 2px;
+      height: 12px;
+      align-items: end;
+    }
+
+    .signal i {
+      display: block;
+      width: 3px;
+      border-radius: 2px;
+      background: #fff;
+    }
+
+    .signal i:nth-child(1) { height: 4px; }
+    .signal i:nth-child(2) { height: 7px; }
+    .signal i:nth-child(3) { height: 9px; }
+    .signal i:nth-child(4) { height: 12px; }
+
+    .battery {
+      width: 24px;
+      height: 12px;
+      border: 1.6px solid #fff;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      background: #fff;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      inset: 2px 5px 2px 2px;
+      background: #fff;
+      border-radius: 2px;
+    }
+
+    .app {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 84px;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 3px;
+    }
+
+    .user-pill,
+    .agent-pill {
+      display: inline-grid;
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 6px;
+      min-height: 34px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 12px;
+      font-size: calc(13px * var(--font-scale));
+      font-weight: 900;
+    }
+
+    .user-pill {
+      color: #061018;
+      background: linear-gradient(135deg, #eff9ff, #64d2ff 48%, #0a84ff);
+      max-width: 170px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .agent-pill {
+      color: #061018;
+      background: var(--green);
+    }
+
+    h1 {
+      margin: 18px 0 6px;
+      font-size: calc(34px * var(--font-scale));
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0;
+      color: var(--muted);
+      font-size: calc(13px * var(--font-scale));
+      line-height: 1.35;
+    }
+
+    .content {
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-right: 2px;
+    }
+
+    .content::-webkit-scrollbar { width: 0; }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .voice-card,
+    .email-card,
+    .confirm-card,
+    .request-card,
+    .upgrade-card {
+      margin-top: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background:
+        linear-gradient(145deg, rgba(100,210,255,.13), transparent 48%),
+        var(--panel);
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .label-row strong {
+      font-size: calc(15px * var(--font-scale));
+    }
+
+    .label-row span {
+      color: var(--muted);
+      font-size: calc(12px * var(--font-scale));
+      white-space: nowrap;
+    }
+
+    .transcript {
+      min-height: 88px;
+      padding: 13px;
+      border-radius: 18px;
+      color: #dfeeff;
+      background: var(--panel-2);
+      font-size: calc(15px * var(--font-scale));
+      line-height: 1.45;
+    }
+
+    textarea,
+    input,
+    select {
+      width: 100%;
+      border: 0;
+      border-radius: 18px;
+      padding: 13px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      font-size: calc(14px * var(--font-scale));
+      outline: none;
+    }
+
+    select {
+      appearance: none;
+      cursor: pointer;
+    }
+
+    textarea {
+      min-height: 116px;
+      resize: none;
+      line-height: 1.45;
+    }
+
+    .task-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .task-option {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font-size: calc(11px * var(--font-scale));
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .task-option.active {
+      color: #061018;
+      background: var(--cyan);
+      border-color: transparent;
+    }
+
+    .wave {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 12px 0;
+    }
+
+    .wave i {
+      flex: 1;
+      max-width: 9px;
+      display: block;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--cyan), var(--green));
+      opacity: .45;
+      transform: scaleY(.45);
+    }
+
+    .listening .wave i {
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    .wave i:nth-child(1) { height: 14px; animation-delay: -.1s; }
+    .wave i:nth-child(2) { height: 32px; animation-delay: -.35s; }
+    .wave i:nth-child(3) { height: 22px; animation-delay: -.2s; }
+    .wave i:nth-child(4) { height: 40px; animation-delay: -.5s; }
+    .wave i:nth-child(5) { height: 28px; animation-delay: -.15s; }
+    .wave i:nth-child(6) { height: 36px; animation-delay: -.45s; }
+    .wave i:nth-child(7) { height: 18px; animation-delay: -.25s; }
+    .wave i:nth-child(8) { height: 34px; animation-delay: -.6s; }
+
+    @keyframes pulse {
+      0%, 100% { transform: scaleY(.45); opacity: .45; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    .voice-button {
+      width: 86px;
+      height: 86px;
+      margin: 8px auto 0;
+      border: 0;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #061018;
+      background: var(--cyan);
+      box-shadow: 0 14px 38px rgba(100,210,255,.28);
+      font-size: calc(32px * var(--font-scale));
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease;
+    }
+
+    .voice-button:hover { transform: translateY(-1px); }
+    .voice-button.listening { background: var(--green); }
+
+    .email-card {
+      display: none;
+    }
+
+    .email-card.show,
+    .confirm-card.show {
+      display: block;
+    }
+
+    .email-field {
+      display: grid;
+      gap: 5px;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: calc(11px * var(--font-scale));
+      font-weight: 850;
+    }
+
+    .email-value,
+    .email-body {
+      min-height: 38px;
+      border-radius: 14px;
+      padding: 10px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font-size: calc(13px * var(--font-scale));
+      line-height: 1.45;
+    }
+
+    .email-body {
+      min-height: 132px;
+      white-space: pre-line;
+    }
+
+    .confirm-card {
+      display: none;
+      margin-bottom: 14px;
+      border-color: rgba(48,209,88,.38);
+    }
+
+    .request-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .registration-card {
+      margin-top: 12px;
+    }
+
+    .registration-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .registration-field {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: calc(12px * var(--font-scale));
+      font-weight: 850;
+    }
+
+    .gender-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .gender-option,
+    .text-button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      font-size: calc(13px * var(--font-scale));
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .gender-option.active {
+      color: #061018;
+      background: var(--cyan);
+      border-color: transparent;
+    }
+
+    .verification-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .code-hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: calc(12px * var(--font-scale));
+      line-height: 1.35;
+    }
+
+    .terms-box {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.045);
+    }
+
+    .terms-panel {
+      display: none;
+      max-height: 150px;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: 14px;
+      background: var(--panel-2);
+      color: #dfeeff;
+      font-size: calc(12px * var(--font-scale));
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+
+    .terms-panel.show {
+      display: block;
+    }
+
+    .terms-consent {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: calc(12px * var(--font-scale));
+      font-weight: 850;
+    }
+
+    .terms-consent input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--green);
+    }
+
+    .request-summary {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 18px;
+      background: var(--panel-2);
+      color: #dfeeff;
+      font-size: calc(13px * var(--font-scale));
+      line-height: 1.45;
+    }
+
+    .settings-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .setting-field {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: calc(12px * var(--font-scale));
+      font-weight: 850;
+    }
+
+    .request-summary.show {
+      display: block;
+    }
+
+    .upgrade-card {
+      display: none;
+      margin-bottom: 14px;
+      border-color: rgba(100,210,255,.38);
+    }
+
+    .upgrade-card.show {
+      display: block;
+    }
+
+    .progress-panel {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.045);
+    }
+
+    .progress-panel.show {
+      display: block;
+    }
+
+    .progress-grid {
+      display: grid;
+      grid-template-columns: 1fr 104px;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .request-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .request-item {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 9px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      font-size: calc(12px * var(--font-scale));
+      font-weight: 900;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .request-item.active {
+      color: #061018;
+      background: var(--cyan);
+      border-color: transparent;
+    }
+
+    .request-detail,
+    .request-progress {
+      padding: 10px;
+      border-radius: 14px;
+      background: var(--panel-2);
+      color: #dfeeff;
+      font-size: calc(12px * var(--font-scale));
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+
+    .request-progress {
+      display: grid;
+      align-content: center;
+      text-align: center;
+      color: #061018;
+      background: var(--gold);
+      font-weight: 950;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .primary,
+    .secondary {
+      min-height: 44px;
+      border: 0;
+      border-radius: 16px;
+      font-size: calc(14px * var(--font-scale));
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .primary {
+      color: #061018;
+      background: var(--green);
+    }
+
+    .primary:disabled {
+      color: rgba(255,255,255,.45);
+      background: var(--panel-3);
+      cursor: not-allowed;
+    }
+
+    #submitRequest {
+      margin-top: 16px;
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: var(--panel-3);
+      border: 1px solid var(--line);
+    }
+
+    .nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 6;
+      height: 74px;
+      padding-bottom: 10px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border-top: 1px solid var(--line);
+      background: rgba(9,14,22,.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav.locked {
+      display: none;
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 4px;
+      font-size: calc(11px * var(--font-scale));
+      font-weight: 780;
+      cursor: pointer;
+    }
+
+    .nav button.active { color: var(--cyan); }
+
+    .nav-symbol {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      font-size: calc(16px * var(--font-scale));
+      line-height: 1;
+    }
+
+    .brief {
+      max-width: 530px;
+    }
+
+    .brief h2 {
+      margin: 0 0 16px;
+      font-size: clamp(30px, 4vw, 54px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .brief p {
+      margin: 0 0 22px;
+      color: #b8c5d4;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .spec {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .spec b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .spec span {
+      color: #aebdcc;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 860px) {
+      .stage {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 24px;
+        padding: 18px 14px 28px;
+      }
+
+      .phone {
+        width: min(390px, calc(100vw - 28px));
+        height: min(844px, calc(100vh - 28px));
+        min-height: 720px;
+      }
+
+      .brief {
+        width: min(390px, calc(100vw - 28px));
+      }
+
+      .specs { grid-template-columns: 1fr; }
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="iPhone voice agent app prototype">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status">
+          <span>9:41</span>
+          <span class="status-icons" aria-hidden="true">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span>5G</span>
+            <span class="battery"></span>
+          </span>
+        </div>
+
+        <div class="app">
+          <div class="toolbar">
+            <button class="user-pill" id="userProfileButton" title="使用者名稱">Clay Tseng</button>
+          </div>
+
+          <h1 id="appTitle">語音 Agent</h1>
+          <p class="subline" id="appStatus">按下語音鍵，說出你要 Agent 幫你完成的事</p>
+
+          <section class="content page active" id="registerPage">
+            <section class="request-card registration-card">
+              <div class="label-row">
+                <strong>首次註冊</strong>
+                <span id="registerStatus">尚未完成</span>
+              </div>
+              <div class="registration-grid">
+                <input id="registerName" value="Clay Tseng" aria-label="姓名" placeholder="姓名">
+                <input id="registerPhone" value="0912-345-678" aria-label="電話" placeholder="電話" inputmode="tel">
+                <input id="registerEmail" value="clay.tseng@example.com" aria-label="Email" placeholder="Email" inputmode="email">
+                <div class="gender-row" aria-label="性別">
+                  <button class="gender-option active" type="button" data-gender="男">男</button>
+                  <button class="gender-option" type="button" data-gender="女">女</button>
+                </div>
+                <label class="registration-field" for="registerAge">年齡
+                  <input id="registerAge" value="32" aria-label="年齡" placeholder="請輸入年齡" inputmode="numeric">
+                </label>
+                <div class="verification-row">
+                  <input id="verificationCodeInput" maxlength="4" aria-label="手機驗證碼" placeholder="輸入 4 位數驗證碼" inputmode="numeric">
+                  <button class="text-button" id="resendCodeButton" type="button">重發</button>
+                </div>
+                <p class="code-hint" id="verificationHint">已發送 4 位數驗證碼到手機。</p>
+                <div class="terms-box">
+                  <button class="text-button" id="toggleTermsButton" type="button">展開使用條款、隱私權政策與免責聲明</button>
+                  <div class="terms-panel" id="termsPanel">語音 Agent App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「語音 Agent App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供 AI 語音助理、語音互動、語音辨識、語音對話、資訊查詢、提醒通知、任務管理及相關 AI Agent 功能服務，所有內容僅供一般資訊與輔助用途。
+
+二、AI 與語音內容聲明
+
+本 App 部分內容可能由 AI 系統自動生成，包括語音回覆、建議、分析、提醒或其他互動內容。
+
+本公司不保證 AI 回覆、語音辨識或系統生成內容之正確性、完整性、即時性、適法性或適用於特定情況。
+
+AI 與語音內容僅供參考，不構成任何法律、醫療、投資、財務或其他專業建議。
+
+三、使用風險與免責聲明
+
+使用者應自行判斷並承擔使用本 App 所產生之一切風險與責任。
+
+本 App 僅提供 AI 與語音互動平台服務，本公司不保證服務持續不中斷、完全無錯誤、無延遲或符合所有使用需求。
+
+語音品質、辨識結果、回覆內容、連線穩定性及 AI 生成內容，可能受網路環境、裝置效能、第三方服務或系統狀況影響。
+
+使用者因依據本 App 提供之語音內容、AI 回覆、提醒、建議或資訊所作之任何決定、行為、安排、交易或其他行為而產生之損失、損害或爭議，均由使用者自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+四、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+* 使用者帳號資訊
+* Email
+* 裝置資訊
+* 使用紀錄
+* IP 位址
+* 語音內容
+* 語音辨識資料
+* 提醒與任務資料
+* 崩潰紀錄與分析資料
+
+五、資料用途
+
+蒐集資料主要用於：
+
+* 提供 AI 語音服務
+* 語音辨識與語音互動功能
+* 提供提醒與任務管理
+* 改善使用體驗
+* 系統安全維護
+* 客服支援
+* 防止詐騙、濫用或違法行為
+* 提升 AI 與語音服務品質
+
+六、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+* OpenAI
+* Firebase
+* Google Analytics
+* 語音辨識服務
+* 雲端儲存服務
+* AI 模型服務
+
+部分資料可能因服務需求而傳輸至第三方服務供應商。
+
+七、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、語音通訊或儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及裝置安全。
+
+八、使用者責任
+
+使用者不得利用本 App 從事任何違法、侵權、騷擾、詐騙、散布惡意程式或其他損害他人權益之行為。
+
+若因使用者違法或不當行為導致任何損害或法律責任，應由使用者自行負責。
+
+九、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、資料、AI 系統及相關內容，均屬本公司或合法授權人所有。
+
+未經授權不得重製、修改、散布、反向工程、破解或用於商業用途。
+
+十、使用者權利
+
+使用者得依法請求查詢、更正或刪除其個人資料。
+
+十一、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利，修改後內容將公布於本 App，使用者繼續使用即視為同意修改內容。</div>
+                  <label class="terms-consent">
+                    <input id="agreeTerms" type="checkbox">
+                    我已打開並同意使用條款、隱私權政策與免責聲明
+                  </label>
+                </div>
+                <button class="primary" id="completeRegistration" type="button" disabled>完成註冊</button>
+                <div class="request-summary" id="registrationSummary"></div>
+              </div>
+            </section>
+          </section>
+
+          <section class="content page" id="voicePage">
+            <section class="voice-card" id="voiceCard">
+              <div class="label-row">
+                <strong>語音需求</strong>
+                <span id="voiceStatus">尚未開始</span>
+              </div>
+              <div class="transcript" id="transcript">例如：幫我寫信給老闆，我身體不舒服，需要請假一天。</div>
+              <div class="task-grid" aria-label="agent task types">
+                <button class="task-option active" data-task="email">撰寫 Email</button>
+                <button class="task-option" data-task="calendar">加入行事曆</button>
+                <button class="task-option" data-task="call">撥打電話</button>
+                <button class="task-option" data-task="alarm">設定鬧鐘</button>
+                <button class="task-option" data-task="timer">設定計時器</button>
+                <button class="task-option" data-task="sms">傳簡訊</button>
+                <button class="task-option" data-task="wifi">Wi-Fi 開/關</button>
+                <button class="task-option" data-task="bluetooth">藍牙 開/關</button>
+                <button class="task-option" data-task="airplane">飛航模式</button>
+                <button class="task-option" data-task="silent">靜音 開/關</button>
+              </div>
+              <div class="wave" aria-label="voice waveform">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <button class="voice-button" id="voiceButton" title="開始語音">🎙</button>
+            </section>
+
+            <section class="email-card" id="emailCard">
+              <div class="label-row">
+                <strong id="draftTitle">Email 草稿</strong>
+                <span id="draftStatus">Mail 已開啟</span>
+              </div>
+              <div id="draftFields">
+                <div class="email-field">收件人<div class="email-value">老闆 &lt;boss@company.com&gt;</div></div>
+                <div class="email-field">主旨<div class="email-value">請假一天</div></div>
+                <div class="email-field">內容<div class="email-body" id="draftBody">老闆您好：
+
+我今天身體不舒服，需要請假一天休息與就醫。手邊工作我會盡快交接與補上進度，若有緊急事項我會保持手機可聯繫。
+
+謝謝您。</div></div>
+              </div>
+            </section>
+
+            <section class="confirm-card" id="confirmCard">
+              <div class="label-row">
+                <strong>是否送出？</strong>
+                <span>等待確認</span>
+              </div>
+              <p class="subline" id="confirmText">Agent 已完成 Email 撰寫。送出前請你確認內容，避免自動寄出未檢查的信件。</p>
+              <div class="actions">
+                <button class="secondary" id="editDraft">先修改</button>
+                <button class="primary" id="sendEmail">確認送出</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="content page" id="requestPage">
+            <section class="request-card">
+              <div class="label-row">
+                <strong>提出新功能需求</strong>
+                <span id="requestStatus">尚未送出</span>
+              </div>
+              <div class="request-form">
+                <textarea id="featureRequest" maxlength="240" placeholder="例如：我希望 Agent 可以幫我整理會議錄音，產生摘要和待辦。">我希望語音 Agent 可以幫我整理會議錄音，產生摘要、待辦事項，並同步到 Notion。</textarea>
+                <input id="requestName" value="Clay Tseng" aria-label="需求提出者">
+                <input id="requestEmail" value="clay.tseng@example.com" aria-label="需求提出者 Email" inputmode="email">
+              </div>
+              <button class="primary" id="submitRequest">送出需求</button>
+              <div class="request-summary" id="requestSummary"></div>
+            </section>
+
+            <section class="upgrade-card" id="upgradeCard">
+              <div class="label-row">
+                <strong>作者報價流程</strong>
+                <span id="upgradeStatus">已通知作者</span>
+              </div>
+              <p class="subline">需求內容會寄送到作者信箱。作者評估後會將更新費用寄到使用者 Email；若使用者同意費用，再點選信中連結完成後續更新流程。</p>
+              <div class="actions">
+                <button class="primary" id="payUpgrade">查看需求進度</button>
+              </div>
+            </section>
+
+            <section class="progress-panel" id="progressPanel">
+              <div class="label-row">
+                <strong>已提出的需求</strong>
+                <span id="progressCount">0 筆</span>
+              </div>
+              <div class="progress-grid">
+                <div>
+                  <div class="request-list" id="requestList"></div>
+                  <div class="request-detail" id="requestDetail" style="margin-top:10px;">請點選左側需求查看內容。</div>
+                </div>
+                <div class="request-progress" id="requestProgress">等待選取</div>
+              </div>
+            </section>
+          </section>
+
+          <section class="content page" id="profilePage">
+            <section class="request-card">
+              <div class="label-row">
+                <strong id="profileTitle">使用者資料</strong>
+                <span id="profileBadge">個人設定</span>
+              </div>
+              <div class="request-form">
+                <input id="profileName" value="Clay Tseng" aria-label="使用者姓名">
+                <input id="profileEmail" value="clay.tseng@example.com" aria-label="Email">
+                <input id="profilePhone" value="0912-345-678" aria-label="電話">
+                <input id="profileCompany" value="Clay Studio" aria-label="公司">
+                <textarea id="profileNote" maxlength="180" aria-label="備註">偏好使用繁體中文，重要通知請寄送 Email 並同步簡訊提醒。</textarea>
+              </div>
+              <div class="actions">
+                <button class="secondary" id="cancelProfile">取消</button>
+                <button class="primary" id="saveProfile">儲存資料</button>
+              </div>
+              <div class="request-summary" id="profileSummary">姓名、Email、電話與通知偏好會用於作者報價與需求更新通知。</div>
+            </section>
+
+            <section class="request-card">
+              <div class="label-row">
+                <strong id="appSettingsTitle">App 設定</strong>
+                <span id="appSettingsBadge">系統設定</span>
+              </div>
+              <div class="settings-grid">
+                <label class="setting-field" for="backgroundSetting">
+                  <span id="backgroundLabel">App 背景</span>
+                  <select id="backgroundSetting">
+                    <option value="default">深色藍光</option>
+                    <option value="sunset">日落暖色</option>
+                    <option value="forest">森林綠色</option>
+                    <option value="photo">圖片背景</option>
+                  </select>
+                </label>
+                <label class="setting-field" for="fontSizeSetting">
+                  <span id="fontSizeLabel">字體大小</span>
+                  <select id="fontSizeSetting">
+                    <option value="small">小</option>
+                    <option value="normal" selected>標準</option>
+                    <option value="large">大</option>
+                  </select>
+                </label>
+                <label class="setting-field" for="languageSetting">
+                  <span id="languageLabel">語言</span>
+                  <select id="languageSetting">
+                    <option value="zh" selected>繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                </label>
+              </div>
+              <div class="request-summary show" id="appSettingsSummary">背景、字體大小與語言會立即套用在 App 介面。</div>
+            </section>
+            <section class="request-card">
+              <div class="label-row">
+                <strong>聯繫客服</strong>
+                <span>問題回報 / 廣告投放 / 合作洽談</span>
+              </div>
+              <div class="request-summary show">問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。</div>
+              <div class="request-summary show">Email：support@app-service.example</div>
+            </section>
+          </section>
+        </div>
+
+        <nav class="nav locked" id="mainNav" aria-label="main navigation">
+          <button class="active" data-page="voicePage"><span class="nav-symbol">🎙</span><span class="nav-text" id="navVoice">語音</span></button>
+          <button><span class="nav-symbol">✉</span><span class="nav-text" id="navAction">動作</span></button>
+          <button><span class="nav-symbol">▣</span><span class="nav-text" id="navTasks">任務</span></button>
+          <button data-page="requestPage"><span class="nav-symbol">＋</span><span class="nav-text" id="navRequest">新需求</span></button>
+          <button data-page="profilePage"><span class="nav-symbol">⚙</span><span class="nav-text" id="navSettings">設定</span></button>
+        </nav>
+      </div>
+    </section>
+
+    <aside class="brief">
+      <h2>語音 Agent iOS App 原型</h2>
+      <p>按下語音鍵後，使用者說出需求。App 依任務自動開啟對應工具並停在確認畫面；底部也新增「新需求」頁，讓使用者提出功能需求並查看作者報價進度。</p>
+      <div class="specs">
+        <div class="spec"><b>核心流程</b><span>語音輸入、轉文字、任務理解、開啟對應工具、最後確認。</span></div>
+        <div class="spec"><b>功能範圍</b><span>Email、行事曆、電話、鬧鐘、計時器、簡訊、Wi-Fi、藍牙、飛航模式、靜音。</span></div>
+        <div class="spec"><b>安全設計</b><span>寄信、打電話、傳簡訊等外部動作都需使用者確認。</span></div>
+        <div class="spec"><b>新需求</b><span>使用者可提交新功能，系統會通知作者並顯示需求進度。</span></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const voiceCard = document.querySelector("#voiceCard");
+    const screen = document.querySelector(".screen");
+    const mainNav = document.querySelector("#mainNav");
+    const pages = [...document.querySelectorAll(".page")];
+    const navPageButtons = [...document.querySelectorAll(".nav button[data-page]")];
+    const registerName = document.querySelector("#registerName");
+    const registerPhone = document.querySelector("#registerPhone");
+    const registerEmail = document.querySelector("#registerEmail");
+    const registerAge = document.querySelector("#registerAge");
+    const registerStatus = document.querySelector("#registerStatus");
+    const genderOptions = [...document.querySelectorAll(".gender-option")];
+    const verificationCodeInput = document.querySelector("#verificationCodeInput");
+    const verificationHint = document.querySelector("#verificationHint");
+    const resendCodeButton = document.querySelector("#resendCodeButton");
+    const toggleTermsButton = document.querySelector("#toggleTermsButton");
+    const termsPanel = document.querySelector("#termsPanel");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const completeRegistration = document.querySelector("#completeRegistration");
+    const registrationSummary = document.querySelector("#registrationSummary");
+    const voiceButton = document.querySelector("#voiceButton");
+    const transcript = document.querySelector("#transcript");
+    const voiceStatus = document.querySelector("#voiceStatus");
+    const userProfileButton = document.querySelector("#userProfileButton");
+    const appStatus = document.querySelector("#appStatus");
+    const emailCard = document.querySelector("#emailCard");
+    const confirmCard = document.querySelector("#confirmCard");
+    const taskOptions = [...document.querySelectorAll(".task-option")];
+    const draftTitle = document.querySelector("#draftTitle");
+    const draftStatus = document.querySelector("#draftStatus");
+    const draftFields = document.querySelector("#draftFields");
+    const confirmText = document.querySelector("#confirmText");
+    const sendEmail = document.querySelector("#sendEmail");
+    const editDraft = document.querySelector("#editDraft");
+    const featureRequest = document.querySelector("#featureRequest");
+    const requestName = document.querySelector("#requestName");
+    const requestEmail = document.querySelector("#requestEmail");
+    const requestStatus = document.querySelector("#requestStatus");
+    const requestSummary = document.querySelector("#requestSummary");
+    const upgradeCard = document.querySelector("#upgradeCard");
+    const upgradeStatus = document.querySelector("#upgradeStatus");
+    const submitRequest = document.querySelector("#submitRequest");
+    const payUpgrade = document.querySelector("#payUpgrade");
+    const progressPanel = document.querySelector("#progressPanel");
+    const progressCount = document.querySelector("#progressCount");
+    const requestList = document.querySelector("#requestList");
+    const requestDetail = document.querySelector("#requestDetail");
+    const requestProgress = document.querySelector("#requestProgress");
+    const profileName = document.querySelector("#profileName");
+    const profileEmail = document.querySelector("#profileEmail");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profileCompany = document.querySelector("#profileCompany");
+    const profileNote = document.querySelector("#profileNote");
+    const profileSummary = document.querySelector("#profileSummary");
+    const saveProfile = document.querySelector("#saveProfile");
+    const cancelProfile = document.querySelector("#cancelProfile");
+    const backgroundSetting = document.querySelector("#backgroundSetting");
+    const fontSizeSetting = document.querySelector("#fontSizeSetting");
+    const languageSetting = document.querySelector("#languageSetting");
+    const appSettingsSummary = document.querySelector("#appSettingsSummary");
+    const copyTargets = {
+      appTitle: document.querySelector("#appTitle"),
+      navVoice: document.querySelector("#navVoice"),
+      navAction: document.querySelector("#navAction"),
+      navTasks: document.querySelector("#navTasks"),
+      navRequest: document.querySelector("#navRequest"),
+      navSettings: document.querySelector("#navSettings"),
+      profileTitle: document.querySelector("#profileTitle"),
+      profileBadge: document.querySelector("#profileBadge"),
+      appSettingsTitle: document.querySelector("#appSettingsTitle"),
+      appSettingsBadge: document.querySelector("#appSettingsBadge"),
+      backgroundLabel: document.querySelector("#backgroundLabel"),
+      fontSizeLabel: document.querySelector("#fontSizeLabel"),
+      languageLabel: document.querySelector("#languageLabel"),
+      saveProfile: document.querySelector("#saveProfile"),
+      cancelProfile: document.querySelector("#cancelProfile"),
+      appSettingsSummary
+    };
+    let currentTask = "email";
+    let currentPage = "registerPage";
+    let currentLanguage = "zh";
+    let isRegistered = false;
+    let selectedGender = "男";
+    let termsOpened = false;
+    let verificationCode = "";
+    let submittedRequests = [];
+
+    const i18n = {
+      zh: {
+        appTitle: "語音 Agent",
+        navVoice: "語音",
+        navAction: "動作",
+        navTasks: "任務",
+        navRequest: "新需求",
+        navSettings: "設定",
+        profileTitle: "使用者資料",
+        profileBadge: "個人設定",
+        appSettingsTitle: "App 設定",
+        appSettingsBadge: "系統設定",
+        backgroundLabel: "App 背景",
+        fontSizeLabel: "字體大小",
+        languageLabel: "語言",
+        saveProfile: "儲存資料",
+        cancelProfile: "取消",
+        appSettingsSummary: "背景、字體大小與語言會立即套用在 App 介面。",
+        voiceNeed: "語音需求",
+        idle: "尚未開始",
+        confirmTitle: "是否送出？",
+        confirmWaiting: "等待確認",
+        requestTitle: "提出新功能需求",
+        requestIdle: "尚未送出",
+        submitRequest: "送出需求",
+        quoteTitle: "作者報價流程",
+        quoteStatus: "已通知作者",
+        quoteBody: "需求內容會寄送到作者信箱。作者評估後會將更新費用寄到使用者 Email；若使用者同意費用，再點選信中連結完成後續更新流程。",
+        viewProgress: "查看需求進度",
+        editDraft: "先修改",
+        progressTitle: "已提出的需求",
+        progressEmpty: "請點選左側需求查看內容。",
+        progressWaiting: "等待選取",
+        profileHelp: "姓名、Email、電話與通知偏好會用於作者報價與需求更新通知。",
+        backgroundOptions: ["深色藍光", "日落暖色", "森林綠色", "圖片背景"],
+        fontOptions: ["小", "標準", "大"],
+        languageOptions: ["繁體中文", "English", "日本語"],
+        taskLabels: ["撰寫 Email", "加入行事曆", "撥打電話", "設定鬧鐘", "設定計時器", "傳簡訊", "Wi-Fi 開/關", "藍牙 開/關", "飛航模式", "靜音 開/關"],
+        examplePrefix: "例如：",
+        selectedTask: "選擇任務",
+        listening: "聆聽中",
+        recognizing: "正在辨識語音…",
+        transcribed: "已轉文字",
+        processing: "正在處理需求",
+        done: "已完成，等待確認",
+        requestItem: "新功能需求",
+        requesterLabel: "需求人",
+        contentLabel: "內容",
+        noRequests: "目前尚未提出需求。",
+        noData: "無資料",
+        sent: "已寄送",
+        sentSummary: "需求已寄送到作者信箱。",
+        waitingQuote: "需求已寄送到作者信箱，等待作者報價",
+        showingProgress: "已顯示提出過的需求與目前進度",
+        countUnit: "筆",
+        updatedLabel: "已更新",
+        emailLabel: "Email",
+        phoneLabel: "電話",
+        companyLabel: "公司",
+        noteLabel: "備註",
+        blankValue: "未填寫",
+        emptyNote: "無",
+        voiceStatus: "按下語音鍵，說出你要 Agent 幫你完成的事",
+        requestStatus: "提出新功能需求，送出後可查看作者報價進度",
+        profileStatus: "管理使用者姓名、Email、電話與通知偏好",
+        saved: "使用者資料已更新",
+        settingsChanged: "App 設定已更新"
+      },
+      en: {
+        appTitle: "Voice Agent",
+        navVoice: "Voice",
+        navAction: "Actions",
+        navTasks: "Tasks",
+        navRequest: "Request",
+        navSettings: "Settings",
+        profileTitle: "User Profile",
+        profileBadge: "Personal",
+        appSettingsTitle: "App Settings",
+        appSettingsBadge: "System",
+        backgroundLabel: "App Background",
+        fontSizeLabel: "Font Size",
+        languageLabel: "Language",
+        saveProfile: "Save",
+        cancelProfile: "Cancel",
+        appSettingsSummary: "Background, font size, and language apply immediately.",
+        voiceNeed: "Voice Request",
+        idle: "Not started",
+        confirmTitle: "Send?",
+        confirmWaiting: "Waiting",
+        requestTitle: "New Feature Request",
+        requestIdle: "Not sent",
+        submitRequest: "Submit Request",
+        quoteTitle: "Author Quote Process",
+        quoteStatus: "Author notified",
+        quoteBody: "The request will be emailed to the author. After review, the update cost will be sent to the user's email. If the user accepts the fee, they can open the email link to continue the update process.",
+        viewProgress: "View Progress",
+        editDraft: "Edit First",
+        progressTitle: "Submitted Requests",
+        progressEmpty: "Select a request on the left to view details.",
+        progressWaiting: "Waiting",
+        profileHelp: "Name, email, phone, and notification preferences are used for quotes and request updates.",
+        backgroundOptions: ["Dark Blue", "Warm Sunset", "Forest Green", "Image Background"],
+        fontOptions: ["Small", "Standard", "Large"],
+        languageOptions: ["Traditional Chinese", "English", "Japanese"],
+        taskLabels: ["Write Email", "Add Calendar", "Call", "Set Alarm", "Set Timer", "Send SMS", "Wi-Fi On/Off", "Bluetooth On/Off", "Airplane Mode", "Silent On/Off"],
+        examplePrefix: "Example: ",
+        selectedTask: "Selected task",
+        listening: "Listening",
+        recognizing: "Recognizing speech...",
+        transcribed: "Transcribed",
+        processing: "Processing request",
+        done: "Done, waiting for confirmation",
+        requestItem: "Feature Request",
+        requesterLabel: "Requester",
+        contentLabel: "Content",
+        noRequests: "No requests have been submitted yet.",
+        noData: "No data",
+        sent: "Sent",
+        sentSummary: "The request has been emailed to the author.",
+        waitingQuote: "Request sent to the author, waiting for a quote",
+        showingProgress: "Submitted requests and current progress are shown",
+        countUnit: "items",
+        updatedLabel: "Updated",
+        emailLabel: "Email",
+        phoneLabel: "Phone",
+        companyLabel: "Company",
+        noteLabel: "Note",
+        blankValue: "Not filled",
+        emptyNote: "None",
+        voiceStatus: "Press the voice button and tell Agent what to do.",
+        requestStatus: "Submit a feature request and track the author's quote.",
+        profileStatus: "Manage name, email, phone, and notification preferences.",
+        saved: "User profile updated",
+        settingsChanged: "App settings updated"
+      },
+      ja: {
+        appTitle: "音声 Agent",
+        navVoice: "音声",
+        navAction: "操作",
+        navTasks: "任務",
+        navRequest: "要望",
+        navSettings: "設定",
+        profileTitle: "ユーザー情報",
+        profileBadge: "個人設定",
+        appSettingsTitle: "App 設定",
+        appSettingsBadge: "システム",
+        backgroundLabel: "App 背景",
+        fontSizeLabel: "文字サイズ",
+        languageLabel: "言語",
+        saveProfile: "保存",
+        cancelProfile: "取消",
+        appSettingsSummary: "背景、文字サイズ、言語はすぐに反映されます。",
+        voiceNeed: "音声依頼",
+        idle: "未開始",
+        confirmTitle: "送信しますか？",
+        confirmWaiting: "確認待ち",
+        requestTitle: "新機能の要望",
+        requestIdle: "未送信",
+        submitRequest: "要望を送信",
+        quoteTitle: "作者の見積もり流程",
+        quoteStatus: "作者へ通知済み",
+        quoteBody: "要望内容は作者のメールに送信されます。作者が確認した後、更新費用をユーザーの Email に送ります。ユーザーが同意した場合、メール内のリンクから更新手続きを続行できます。",
+        viewProgress: "進捗を見る",
+        editDraft: "先に修正",
+        progressTitle: "提出済みの要望",
+        progressEmpty: "左側の要望を選択して内容を確認してください。",
+        progressWaiting: "選択待ち",
+        profileHelp: "名前、Email、電話、通知設定は見積もりと要望更新の通知に使用されます。",
+        backgroundOptions: ["ダークブルー", "夕焼け", "フォレスト", "画像背景"],
+        fontOptions: ["小", "標準", "大"],
+        languageOptions: ["繁體中文", "English", "日本語"],
+        taskLabels: ["Email 作成", "カレンダー追加", "電話", "アラーム設定", "タイマー設定", "SMS 送信", "Wi-Fi 切替", "Bluetooth 切替", "機内モード", "消音切替"],
+        examplePrefix: "例：",
+        selectedTask: "選択任務",
+        listening: "聞き取り中",
+        recognizing: "音声を認識中…",
+        transcribed: "文字起こし完了",
+        processing: "依頼を処理中",
+        done: "完了、確認待ち",
+        requestItem: "新機能要望",
+        requesterLabel: "依頼者",
+        contentLabel: "内容",
+        noRequests: "まだ要望は提出されていません。",
+        noData: "データなし",
+        sent: "送信済み",
+        sentSummary: "要望は作者のメールに送信されました。",
+        waitingQuote: "要望を作者に送信し、見積もり待ちです",
+        showingProgress: "提出済みの要望と現在の進捗を表示しています",
+        countUnit: "件",
+        updatedLabel: "更新済み",
+        emailLabel: "Email",
+        phoneLabel: "電話",
+        companyLabel: "会社",
+        noteLabel: "備考",
+        blankValue: "未入力",
+        emptyNote: "なし",
+        voiceStatus: "音声ボタンを押して Agent に依頼してください。",
+        requestStatus: "新機能の要望を送信し、見積もり進捗を確認できます。",
+        profileStatus: "名前、Email、電話、通知設定を管理します。",
+        saved: "ユーザー情報を更新しました",
+        settingsChanged: "App 設定を更新しました"
+      }
+    };
+
+    const taskData = {
+      email: {
+        label: "Email",
+        open: "自動開啟 Email 撰寫畫面",
+        draft: "完成請假信草稿",
+        confirm: "詢問是否送出",
+        transcript: "幫我寫信給老闆，我身體不舒服，需要請假一天。",
+        openingStatus: "已辨識需求，準備開啟 Email",
+        openedStatus: "已自動開啟 Email",
+        doneStatus: "Email 已完成，等待你確認是否送出",
+        title: "Email 草稿",
+        status: "Mail 已開啟",
+        confirmText: "Agent 已完成 Email 撰寫。送出前請你確認內容，避免自動寄出未檢查的信件。",
+        confirmButton: "確認送出",
+        sentStatus: "Email 已送出",
+        fields: [
+          ["收件人", "老闆 <boss@company.com>"],
+          ["主旨", "請假一天"],
+          ["內容", "老闆您好：\n\n我今天身體不舒服，需要請假一天休息與就醫。手邊工作我會盡快交接與補上進度，若有緊急事項我會保持手機可聯繫。\n\n謝謝您。", true]
+        ]
+      },
+      calendar: {
+        label: "行事曆",
+        open: "自動開啟行事曆",
+        draft: "完成行程資訊",
+        confirm: "詢問是否加入",
+        transcript: "幫我明天下午三點加入和 Alex 的專案會議，提醒我提前十分鐘。",
+        openingStatus: "已辨識需求，準備開啟行事曆",
+        openedStatus: "已自動開啟行事曆",
+        doneStatus: "行程已建立，等待你確認是否加入",
+        title: "行事曆事件",
+        status: "Calendar 已開啟",
+        confirmText: "Agent 已整理好行程。加入行事曆前請確認時間、對象與提醒設定。",
+        confirmButton: "確認加入",
+        sentStatus: "行程已加入",
+        fields: [
+          ["標題", "和 Alex 的專案會議"],
+          ["時間", "明天下午 3:00"],
+          ["提醒", "提前 10 分鐘"]
+        ]
+      },
+      call: {
+        label: "電話",
+        open: "自動開啟電話",
+        draft: "準備撥號資訊",
+        confirm: "詢問是否撥打",
+        transcript: "幫我打電話給媽媽。",
+        openingStatus: "已辨識需求，準備開啟電話",
+        openedStatus: "已自動開啟電話",
+        doneStatus: "電話已準備好，等待你確認是否撥打",
+        title: "撥打電話",
+        status: "Phone 已開啟",
+        confirmText: "Agent 已找到聯絡人。撥打電話前請確認對象正確。",
+        confirmButton: "確認撥打",
+        sentStatus: "正在撥打電話",
+        fields: [
+          ["聯絡人", "媽媽"],
+          ["電話", "Mobile · 0912-345-678"]
+        ]
+      },
+      alarm: {
+        label: "鬧鐘",
+        open: "自動開啟鬧鐘",
+        draft: "設定鬧鐘時間",
+        confirm: "詢問是否啟用",
+        transcript: "幫我設定明天早上七點半的鬧鐘。",
+        openingStatus: "已辨識需求，準備開啟鬧鐘",
+        openedStatus: "已自動開啟鬧鐘",
+        doneStatus: "鬧鐘已設定，等待你確認是否啟用",
+        title: "鬧鐘設定",
+        status: "Clock 已開啟",
+        confirmText: "Agent 已設定鬧鐘時間。啟用前請確認日期與時間。",
+        confirmButton: "確認啟用",
+        sentStatus: "鬧鐘已啟用",
+        fields: [
+          ["時間", "明天 07:30"],
+          ["重複", "一次"],
+          ["標籤", "起床"]
+        ]
+      },
+      timer: {
+        label: "計時器",
+        open: "自動開啟計時器",
+        draft: "設定倒數時間",
+        confirm: "詢問是否開始",
+        transcript: "幫我設定二十五分鐘的計時器。",
+        openingStatus: "已辨識需求，準備開啟計時器",
+        openedStatus: "已自動開啟計時器",
+        doneStatus: "計時器已準備好，等待你確認是否開始",
+        title: "計時器設定",
+        status: "Timer 已開啟",
+        confirmText: "Agent 已設定倒數時間。開始前請確認長度正確。",
+        confirmButton: "確認開始",
+        sentStatus: "計時器已開始",
+        fields: [
+          ["倒數時間", "25 分鐘"],
+          ["用途", "專注工作"]
+        ]
+      },
+      sms: {
+        label: "簡訊",
+        open: "自動開啟訊息",
+        draft: "完成簡訊草稿",
+        confirm: "詢問是否傳送",
+        transcript: "幫我傳簡訊給小美，說我晚十分鐘到。",
+        openingStatus: "已辨識需求，準備開啟訊息",
+        openedStatus: "已自動開啟訊息",
+        doneStatus: "簡訊已完成，等待你確認是否傳送",
+        title: "簡訊草稿",
+        status: "Messages 已開啟",
+        confirmText: "Agent 已完成簡訊。傳送前請確認聯絡人與內容。",
+        confirmButton: "確認傳送",
+        sentStatus: "簡訊已傳送",
+        fields: [
+          ["收件人", "小美"],
+          ["內容", "我會晚 10 分鐘到，到了再跟你說。", true]
+        ]
+      },
+      wifi: {
+        label: "Wi-Fi",
+        open: "準備切換 Wi-Fi",
+        draft: "建立 Wi-Fi 控制指令",
+        confirm: "詢問是否套用",
+        transcript: "幫我關閉 Wi-Fi。",
+        openingStatus: "已辨識需求，準備切換 Wi-Fi",
+        openedStatus: "Wi-Fi 控制已準備好",
+        doneStatus: "Wi-Fi 指令已建立，等待你確認是否套用",
+        title: "Wi-Fi 控制",
+        status: "系統設定",
+        confirmText: "Agent 已準備關閉 Wi-Fi。此類系統設定需使用者確認後才會套用。",
+        confirmButton: "確認關閉",
+        sentStatus: "Wi-Fi 已關閉",
+        fields: [
+          ["控制項目", "Wi-Fi"],
+          ["支援指令", "打開 Wi-Fi / 關閉 Wi-Fi"],
+          ["目標狀態", "關閉"],
+          ["安全提醒", "關閉後可能會改用行動網路。"]
+        ]
+      },
+      bluetooth: {
+        label: "藍牙",
+        open: "準備切換藍牙",
+        draft: "建立藍牙控制指令",
+        confirm: "詢問是否套用",
+        transcript: "幫我打開藍牙。",
+        openingStatus: "已辨識需求，準備切換藍牙",
+        openedStatus: "藍牙控制已準備好",
+        doneStatus: "藍牙指令已建立，等待你確認是否套用",
+        title: "藍牙控制",
+        status: "系統設定",
+        confirmText: "Agent 已準備打開藍牙。確認後可連接耳機、手錶或其他周邊裝置。",
+        confirmButton: "確認打開",
+        sentStatus: "藍牙已打開",
+        fields: [
+          ["控制項目", "藍牙"],
+          ["支援指令", "打開藍牙 / 關閉藍牙"],
+          ["目標狀態", "打開"],
+          ["用途", "可搜尋並連接附近藍牙裝置。"]
+        ]
+      },
+      airplane: {
+        label: "飛航模式",
+        open: "準備開啟飛航模式",
+        draft: "建立飛航模式控制指令",
+        confirm: "詢問是否套用",
+        transcript: "幫我打開飛航模式。",
+        openingStatus: "已辨識需求，準備開啟飛航模式",
+        openedStatus: "飛航模式控制已準備好",
+        doneStatus: "飛航模式指令已建立，等待你確認是否套用",
+        title: "飛航模式控制",
+        status: "系統設定",
+        confirmText: "Agent 已準備打開飛航模式。開啟後行動網路、Wi-Fi 與藍牙連線可能會中斷。",
+        confirmButton: "確認開啟",
+        sentStatus: "飛航模式已開啟",
+        fields: [
+          ["控制項目", "飛航模式"],
+          ["目標狀態", "打開"],
+          ["影響", "通話、行動網路與部分無線連線會暫停。"]
+        ]
+      },
+      silent: {
+        label: "靜音",
+        open: "準備切換靜音",
+        draft: "建立靜音控制指令",
+        confirm: "詢問是否套用",
+        transcript: "幫我打開靜音模式。",
+        openingStatus: "已辨識需求，準備切換靜音模式",
+        openedStatus: "靜音控制已準備好",
+        doneStatus: "靜音指令已建立，等待你確認是否套用",
+        title: "靜音模式控制",
+        status: "系統設定",
+        confirmText: "Agent 已準備打開靜音模式。確認後來電與通知提示音會保持安靜。",
+        confirmButton: "確認打開",
+        sentStatus: "靜音模式已打開",
+        fields: [
+          ["控制項目", "靜音模式"],
+          ["支援指令", "打開靜音 / 關閉靜音"],
+          ["目標狀態", "打開"],
+          ["提醒", "鬧鐘與重要警示可能仍會依系統設定響鈴。"]
+        ]
+      }
+    };
+
+    const taskOrder = ["email", "calendar", "call", "alarm", "timer", "sms", "wifi", "bluetooth", "airplane", "silent"];
+    const taskExamples = {
+      zh: {
+        email: "幫我寫信給老闆，我身體不舒服，需要請假一天。",
+        calendar: "幫我明天下午三點加入和 Alex 的專案會議，提醒我提前十分鐘。",
+        call: "幫我打電話給媽媽。",
+        alarm: "幫我設定明天早上七點半的鬧鐘。",
+        timer: "幫我設定二十五分鐘的計時器。",
+        sms: "幫我傳簡訊給小美，說我晚十分鐘到。",
+        wifi: "幫我關閉 Wi-Fi。",
+        bluetooth: "幫我打開藍牙。",
+        airplane: "幫我打開飛航模式。",
+        silent: "幫我打開靜音模式。"
+      },
+      en: {
+        email: "Write an email to my boss saying I am sick and need one day off.",
+        calendar: "Add a project meeting with Alex tomorrow at 3 PM and remind me 10 minutes early.",
+        call: "Call Mom for me.",
+        alarm: "Set an alarm for tomorrow morning at 7:30.",
+        timer: "Set a 25-minute timer.",
+        sms: "Text Mei that I will arrive 10 minutes late.",
+        wifi: "Turn off Wi-Fi.",
+        bluetooth: "Turn on Bluetooth.",
+        airplane: "Turn on Airplane Mode.",
+        silent: "Turn on Silent Mode."
+      },
+      ja: {
+        email: "体調不良で一日休みたいと上司にメールを書いて。",
+        calendar: "明日の午後3時に Alex との会議を追加して、10分前に通知して。",
+        call: "母に電話して。",
+        alarm: "明日の朝7時半にアラームを設定して。",
+        timer: "25分のタイマーを設定して。",
+        sms: "小美に10分遅れるとSMSして。",
+        wifi: "Wi-Fi をオフにして。",
+        bluetooth: "Bluetooth をオンにして。",
+        airplane: "機内モードをオンにして。",
+        silent: "消音モードをオンにして。"
+      }
+    };
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function renderDraft(task) {
+      draftTitle.textContent = task.title;
+      draftStatus.textContent = task.status;
+      confirmText.textContent = task.confirmText;
+      sendEmail.textContent = task.confirmButton;
+      draftFields.innerHTML = task.fields.map(([label, value, large]) => `
+        <div class="email-field">${escapeHtml(label)}<div class="${large ? "email-body" : "email-value"}">${escapeHtml(value)}</div></div>
+      `).join("");
+    }
+
+    function pageStatus(pageId) {
+      const copy = i18n[currentLanguage];
+      if (pageId === "registerPage") return "首次下載需完成資料、手機驗證與條文同意後才能註冊。";
+      if (pageId === "requestPage") return copy.requestStatus;
+      if (pageId === "profilePage") return copy.profileStatus;
+      return copy.voiceStatus;
+    }
+
+    function setText(selector, text) {
+      const element = document.querySelector(selector);
+      if (element) element.textContent = text;
+    }
+
+    function setOptions(select, labels) {
+      [...select.options].forEach((option, index) => {
+        if (labels[index]) option.textContent = labels[index];
+      });
+    }
+
+    function applyLanguage(language) {
+      currentLanguage = language;
+      const copy = i18n[currentLanguage];
+      Object.entries(copyTargets).forEach(([key, element]) => {
+        if (element && copy[key]) element.textContent = copy[key];
+      });
+      document.documentElement.lang = currentLanguage === "zh" ? "zh-Hant" : currentLanguage;
+      setText("#voiceCard .label-row strong", copy.voiceNeed);
+      setText("#voiceStatus", copy.idle);
+      setText("#confirmCard .label-row strong", copy.confirmTitle);
+      setText("#confirmCard .label-row span", copy.confirmWaiting);
+      setText("#requestPage .request-card .label-row strong", copy.requestTitle);
+      setText("#requestStatus", copy.requestIdle);
+      setText("#submitRequest", copy.submitRequest);
+      setText("#upgradeCard .label-row strong", copy.quoteTitle);
+      setText("#upgradeStatus", copy.quoteStatus);
+      setText("#upgradeCard .subline", copy.quoteBody);
+      setText("#payUpgrade", copy.viewProgress);
+      setText("#progressPanel .label-row strong", copy.progressTitle);
+      setText("#requestDetail", copy.progressEmpty);
+      setText("#requestProgress", copy.progressWaiting);
+      setText("#profileSummary", copy.profileHelp);
+      setText("#editDraft", copy.editDraft);
+      taskOptions.forEach((option, index) => {
+        option.textContent = copy.taskLabels[index];
+      });
+      setOptions(backgroundSetting, copy.backgroundOptions);
+      setOptions(fontSizeSetting, copy.fontOptions);
+      setOptions(languageSetting, copy.languageOptions);
+      const supportCopy = {
+        zh: ["聯繫客服", "問題回報 / 廣告投放 / 合作洽談", "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。", "Email：support@app-service.example"],
+        en: ["Contact Support", "Issue Report / Partnership", "For issue reports or partnership inquiries, contact us by Email.", "Email: support@app-service.example"],
+        ja: ["サポート連絡", "問題報告 / 提携相談", "問題報告、提携相談は Email でお問い合わせください。", "Email：support@app-service.example"]
+      }[currentLanguage];
+      const supportCard = document.querySelector("#profilePage .request-card:last-of-type");
+      if (supportCard && supportCopy) {
+        supportCard.querySelector(".label-row strong").textContent = supportCopy[0];
+        supportCard.querySelector(".label-row span").textContent = supportCopy[1];
+        const summaries = supportCard.querySelectorAll(".request-summary");
+        summaries[0].textContent = supportCopy[2];
+        summaries[1].textContent = supportCopy[3];
+      }
+      transcript.textContent = `${copy.examplePrefix}${taskExamples[currentLanguage][currentTask]}`;
+      appStatus.textContent = pageStatus(currentPage);
+    }
+
+    function applyAppSettings() {
+      screen.classList.remove("theme-sunset", "theme-forest", "theme-photo", "font-small", "font-large");
+
+      if (backgroundSetting.value !== "default") {
+        screen.classList.add(`theme-${backgroundSetting.value}`);
+      }
+
+      if (fontSizeSetting.value !== "normal") {
+        screen.classList.add(`font-${fontSizeSetting.value}`);
+      }
+
+      applyLanguage(languageSetting.value);
+      appStatus.textContent = i18n[currentLanguage].settingsChanged;
+    }
+
+    function generateVerificationCode() {
+      verificationCode = String(Math.floor(1000 + Math.random() * 9000));
+      verificationHint.textContent = `已發送 4 位數驗證碼到手機 ${registerPhone.value.trim() || "使用者手機"}。原型示範碼：${verificationCode}`;
+      verificationCodeInput.value = "";
+      validateRegistration();
+    }
+
+    function validateRegistration() {
+      const hasProfile = registerName.value.trim()
+        && registerPhone.value.trim()
+        && registerEmail.value.trim()
+        && registerAge.value.trim()
+        && Number(registerAge.value) > 0;
+      const emailLooksOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerEmail.value.trim());
+      const termsOk = termsOpened && agreeTerms.checked;
+      const codeEntered = verificationCodeInput.value.trim().length === 4;
+      const ready = Boolean(hasProfile && emailLooksOk && codeEntered && termsOk);
+      completeRegistration.disabled = !ready;
+
+      if (!termsOpened) {
+        registerStatus.textContent = "請先打開條文";
+      } else if (!agreeTerms.checked) {
+        registerStatus.textContent = "請勾選同意";
+      } else if (!hasProfile || !emailLooksOk) {
+        registerStatus.textContent = "請完成資料";
+      } else if (!codeEntered) {
+        registerStatus.textContent = "請輸入簡訊碼";
+      } else {
+        registerStatus.textContent = "可送出";
+      }
+    }
+
+    function showPage(pageId) {
+      if (!isRegistered && pageId !== "registerPage") {
+        appStatus.textContent = pageStatus("registerPage");
+        return;
+      }
+      currentPage = pageId;
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navPageButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      appStatus.textContent = pageStatus(pageId);
+    }
+
+    function applyTask(taskKey) {
+      currentTask = taskKey;
+      const task = taskData[currentTask];
+      taskOptions.forEach(option => option.classList.toggle("active", option.dataset.task === taskKey));
+      transcript.textContent = `${i18n[currentLanguage].examplePrefix}${taskExamples[currentLanguage][taskKey]}`;
+      appStatus.textContent = `${i18n[currentLanguage].selectedTask}：${i18n[currentLanguage].taskLabels[taskOrder.indexOf(taskKey)]}`;
+      voiceStatus.textContent = i18n[currentLanguage].idle;
+      emailCard.classList.remove("show");
+      confirmCard.classList.remove("show");
+      renderDraft(task);
+    }
+
+    function runAgentFlow() {
+      const task = taskData[currentTask];
+      const copy = i18n[currentLanguage];
+      emailCard.classList.remove("show");
+      confirmCard.classList.remove("show");
+      confirmCard.querySelector(".label-row span").textContent = copy.done;
+      voiceButton.classList.add("listening");
+      voiceCard.classList.add("listening");
+      voiceStatus.textContent = copy.listening;
+      appStatus.textContent = copy.listening;
+      transcript.textContent = copy.recognizing;
+
+      window.setTimeout(() => {
+        voiceButton.classList.remove("listening");
+        voiceCard.classList.remove("listening");
+        transcript.textContent = taskExamples[currentLanguage][currentTask];
+        voiceStatus.textContent = copy.transcribed;
+        appStatus.textContent = copy.processing;
+      }, 900);
+
+      window.setTimeout(() => {
+        renderDraft(task);
+        emailCard.classList.add("show");
+        appStatus.textContent = copy.processing;
+      }, 1700);
+
+      window.setTimeout(() => {
+        appStatus.textContent = copy.done;
+        confirmCard.classList.add("show");
+      }, 2500);
+    }
+
+    taskOptions.forEach(option => {
+      option.addEventListener("click", () => applyTask(option.dataset.task));
+    });
+
+    [registerName, registerPhone, registerEmail, registerAge, verificationCodeInput, agreeTerms].forEach(input => {
+      input.addEventListener("input", validateRegistration);
+      input.addEventListener("change", validateRegistration);
+    });
+
+    genderOptions.forEach(button => {
+      button.addEventListener("click", () => {
+        selectedGender = button.dataset.gender;
+        genderOptions.forEach(item => item.classList.toggle("active", item === button));
+        validateRegistration();
+      });
+    });
+
+    resendCodeButton.addEventListener("click", generateVerificationCode);
+
+    toggleTermsButton.addEventListener("click", () => {
+      termsOpened = true;
+      termsPanel.classList.toggle("show");
+      toggleTermsButton.textContent = termsPanel.classList.contains("show")
+        ? "收合使用條款、隱私權政策與免責聲明"
+        : "展開使用條款、隱私權政策與免責聲明";
+      validateRegistration();
+    });
+
+    completeRegistration.addEventListener("click", () => {
+      if (completeRegistration.disabled) return;
+      if (verificationCodeInput.value.trim() !== verificationCode) {
+        registerStatus.textContent = "簡訊碼輸入錯誤";
+        registrationSummary.classList.add("show");
+        registrationSummary.textContent = "簡訊碼輸入錯誤，請確認手機收到的 4 位數驗證碼後再試一次。";
+        verificationCodeInput.focus();
+        return;
+      }
+      isRegistered = true;
+      mainNav.classList.remove("locked");
+      const name = registerName.value.trim() || "使用者";
+      userProfileButton.textContent = name;
+      profileName.value = name;
+      profilePhone.value = registerPhone.value.trim();
+      profileEmail.value = registerEmail.value.trim();
+      profileNote.value = `性別：${selectedGender}，年齡：${registerAge.value.trim()}`;
+      requestName.value = name;
+      requestEmail.value = registerEmail.value.trim();
+      registrationSummary.classList.add("show");
+      registrationSummary.textContent = `註冊成功\n姓名：${name}\n電話：${registerPhone.value.trim()}\nEmail：${registerEmail.value.trim()}\n性別：${selectedGender}\n年齡：${registerAge.value.trim()}`;
+      registerStatus.textContent = "註冊成功";
+      showPage("voicePage");
+      appStatus.textContent = "註冊成功，可以開始使用 Voice Agent。";
+    });
+
+    navPageButtons.forEach(button => {
+      button.addEventListener("click", () => showPage(button.dataset.page));
+    });
+
+    userProfileButton.addEventListener("click", () => showPage("profilePage"));
+
+    voiceButton.addEventListener("click", runAgentFlow);
+
+    editDraft.addEventListener("click", () => {
+      appStatus.textContent = "已保留草稿，可先修改再送出";
+    });
+
+    sendEmail.addEventListener("click", () => {
+      const task = taskData[currentTask];
+      appStatus.textContent = task.sentStatus;
+      confirmCard.querySelector(".label-row span").textContent = "已完成";
+    });
+
+    function renderRequestProgress(selectedIndex = 0) {
+      const copy = i18n[currentLanguage];
+      progressCount.textContent = `${submittedRequests.length} ${copy.countUnit}`;
+      requestList.innerHTML = submittedRequests.map((request, index) => `
+        <button class="request-item ${index === selectedIndex ? "active" : ""}" data-request-index="${index}">
+          ${copy.requestItem}<br>${request.requester}
+        </button>
+      `).join("");
+
+      const selected = submittedRequests[selectedIndex];
+      if (selected) {
+        requestDetail.textContent = `${copy.requesterLabel}：${selected.requester}\n${copy.contentLabel}：${selected.detail}`;
+        requestProgress.textContent = selected.progress;
+      } else {
+        requestDetail.textContent = copy.noRequests;
+        requestProgress.textContent = copy.noData;
+      }
+
+      requestList.querySelectorAll("[data-request-index]").forEach(button => {
+        button.addEventListener("click", () => renderRequestProgress(Number(button.dataset.requestIndex)));
+      });
+    }
+
+    submitRequest.addEventListener("click", () => {
+      const copy = i18n[currentLanguage];
+      requestName.value = profileName.value.trim() || requestName.value.trim() || "使用者";
+      requestEmail.value = profileEmail.value.trim() || requestEmail.value.trim() || "使用者信箱";
+      const requester = requestName.value.trim() || "使用者";
+      const requesterEmail = requestEmail.value.trim() || "使用者信箱";
+      const detail = featureRequest.value.trim() || "尚未輸入需求";
+      submittedRequests.unshift({
+        requester,
+        requesterEmail,
+        detail,
+        progress: copy.quoteStatus
+      });
+      requestStatus.textContent = copy.sent;
+      requestSummary.classList.add("show");
+      requestSummary.textContent = `${copy.requesterLabel}：${requester}\nEmail：${requesterEmail}\n${copy.contentLabel}：${detail}\n\n${copy.sentSummary}`;
+      upgradeCard.classList.add("show");
+      upgradeStatus.textContent = copy.quoteStatus;
+      progressPanel.classList.remove("show");
+      renderRequestProgress(0);
+      appStatus.textContent = copy.waitingQuote;
+    });
+
+    payUpgrade.addEventListener("click", () => {
+      const copy = i18n[currentLanguage];
+      progressPanel.classList.add("show");
+      renderRequestProgress(0);
+      requestStatus.textContent = copy.viewProgress;
+      appStatus.textContent = copy.showingProgress;
+    });
+
+    saveProfile.addEventListener("click", () => {
+      const copy = i18n[currentLanguage];
+      const name = profileName.value.trim() || "使用者";
+      userProfileButton.textContent = name;
+      requestName.value = name;
+      profileSummary.classList.add("show");
+      profileSummary.textContent = `${copy.updatedLabel}：${name}\n${copy.emailLabel}：${profileEmail.value.trim() || copy.blankValue}\n${copy.phoneLabel}：${profilePhone.value.trim() || copy.blankValue}\n${copy.companyLabel}：${profileCompany.value.trim() || copy.blankValue}\n${copy.noteLabel}：${profileNote.value.trim() || copy.emptyNote}`;
+      appStatus.textContent = copy.saved;
+    });
+
+    cancelProfile.addEventListener("click", () => {
+      showPage("voicePage");
+    });
+
+    backgroundSetting.addEventListener("change", applyAppSettings);
+    fontSizeSetting.addEventListener("change", applyAppSettings);
+    languageSetting.addEventListener("change", applyAppSettings);
+
+    applyLanguage("zh");
+    applyTask("email");
+    generateVerificationCode();
+    showPage("registerPage");
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

@@ -1,0 +1,1664 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>English Question Bank iOS App Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --ink: #f7fbff;
+      --muted: #a6b4c6;
+      --line: rgba(255,255,255,.13);
+      --panel: #111d2b;
+      --panel-2: #18283a;
+      --panel-3: #243a53;
+      --blue: #64d2ff;
+      --green: #30d158;
+      --yellow: #ffd60a;
+      --red: #ff453a;
+      --app-font-size: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      padding: 28px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(100,210,255,.18), transparent 24rem),
+        radial-gradient(circle at 88% 92%, rgba(48,209,88,.13), transparent 22rem),
+        #06101b;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100%, 1060px);
+      display: grid;
+      grid-template-columns: 390px minmax(280px, 1fr);
+      gap: 44px;
+      align-items: start;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #334252, #05070a 34%, #3b4d5f);
+      box-shadow: 0 30px 80px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.16);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(100,210,255,.18), transparent 13rem),
+        linear-gradient(180deg, rgba(48,209,88,.08), transparent 34%),
+        var(--bg);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .screen.theme-green {
+      --bg: #07140f;
+      --panel: #102119;
+      --panel-2: #173326;
+      --panel-3: #204935;
+      --blue: #7ee7bd;
+    }
+
+    .screen.theme-light {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --ink: #102033;
+      --muted: #607084;
+      --line: rgba(20,40,60,.14);
+      --panel: #ffffff;
+      --panel-2: #e9f0f7;
+      --panel-3: #dbe8f2;
+      --blue: #0a84ff;
+    }
+
+    .screen.font-small { --app-font-size: 12px; }
+    .screen.font-large { --app-font-size: 16px; }
+
+    .island {
+      position: absolute;
+      z-index: 10;
+      top: 11px;
+      left: 50%;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+    }
+
+    .status {
+      height: 58px;
+      padding: 12px 26px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .app {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 84px;
+      overflow: hidden;
+      font-size: var(--app-font-size);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      min-height: 36px;
+      gap: 8px;
+    }
+
+    .user,
+    .points {
+      height: 36px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 12px;
+      color: #061018;
+      font-weight: 950;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .user {
+      max-width: 168px;
+      background: linear-gradient(135deg, #fff, #bdefff 44%, var(--blue));
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .points {
+      margin-left: auto;
+      background: var(--yellow);
+    }
+
+    .credit-alert {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      color: #061018;
+      background: var(--yellow);
+      font-weight: 950;
+    }
+
+    .credit-alert.show { display: flex; }
+
+    .credit-alert button {
+      min-height: 32px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 12px;
+      color: #061018;
+      background: var(--green);
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    h1 {
+      margin: 16px 0 6px;
+      font-size: calc(var(--app-font-size) + 19px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 1px);
+      line-height: 1.35;
+    }
+
+    .content {
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-right: 2px;
+    }
+
+    .content::-webkit-scrollbar { width: 0; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background:
+        linear-gradient(145deg, rgba(100,210,255,.11), transparent 48%),
+        var(--panel);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: calc(var(--app-font-size) + 4px);
+      letter-spacing: 0;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 850;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-radius: 15px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 96px;
+      padding-top: 12px;
+      resize: none;
+      line-height: 1.45;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .terms-box {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .terms-toggle {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: var(--panel-3);
+      font: inherit;
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .terms-panel {
+      display: none;
+      max-height: 220px;
+      overflow-y: auto;
+      white-space: pre-line;
+      color: #d7e5f2;
+      font-size: calc(var(--app-font-size) - 2px);
+      line-height: 1.55;
+      scrollbar-width: thin;
+    }
+
+    .terms-panel.show {
+      display: block;
+    }
+
+    .terms-consent {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 850;
+    }
+
+    .terms-consent input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue);
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.05);
+      padding: 10px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 15px;
+    }
+
+    .segment {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .segment button,
+    .primary,
+    .secondary {
+      min-height: 42px;
+      border: 0;
+      border-radius: 15px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .segment button,
+    .secondary {
+      color: var(--ink);
+      background: var(--panel-3);
+      border: 1px solid var(--line);
+    }
+
+    .segment button.active {
+      color: #061018;
+      background: var(--blue);
+    }
+
+    .primary {
+      color: #061018;
+      background: var(--blue);
+    }
+
+    .question-card {
+      padding: 13px;
+      margin-bottom: 10px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid var(--line);
+    }
+
+    .question-card.correct {
+      border: 3px solid var(--green);
+      background: rgba(48,209,88,.18);
+      box-shadow: 0 0 0 3px rgba(48,209,88,.16), 0 12px 28px rgba(48,209,88,.16);
+    }
+
+    .question-card.incorrect {
+      border: 2px solid var(--red);
+      background: rgba(255,69,58,.12);
+    }
+
+    .question-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--blue);
+    }
+
+    .question-card p {
+      margin: 0;
+      color: var(--ink);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .solution {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 14px;
+      color: #061018;
+      background: rgba(48,209,88,.9);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .solution.show { display: block; }
+
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .plan {
+      min-height: 82px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .plan.active {
+      color: #061018;
+      background: var(--yellow);
+      box-shadow: 0 0 0 4px rgba(255,214,10,.14);
+    }
+
+    .school-card {
+      width: 100%;
+      display: grid;
+      gap: 6px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--ink);
+      background: var(--panel-2);
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .school-card strong { color: var(--blue); }
+    .school-card span { color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .recommend-badge {
+      align-self: flex-start;
+      background: rgba(94, 210, 255, .16);
+      border: 1px solid rgba(94, 210, 255, .75);
+      border-radius: 999px;
+      color: var(--blue) !important;
+      font-size: 12px !important;
+      font-weight: 900;
+      max-width: 92px;
+      overflow: hidden;
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+    .recommend-badge::before {
+      animation: recommendMarquee 2.4s linear infinite;
+      color: var(--blue);
+      content: "★ 推薦 ★";
+      display: inline-block;
+      min-width: 100%;
+      transform: translateX(100%);
+    }
+    .recommend-badge { color: transparent !important; }
+    @keyframes recommendMarquee {
+      from { transform: translateX(100%); }
+      to { transform: translateX(-100%); }
+    }
+    .contact-form { display: none; }
+    .contact-form.show { display: grid; }
+
+    .paywall { display: none; }
+    .paywall.show { display: grid; }
+
+    .nav {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      height: 64px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border-radius: 0 0 38px 38px;
+      background: rgba(8,16,24,.86);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-size: calc(var(--app-font-size) - 3px);
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .nav button.active { color: var(--blue); }
+
+    .brief {
+      max-width: 520px;
+      padding-top: 32px;
+    }
+
+    .brief h2 {
+      margin: 0 0 14px;
+      font-size: clamp(30px, 4vw, 52px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .brief p {
+      margin: 0;
+      color: #b9c7d6;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="iPhone English question bank app prototype">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status"><span>9:41</span><span>5G  ▰</span></div>
+
+        <div class="app">
+          <div class="toolbar">
+            <button class="user" id="userNameButton">尚未註冊</button>
+            <button class="points" id="pointsButton">3 點</button>
+          </div>
+          <div class="credit-alert" id="creditAlert">
+            <span id="creditAlertText">點數已用完 請點選升級</span>
+            <button id="creditAlertUpgrade" type="button">升級</button>
+          </div>
+
+          <h1 id="title">英文題庫</h1>
+          <p class="subline" id="appStatus">完成註冊後開始產生英文題庫。</p>
+
+          <section class="content">
+            <section class="page active" id="loginPage">
+              <div class="card">
+                <h2>註冊登入</h2>
+                <label>姓名<input id="studentName" value="Clay Tseng" placeholder="請輸入姓名"></label>
+                <label>電話<input id="studentPhone" value="0912-345-678" inputmode="tel" placeholder="請輸入電話"></label>
+                <label>Email<input id="studentEmail" value="clay.tseng@example.com" inputmode="email" placeholder="請輸入 Email"></label>
+                <div class="grid-2">
+                  <label>地址縣市<input id="studentCity" value="台北市" placeholder="例如：台北市"></label>
+                  <label>地址區域<input id="studentDistrict" value="大安區" placeholder="例如：大安區"></label>
+                </div>
+                <div class="grid-2">
+                  <label>簡訊驗證碼<input id="smsCode" maxlength="4" inputmode="numeric" placeholder="4 位數"></label>
+                  <button class="secondary" id="sendSms" type="button">發送簡訊</button>
+                </div>
+                <p class="subline" id="smsHint">按下發送簡訊後會產生 4 位數驗證碼。</p>
+                <div class="terms-box">
+                  <button class="terms-toggle" id="toggleTermsButton" type="button">展開使用條款、隱私權政策與免責聲明</button>
+                  <div class="terms-panel" id="termsPanel">英文題庫 App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「英文題庫 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供英文題庫、單字學習、文法練習、閱讀測驗、聽力練習、AI 解題、學習分析、模擬測驗、語音互動及相關英語教育與學習輔助服務，所有內容僅供教育、學習與參考用途。
+
+二、AI 與學習內容聲明
+
+本 App 部分內容可能由 AI 系統自動生成，包括英文解析、翻譯、學習建議、語音回覆或其他互動內容。
+
+本公司不保證相關內容之正確性、完整性、即時性、適法性或完全符合特定考試需求。
+
+所有題目、解析、翻譯、AI 解題與學習建議僅供學習與參考用途，不構成正式教育保證、考試保證、語言能力保證或成績保證。
+
+三、使用風險與免責聲明
+
+使用者應自行判斷並承擔使用本 App 所產生之一切風險與責任。
+
+本 App 僅提供教育與學習輔助服務，本公司不保證任何學習成果、考試結果、語言能力提升或 AI 解題內容之準確性。
+
+使用者因依據本 App 提供之題目、解析、翻譯、建議、AI 回覆或資訊所作之任何學習安排、考試準備或決策而產生之結果、損失或爭議，均由使用者自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+本 App 之語音、AI、網路及第三方服務功能，可能受網路環境、裝置效能、第三方服務或系統狀況影響，本公司不保證服務之穩定性、即時性或完全無錯誤。
+
+四、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+* 使用者帳號資訊
+* Email
+* 裝置資訊
+* 使用紀錄
+* IP 位址
+* 學習紀錄
+* 作答紀錄
+* 語音內容
+* AI 互動紀錄
+* 崩潰紀錄與分析資料
+
+五、資料用途
+
+蒐集資料主要用於：
+
+* 提供英文題庫與學習服務
+* AI 解題與學習分析
+* 提供個人化學習內容
+* 語音互動與 AI 回覆
+* 改善使用體驗
+* 系統安全維護
+* 客服支援
+* 防止詐騙、濫用或違法行為
+* 提升 AI 與系統服務品質
+
+六、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+* OpenAI
+* Firebase
+* Google Analytics
+* 語音辨識服務
+* 雲端儲存服務
+* AI 模型服務
+
+部分資料可能因服務需求而傳輸至第三方服務供應商。
+
+七、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、語音通訊或儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及裝置安全。
+
+八、使用者責任
+
+使用者不得利用本 App 從事任何違法、侵權、作弊、散布惡意程式或其他損害他人權益之行為。
+
+若因使用者違法或不當行為導致任何損害或法律責任，應由使用者自行負責。
+
+九、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、題庫內容、資料、AI 系統及相關內容，均屬本公司或合法授權人所有。
+
+未經授權不得重製、修改、散布、反向工程、破解或用於商業用途。
+
+十、使用者權利
+
+使用者得依法請求查詢、更正或刪除其個人資料。
+
+十一、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利，修改後內容將公布於本 App，使用者繼續使用即視為同意修改內容。</div>
+                  <label class="terms-consent">
+                    <input id="agreeTerms" type="checkbox">
+                    我已打開並同意使用條款、隱私權政策與免責聲明
+                  </label>
+                </div>
+                <button class="primary" id="finishLogin" type="button">完成註冊</button>
+              </div>
+            </section>
+
+            <section class="page" id="profilePage">
+              <div class="card">
+                <h2>使用者資料</h2>
+                <label>使用者名稱<input id="profileName" placeholder="請輸入使用者名稱"></label>
+                <label>Email<input id="profileEmail" inputmode="email" placeholder="請輸入 Email"></label>
+                <label>電話<input id="profilePhone" readonly disabled></label>
+                <div class="grid-2">
+                  <label>地址縣市<input id="profileCity" placeholder="例如：台北市"></label>
+                  <label>地址區域<input id="profileDistrict" placeholder="例如：大安區"></label>
+                </div>
+                <p class="subline">電話不可自行修改，請聯繫客服進行更改。客服電話：02-1234-5678</p>
+                <div class="grid-2">
+                  <div class="metric"><span>目前方案</span><strong id="profilePlan">免費方案</strong></div>
+                  <div class="metric"><span>剩餘點數</span><strong id="profileCredits">3 點</strong></div>
+                </div>
+                <button class="primary" id="saveProfile" type="button">儲存資料</button>
+              </div>
+            </section>
+
+            <section class="page" id="practicePage">
+              <div class="card">
+                <h2>產生英文題庫</h2>
+                <div class="segment" id="schoolStage">
+                  <button class="active" data-stage="國小">國小</button>
+                  <button data-stage="國中">國中</button>
+                  <button data-stage="高中">高中</button>
+                </div>
+                <label>年級<select id="gradeSelect"></select></label>
+                <label>英文單元<select id="englishUnitSelect"></select></label>
+                <label>題目難易度</label>
+                <div class="segment" id="difficultyLevel">
+                  <button class="active" data-difficulty="易">易</button>
+                  <button data-difficulty="中">中</button>
+                  <button data-difficulty="難">難</button>
+                </div>
+                <button class="primary" id="generateQuestions" type="button">產生題庫</button>
+              </div>
+              <div id="questionList"></div>
+              <div class="card paywall" id="paywall">
+                <h2>點數已用完</h2>
+                <p class="subline">點數已用完 請點選升級</p>
+                <button class="primary" id="goUpgrade" type="button">升級</button>
+              </div>
+            </section>
+
+            <section class="page" id="solverPage">
+              <div class="card">
+                <h2>英文詳解助手</h2>
+                <label>輸入英文題目<textarea id="manualQuestion" placeholder="例如：Choose the correct tense: She ___ to school yesterday."></textarea></label>
+                <button class="primary" id="solveProblem" type="button">產生詳解</button>
+              </div>
+              <div class="card" id="solveResult">
+                <h2>詳解結果</h2>
+                <p class="subline">輸入英文題目後按下產生詳解，這裡會顯示答案、文法理由與例句。</p>
+              </div>
+            </section>
+
+            <section class="page" id="tutoringPage">
+              <div class="card">
+                <h2>補習班</h2>
+                <p class="subline">依使用者註冊地址或定位地址排序，點選補習班留下資料，系統會自動以 Email 或簡訊通知補習班。</p>
+                <div class="grid-2">
+                  <label>篩選縣市<select id="tutorCityFilter"></select></label>
+                  <label>篩選區域<select id="tutorDistrictFilter"></select></label>
+                </div>
+                <button class="school-card" type="button" data-school="菁英英文補習班" data-email="english@elite.example" data-phone="02-2345-2211" data-city="台北市" data-district="大安區" data-paid="true"><span class="recommend-badge">★ 推薦 ★</span><strong>菁英英文補習班</strong><span>國小到高中英文、會考與學測英文</span><span>地址：台北市大安區忠孝東路三段 120 號</span><span>Email：english@elite.example｜電話：02-2345-2211</span></button>
+                <button class="school-card" type="button" data-school="A+ 英語學院" data-email="contact@aplus-english.example" data-phone="02-2766-5522" data-city="新北市" data-district="板橋區"><strong>A+ 英語學院</strong><span>文法、閱讀、作文與口說訓練</span><span>地址：新北市板橋區民生路二段 38 號</span><span>Email：contact@aplus-english.example｜電話：02-2766-5522</span></button>
+                <button class="school-card" type="button" data-school="晨星英文家教中心" data-email="hello@morning-english.example" data-phone="02-2555-6677" data-city="桃園市" data-district="桃園區"><strong>晨星英文家教中心</strong><span>一對一英文、弱點補強、升學規劃</span><span>地址：桃園市桃園區復興路 52 號</span><span>Email：hello@morning-english.example｜電話：02-2555-6677</span></button>
+              </div>
+              <div class="card contact-form" id="tutorContactForm">
+                <h2 id="selectedTutorTitle">補習班洽談</h2>
+                <label>姓名<input id="tutorContactName" placeholder="請輸入姓名"></label>
+                <label>電話<input id="tutorContactPhone" inputmode="tel" placeholder="請輸入電話"></label>
+                <label>要洽談的問題<textarea id="tutorContactQuestion" placeholder="請輸入想洽談的課程、年級或學習問題"></textarea></label>
+                <button class="primary" id="sendTutorContact" type="button">送出</button>
+                <p class="subline" id="tutorContactResult"></p>
+              </div>
+            </section>
+
+            <section class="page" id="plansPage">
+              <div class="card">
+                <h2>升級方案</h2>
+                <p class="subline">目前剩餘：<strong id="pointsSummary">3 點</strong></p>
+                <div class="plans">
+                  <button class="plan" data-plan="Basic" data-price="NTD$99" data-points="30">Basic<br>NTD$99<br>每月 30 次</button>
+                  <button class="plan" data-plan="Plus" data-price="NTD$399" data-points="150">Plus<br>NTD$399<br>每月 150 次</button>
+                  <button class="plan" data-plan="Pro" data-price="NTD$599" data-points="300">Pro<br>NTD$599<br>每月 300 次</button>
+                  <button class="plan" data-plan="VIP" data-price="NTD$999" data-points="1000">VIP<br>NTD$999<br>每月 1000 次</button>
+                </div>
+                <button class="primary" id="confirmPlan" type="button">確認方案並前往付款</button>
+              </div>
+            </section>
+
+            <section class="page" id="paymentPage">
+              <div class="card">
+                <h2>信用卡付費</h2>
+                <p class="subline" id="paymentPlan">請先選擇方案。</p>
+                <label>持卡人<input id="cardName" value="Clay Tseng"></label>
+                <label>卡號<input id="cardNumber" value="4242 4242 4242 4242" inputmode="numeric"></label>
+                <div class="grid-2">
+                  <label>有效期限<input id="cardExp" value="12/29"></label>
+                  <label>CVV<input id="cardCvv" value="123" inputmode="numeric"></label>
+                </div>
+                <button class="primary" id="payNow" type="button">確認付款</button>
+              </div>
+            </section>
+
+            <section class="page" id="settingsPage">
+              <div class="card">
+                <h2>設定</h2>
+                <label>App 背景
+                  <select id="themeSelect">
+                    <option value="dark">深色藍黑</option>
+                    <option value="green">護眼綠</option>
+                    <option value="light">明亮白</option>
+                  </select>
+                </label>
+                <label>字體大小
+                  <select id="fontSizeSelect">
+                    <option value="normal">標準</option>
+                    <option value="small">小</option>
+                    <option value="large">大</option>
+                  </select>
+                </label>
+                <label>語言
+                  <select id="languageSelect">
+                    <option value="zh">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                </label>
+              </div>
+              <div class="card">
+                <h2>聯繫客服</h2>
+                <p class="subline">問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。</p>
+                <p class="subline">Email：support@app-service.example</p>
+              </div>
+            </section>
+          </section>
+        </div>
+
+        <nav class="nav" aria-label="main navigation">
+          <button class="active" data-page="practicePage">題庫</button>
+          <button data-page="solverPage">詳解</button>
+          <button data-page="tutoringPage">補習班</button>
+          <button data-page="plansPage">升級</button>
+          <button data-page="settingsPage">設定</button>
+        </nav>
+      </div>
+    </section>
+
+    <aside class="brief">
+      <h2>英文題庫 iOS App</h2>
+      <p>學生可依國小、國中、高中與年級選擇英文單元，產生真正分級的英文題目。易題重基礎辨識，中題重文意與應用，難題重整合、改寫與寫作判斷。</p>
+    </aside>
+  </main>
+
+  <script>
+    const pages = [...document.querySelectorAll(".page")];
+    const navButtons = [...document.querySelectorAll(".nav button")];
+    const screen = document.querySelector(".screen");
+    const title = document.querySelector("#title");
+    const userNameButton = document.querySelector("#userNameButton");
+    const pointsButton = document.querySelector("#pointsButton");
+    const creditAlert = document.querySelector("#creditAlert");
+    const creditAlertText = document.querySelector("#creditAlertText");
+    const creditAlertUpgrade = document.querySelector("#creditAlertUpgrade");
+    const appStatus = document.querySelector("#appStatus");
+    const studentName = document.querySelector("#studentName");
+    const studentPhone = document.querySelector("#studentPhone");
+    const studentEmail = document.querySelector("#studentEmail");
+    const studentCity = document.querySelector("#studentCity");
+    const studentDistrict = document.querySelector("#studentDistrict");
+    const profileName = document.querySelector("#profileName");
+    const profileEmail = document.querySelector("#profileEmail");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profileCity = document.querySelector("#profileCity");
+    const profileDistrict = document.querySelector("#profileDistrict");
+    const saveProfile = document.querySelector("#saveProfile");
+    const profilePlan = document.querySelector("#profilePlan");
+    const profileCredits = document.querySelector("#profileCredits");
+    const smsCode = document.querySelector("#smsCode");
+    const smsHint = document.querySelector("#smsHint");
+    const sendSms = document.querySelector("#sendSms");
+    const finishLogin = document.querySelector("#finishLogin");
+    const toggleTermsButton = document.querySelector("#toggleTermsButton");
+    const termsPanel = document.querySelector("#termsPanel");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const schoolStage = document.querySelector("#schoolStage");
+    const gradeSelect = document.querySelector("#gradeSelect");
+    const englishUnitSelect = document.querySelector("#englishUnitSelect");
+    const difficultyLevel = document.querySelector("#difficultyLevel");
+    const generateQuestions = document.querySelector("#generateQuestions");
+    const questionList = document.querySelector("#questionList");
+    const paywall = document.querySelector("#paywall");
+    const manualQuestion = document.querySelector("#manualQuestion");
+    const solveProblem = document.querySelector("#solveProblem");
+    const solveResult = document.querySelector("#solveResult");
+    const planButtons = [...document.querySelectorAll(".plan")];
+    const pointsSummary = document.querySelector("#pointsSummary");
+    const confirmPlan = document.querySelector("#confirmPlan");
+    const paymentPlan = document.querySelector("#paymentPlan");
+    const payNow = document.querySelector("#payNow");
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSizeSelect = document.querySelector("#fontSizeSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const tutorCityFilter = document.querySelector("#tutorCityFilter");
+    const tutorDistrictFilter = document.querySelector("#tutorDistrictFilter");
+    const schoolCards = [...document.querySelectorAll(".school-card")];
+    const tutorContactForm = document.querySelector("#tutorContactForm");
+    const selectedTutorTitle = document.querySelector("#selectedTutorTitle");
+    const tutorContactName = document.querySelector("#tutorContactName");
+    const tutorContactPhone = document.querySelector("#tutorContactPhone");
+    const sendTutorContact = document.querySelector("#sendTutorContact");
+    const tutorContactResult = document.querySelector("#tutorContactResult");
+
+    let smsToken = "";
+    let loggedIn = false;
+    let termsOpened = false;
+    let credits = 3;
+    let currentPlan = "免費方案";
+    let selectedStage = "國小";
+    let selectedDifficulty = "易";
+    let selectedPlan = null;
+    let selectedTutor = null;
+
+    const gradeMap = {
+      "國小": ["1 年級", "2 年級", "3 年級", "4 年級", "5 年級", "6 年級"],
+      "國中": ["1 年級", "2 年級", "3 年級"],
+      "高中": ["1 年級", "2 年級", "3 年級"]
+    };
+
+    const unitMap = {
+      "國小": ["單字拼寫", "基礎文法", "閱讀理解", "句型造句"],
+      "國中": ["時態文法", "克漏字", "閱讀推論", "句子改寫"],
+      "高中": ["學測單字", "進階文法", "篇章閱讀", "英文作文"]
+    };
+
+    const pageTitles = {
+      loginPage: "英文題庫",
+      profilePage: "使用者資料",
+      practicePage: "英文題庫",
+      solverPage: "英文詳解",
+      tutoringPage: "補習班",
+      plansPage: "升級方案",
+      paymentPage: "信用卡付費",
+      settingsPage: "設定"
+    };
+
+    function showPage(pageId) {
+      const protectedPages = ["profilePage", "practicePage", "solverPage", "tutoringPage", "plansPage", "paymentPage", "settingsPage"];
+      if (!loggedIn && protectedPages.includes(pageId)) {
+        appStatus.textContent = "請先完成註冊後才能使用 App。";
+        pageId = "loginPage";
+      }
+      if (pageId === "tutoringPage") sortTutorSchools();
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      title.textContent = pageTitles[pageId] || "英文題庫";
+    }
+
+    function updateCredits() {
+      pointsButton.textContent = `${credits} 點`;
+      pointsSummary.textContent = `${credits} 點`;
+      profileCredits.textContent = `${credits} 點`;
+      profilePlan.textContent = currentPlan;
+      paywall.classList.toggle("show", credits <= 0);
+      creditAlert.classList.toggle("show", credits <= 0);
+      creditAlertText.textContent = "點數已用完 請點選升級";
+    }
+
+    function consumeCredit() {
+      if (!loggedIn) {
+        appStatus.textContent = "請先完成註冊後才能使用 App。";
+        showPage("loginPage");
+        return false;
+      }
+      if (credits <= 0) {
+        appStatus.textContent = "點數已用完 請點選升級";
+        showPage("plansPage");
+        return false;
+      }
+      credits -= 1;
+      updateCredits();
+      return true;
+    }
+
+    function renderGrades() {
+      const currentGrade = gradeSelect.value;
+      gradeSelect.innerHTML = gradeMap[selectedStage]
+        .map(grade => `<option value="${grade}">${grade}</option>`)
+        .join("");
+      if (gradeMap[selectedStage].includes(currentGrade)) gradeSelect.value = currentGrade;
+    }
+
+    function renderUnits() {
+      const currentUnit = englishUnitSelect.value;
+      englishUnitSelect.innerHTML = unitMap[selectedStage]
+        .map(unit => `<option value="${unit}">${unit}</option>`)
+        .join("");
+      if (unitMap[selectedStage].includes(currentUnit)) englishUnitSelect.value = currentUnit;
+    }
+
+    function gradeNumber() {
+      return Number(gradeSelect.value.match(/\d+/)?.[0] || 1);
+    }
+
+    function geminiPromptForEnglishQuestions(stage, grade, unit, difficulty) {
+      return [
+        "你是英文題庫 iOS app 的內部產題服務。",
+        `請產生 ${stage}${grade}、英文單元「${unit}」、難度「${difficulty}」的 3 題英文題。`,
+        "易：單字或文法辨識；中：情境應用與文意判斷；難：整合閱讀、改寫、寫作與理由分析。",
+        "每題回傳 title、question、solution。solution 必須包含答案、詳細解題步驟、英文規則、例句或改寫過程。"
+      ].join("\n");
+    }
+
+    async function requestInternalGeminiQuestions(stage, grade, unit, difficulty) {
+      const prompt = geminiPromptForEnglishQuestions(stage, grade, unit, difficulty);
+      // Production hook: send this prompt to your backend, where the Gemini API key is stored securely.
+      // Example backend route: POST /api/gemini/english-questions { prompt }
+      return { prompt, questions: null };
+    }
+
+    function difficultyNote(difficulty) {
+      return {
+        "易": "基礎辨識：重點是認出單字、句型或文法規則。",
+        "中": "應用理解：需要讀懂上下文，再套用文法或語意判斷。",
+        "難": "整合挑戰：需要推論、改寫、比較語氣，或完成短文組織。"
+      }[difficulty];
+    }
+
+    function englishQuestions(stage, grade, unit, difficulty) {
+      const g = gradeNumber();
+      const baseTitle = `${stage}${grade} · ${difficulty} · ${unit}`;
+      const set = items => items.map((item, index) => ({
+        title: `${baseTitle} · 題目 ${index + 1}`,
+        question: item.question,
+        answer: item.answer,
+        solution: `${difficultyNote(difficulty)}<br><br><strong>答案</strong><br>${item.answer}<br><br><strong>詳細解題過程</strong><br>${item.steps}`
+      }));
+
+      const banks = {
+        "單字拼寫": {
+          "易": set([
+            { question: "Choose the correct spelling: (A) applle (B) apple (C) aple", answer: "B. apple", steps: "apple 是「蘋果」。正確拼法為 a-p-p-l-e。<br>例句：I eat an apple every day." },
+            { question: "Fill in the blank: I can ___ a bike. (ride / write)", answer: "ride", steps: "ride a bike 是固定搭配，意思是騎腳踏車。write 是寫，不符合語意。<br>完整句：I can ride a bike." },
+            { question: "Match the word: happy = ?", answer: "快樂的", steps: "happy 是形容詞，表示快樂的。<br>例句：She is happy." }
+          ]),
+          "中": set([
+            { question: "Choose the word that best completes the sentence: The soup is too ___. I need water. (salty / quiet / early)", answer: "salty", steps: "too salty 表示太鹹，需要水符合語意。quiet 是安靜，early 是早。<br>完整句：The soup is too salty." },
+            { question: "Which word is the opposite of 'strong'?", answer: "weak", steps: "opposite 表示相反詞。strong 是強壯的，相反詞是 weak。<br>例句：The box is heavy, but he is not weak." },
+            { question: "Choose the correct word: I wear a ___ when it rains. (raincoat / notebook / sandwich)", answer: "raincoat", steps: "下雨時穿雨衣，raincoat 符合情境。notebook 是筆記本，sandwich 是三明治。" }
+          ]),
+          "難": set([
+            { question: "Choose the best word: The student gave a ___ answer, so the teacher understood quickly. (clear / cloud / climb)", answer: "clear", steps: "answer 需要形容詞修飾。clear answer 表示清楚的回答。cloud 是名詞，climb 是動詞，不適合。<br>句型：形容詞 + 名詞。" },
+            { question: "Pick the word that fits both meaning and part of speech: We should ___ the environment. (protect / protection / protective)", answer: "protect", steps: "should 後面接原形動詞，所以要用 protect。protection 是名詞，protective 是形容詞。<br>完整句：We should protect the environment." },
+            { question: "Choose the most precise word: The movie was not just good; it was ___. (excellent / hungry / simple)", answer: "excellent", steps: "not just good 表示比 good 更強，excellent 表示極好的，語意最精準。" }
+          ])
+        },
+        "基礎文法": {
+          "易": set([
+            { question: "Choose: She ___ my sister. (am / is / are)", answer: "is", steps: "主詞 She 是第三人稱單數，be 動詞用 is。<br>She is my sister." },
+            { question: "Choose: I ___ a dog. (have / has)", answer: "have", steps: "主詞 I 搭配 have。has 用於 he/she/it。<br>I have a dog." },
+            { question: "Choose: They ___ students. (is / are)", answer: "are", steps: "They 是複數主詞，be 動詞用 are。<br>They are students." }
+          ]),
+          "中": set([
+            { question: "Choose: My brother ___ basketball every Sunday. (play / plays)", answer: "plays", steps: "My brother 是第三人稱單數，現在簡單式動詞加 s。<br>My brother plays basketball every Sunday." },
+            { question: "Choose: There ___ two books on the desk. (is / are)", answer: "are", steps: "two books 是複數，所以 there are。<br>There are two books on the desk." },
+            { question: "Choose: She doesn't ___ coffee. (like / likes)", answer: "like", steps: "助動詞 doesn't 後接原形動詞，所以用 like。<br>She doesn't like coffee." }
+          ]),
+          "難": set([
+            { question: "Rewrite: He is a good student. Make it negative.", answer: "He is not a good student.", steps: "be 動詞句改否定，在 be 動詞後加 not。<br>He is + not + a good student." },
+            { question: "Ask a question: You are tired.", answer: "Are you tired?", steps: "be 動詞疑問句把 Are 移到主詞 you 前面，句尾加問號。" },
+            { question: "Correct the sentence: She go to school by bus.", answer: "She goes to school by bus.", steps: "She 是第三人稱單數，現在簡單式 go 要改成 goes。" }
+          ])
+        },
+        "時態文法": {
+          "易": set([
+            { question: "Choose: She ___ to school yesterday. (go / went)", answer: "went", steps: "yesterday 表示過去時間，go 的過去式是 went。" },
+            { question: "Choose: I ___ TV now. (watch / am watching)", answer: "am watching", steps: "now 表示正在進行，用現在進行式 am/is/are + V-ing。" },
+            { question: "Choose: He usually ___ breakfast at seven. (eat / eats)", answer: "eats", steps: "usually 表示習慣，主詞 He 是第三人稱單數，所以 eat 加 s。" }
+          ]),
+          "中": set([
+            { question: "Choose: When I called him, he ___. (slept / was sleeping)", answer: "was sleeping", steps: "一個過去動作發生時，另一個動作正在進行，用過去進行式 was/were + V-ing。" },
+            { question: "Choose: I ___ my homework already. (finish / have finished)", answer: "have finished", steps: "already 常搭配現在完成式 have/has + p.p.，表示已完成。" },
+            { question: "Correct: She have lived here for three years.", answer: "She has lived here for three years.", steps: "She 是第三人稱單數，現在完成式用 has + p.p.。" }
+          ]),
+          "難": set([
+            { question: "Explain the difference: I lived here for three years. / I have lived here for three years.", answer: "第一句表示過去住過，現在未必還住；第二句表示從過去持續到現在。", steps: "過去式切斷現在；現在完成式連結過去與現在。for three years 在現在完成式中強調持續時間。" },
+            { question: "Rewrite using present perfect: I started learning English in 2023, and I still learn it.", answer: "I have learned English since 2023.", steps: "從過去開始並持續到現在，用 have/has + p.p. + since 起點時間。" },
+            { question: "Choose and explain: By the time I arrived, the class ___. (started / had started)", answer: "had started", steps: "By the time + 過去時間，表示更早之前已經發生，用過去完成式 had + p.p.。" }
+          ])
+        },
+        "閱讀推論": {
+          "易": set([
+            { question: "Tom put on his coat and opened his umbrella. What is the weather like?", answer: "It is rainy.", steps: "umbrella 是雨傘，put on his coat 也暗示天氣不好，所以推論正在下雨。" },
+            { question: "Mary studied hard and got 100 on the test. How did she feel?", answer: "She felt happy/proud.", steps: "考 100 分通常讓人開心或驕傲，需從情境推論情緒。" },
+            { question: "The shop is closed. Can we buy things there now?", answer: "No.", steps: "closed 表示未營業，所以現在不能買東西。" }
+          ]),
+          "中": set([
+            { question: "A boy looked at the broken window and held a baseball bat. What probably happened?", answer: "He probably broke the window while playing baseball.", steps: "broken window + baseball bat 是線索，推論球或球棒造成窗戶破裂。" },
+            { question: "Lisa missed the bus, so she ran to school. Why did she run?", answer: "Because she did not want to be late.", steps: "missed the bus 造成時間不足，ran to school 是為了避免遲到。" },
+            { question: "The teacher smiled after reading Amy's essay. What can we infer?", answer: "Amy probably wrote a good essay.", steps: "teacher smiled 是正面反應，可推論文章寫得不錯。" }
+          ]),
+          "難": set([
+            { question: "Kevin said, 'Great, another rainy day,' and looked unhappy. What does he really mean?", answer: "He does not like the rain; he is being sarcastic.", steps: "字面上 great 是好，但 looked unhappy 顯示相反情緒，這是反諷語氣。" },
+            { question: "A character gives away his lunch to a hungry classmate. What trait does this show?", answer: "He is kind/generous.", steps: "放棄自己的午餐幫助同學，顯示慷慨與善良。" },
+            { question: "The passage says the streets were empty and all lights were off. What mood is created?", answer: "A lonely or mysterious mood.", steps: "empty streets 與 lights off 形成安靜、孤單或神秘的氣氛。" }
+          ])
+        },
+        "英文作文": {
+          "易": set([
+            { question: "Write one sentence about your favorite food.", answer: "My favorite food is pizza.", steps: "基本句型：My favorite food is + 食物。句首大寫，句尾加句點。" },
+            { question: "Combine: I like English. It is interesting.", answer: "I like English because it is interesting.", steps: "用 because 連接原因，because 後面接完整子句。" },
+            { question: "Correct punctuation: i like dogs", answer: "I like dogs.", steps: "英文句首 I 永遠大寫，句尾要加句點。" }
+          ]),
+          "中": set([
+            { question: "Write a topic sentence for: reading books, learning words, improving writing.", answer: "Reading books can help students improve their English.", steps: "主題句要概括段落重點，三個提示都和閱讀幫助英文能力有關。" },
+            { question: "Improve the sentence: English is good. I like it.", answer: "English is useful, so I enjoy learning it.", steps: "用 useful 取代籠統的 good，並用 so 表示結果。" },
+            { question: "Add a transition: I was tired. I finished my homework.", answer: "Although I was tired, I finished my homework.", steps: "兩句有讓步關係，用 Although 表示雖然。" }
+          ]),
+          "難": set([
+            { question: "Rewrite to sound more formal: Kids should learn English because it helps a lot.", answer: "Students should learn English because it provides many academic and career opportunities.", steps: "正式寫作用 students 取代 kids，用 provides opportunities 取代 helps a lot。" },
+            { question: "Write a concluding sentence for an essay about learning English.", answer: "For these reasons, learning English is an important step toward wider communication and future success.", steps: "結論句要總結理由並回扣主題，不能加入太多新細節。" },
+            { question: "Improve coherence: I like English. Tests are hard. I watch movies.", answer: "Although English tests are difficult, I still enjoy learning English by watching movies.", steps: "用 although 建立轉折，再把 watching movies 變成學英文的方法，句意更連貫。" }
+          ])
+        }
+      };
+
+      const fallback = {
+        "易": set([
+          { question: `Answer a basic ${unit} question for ${stage}${grade}.`, answer: "Use the core rule.", steps: "先辨認題型，再套用最基本的英文規則。" },
+          { question: `Choose the correct answer in a simple ${unit} sentence.`, answer: "The answer depends on the rule.", steps: "找主詞、動詞、時間詞或關鍵字，依規則判斷。" },
+          { question: `Make one sentence using the ${unit} skill.`, answer: "A correct simple sentence.", steps: "用主詞 + 動詞 + 受詞或補語完成句子。" }
+        ]),
+        "中": set([
+          { question: `Solve a context-based ${unit} question.`, answer: "Use context clues.", steps: "先讀上下文，再用關鍵字與文法規則判斷。" },
+          { question: `Explain why one answer is better than another in ${unit}.`, answer: "The better answer fits grammar and meaning.", steps: "比較選項的詞性、語意與句型位置。" },
+          { question: `Rewrite a sentence using the ${unit} rule.`, answer: "A rewritten correct sentence.", steps: "先保留原意，再改變句型或文法結構。" }
+        ]),
+        "難": set([
+          { question: `Analyze a difficult ${unit} sentence and explain the answer.`, answer: "Use grammar, meaning, and tone.", steps: "同時檢查文法結構、語意線索與語氣。" },
+          { question: `Write or revise a short English response about ${unit}.`, answer: "A coherent English response.", steps: "先決定主旨，再安排句子順序與轉折。" },
+          { question: `Infer the best answer from hidden clues in ${unit}.`, answer: "Use inference.", steps: "找明示線索與暗示線索，排除不合理選項。" }
+        ])
+      };
+
+      return banks[unit]?.[difficulty] || fallback[difficulty];
+    }
+
+    function makeQuestions() {
+      const grade = gradeSelect.value;
+      const unit = englishUnitSelect.value;
+      requestInternalGeminiQuestions(selectedStage, grade, unit, selectedDifficulty);
+      return [
+        ...englishQuestions(selectedStage, grade, unit, selectedDifficulty),
+        ...englishExtraQuestions(selectedStage, grade, unit, selectedDifficulty)
+      ];
+    }
+
+    function englishExtraQuestions(stage, grade, unit, difficulty) {
+      const baseTitle = `${stage}${grade} · ${difficulty} · ${unit} · 補充題`;
+      const set = items => items.map((item, index) => ({
+        title: `${baseTitle} ${index + 1}`,
+        question: item.question,
+        answer: item.answer,
+        solution: `${difficultyNote(difficulty)}<br><br><strong>答案</strong><br>${item.answer}<br><br><strong>詳細解題過程</strong><br>${item.steps}`
+      }));
+      return set([
+        { question: `Choose the best answer for this ${unit} sentence: She ___ breakfast every morning. (A) eat (B) eats (C) eating (D) eaten`, answer: "B. eats", steps: "主詞 She 是第三人稱單數，一般現在式動詞需加 s，所以用 eats。" },
+        { question: `Which option best matches the ${unit} meaning: "careful"?`, answer: "paying attention and avoiding mistakes", steps: "careful 表示小心、注意細節，與避免錯誤有關。" },
+        { question: `Fill in the blank with the best ${unit} choice: We went home ___ it started raining. (A) because (B) but (C) or (D) so`, answer: "A. because", steps: "後半句說下雨是回家的原因，因此用 because 連接原因。" }
+      ]);
+    }
+
+    function normalizeQuizAnswer(value) {
+      return String(value || "").toLowerCase().replace(/[。．.，,\s]/g, "").trim();
+    }
+
+    function escapeQuizText(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function shuffledItems(items) {
+      return [...items].sort(() => Math.random() - 0.5);
+    }
+
+    function uniqueQuestionKey(item) {
+      return normalizeQuizAnswer(item.question);
+    }
+
+    function makeQuizVariant(item, variantIndex) {
+      const stems = [
+        "延伸題：請依同一文法觀念判斷，",
+        "變化題：請換一個語境思考，",
+        "應用題：請依同一規則選出答案，"
+      ];
+      return {
+        ...item,
+        title: `${item.title} · 延伸 ${variantIndex}`,
+        question: `${stems[variantIndex % stems.length]}${item.question}`
+      };
+    }
+
+    function expandQuizItems(items) {
+      const pool = shuffledItems(items);
+      const picked = [];
+      const seen = new Set();
+      pool.forEach(item => {
+        const key = uniqueQuestionKey(item);
+        if (seen.has(key) || picked.length >= 5) return;
+        seen.add(key);
+        picked.push(item);
+      });
+      let variantIndex = 1;
+      while (picked.length < 5 && pool.length) {
+        const variant = makeQuizVariant(pool[(variantIndex - 1) % pool.length], variantIndex);
+        const key = uniqueQuestionKey(variant);
+        if (!seen.has(key)) {
+          seen.add(key);
+          picked.push(variant);
+        }
+        variantIndex += 1;
+      }
+      return picked.slice(0, 5).map((source, index) => ({ ...source, title: `${source.title} · 第 ${index + 1} 題` }));
+    }
+
+    function parseInlineChoices(question, answer) {
+      const text = String(question || "");
+      const letterMatches = [...text.matchAll(/[（(]([A-D])[）)]\s*([^（(]+)/g)]
+        .map(match => `${match[1]}. ${match[2].trim()}`);
+      if (letterMatches.length >= 2) return letterMatches;
+      const slashMatch = text.match(/[（(]([^()（）]+\/[^()（）]+)[）)]/);
+      if (slashMatch) {
+        const parts = slashMatch[1].split("/").map(part => part.trim()).filter(Boolean);
+        const correct = String(answer || "").replace(/^[A-D][\s.．、]*/i, "").trim();
+        return [...new Set([correct, ...parts].filter(Boolean))];
+      }
+      return [];
+    }
+
+    function cleanChoiceText(value) {
+      return String(value || "")
+        .replace(/^[A-D][.、\s]+/i, "")
+        .trim();
+    }
+
+    function uniqueQuizChoices(choices) {
+      const seen = new Set();
+      return choices.filter(choice => {
+        const key = normalizeQuizAnswer(cleanChoiceText(choice));
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function matchedEnglishChoices(item, correct) {
+      const question = String(item.question || "");
+      const exactChoices = {
+        "快樂的": ["快樂的", "生氣的", "安靜的", "提早的"],
+        "weak": ["weak", "stronger", "heavy", "brave"],
+        "A correct simple sentence.": ["A correct simple sentence.", "A word list without a verb.", "A sentence with the wrong subject.", "A phrase that does not answer the prompt."],
+        "Use context clues.": ["Use context clues.", "Ignore the sentence meaning.", "Choose only by word length.", "Pick the first option every time."],
+        "The better answer fits grammar and meaning.": ["The better answer fits grammar and meaning.", "The better answer ignores grammar.", "The better answer is always the longest.", "The better answer has no relation to meaning."],
+        "A rewritten correct sentence.": ["A rewritten correct sentence.", "A sentence with changed meaning.", "A sentence missing the main verb.", "A list of unrelated words."],
+        "Use grammar, meaning, and tone.": ["Use grammar, meaning, and tone.", "Use spelling only.", "Ignore tone and context.", "Choose by punctuation only."],
+        "A coherent English response.": ["A coherent English response.", "A random sentence fragment.", "An unrelated Chinese explanation.", "A response with no main idea."],
+        "Use inference.": ["Use inference.", "Ignore hidden clues.", "Translate one word only.", "Choose the shortest answer."]
+      };
+      const exactKey = Object.keys(exactChoices).find(key => normalizeQuizAnswer(correct) === normalizeQuizAnswer(key));
+      if (exactKey) return exactChoices[exactKey];
+      if (/opposite|strong/i.test(question)) return [correct, "happy", "early", "quiet"];
+      if (/spelling|correct spelling/i.test(question)) return [correct, "applle", "aple", "appel"];
+      if (/blank|completes|correct word|best word|fits/i.test(question)) return [correct, "wrong tense", "wrong part of speech", "does not fit the meaning"];
+      if (/sentence|rewrite|response/i.test(question)) return [correct, "A sentence that changes the meaning.", "A phrase without a complete idea.", "An unrelated answer."];
+      return [correct, `Not ${correct}, and it does not fit the sentence.`, "Wrong part of speech or tense.", "Similar-looking but incomplete in meaning."];
+    }
+
+    function buildQuizChoices(item, index) {
+      const inlineChoices = parseInlineChoices(item.question, item.answer);
+      if (inlineChoices.length >= 2) {
+        const choices = uniqueQuizChoices(inlineChoices);
+        while (choices.length < 4) choices.push(`${String.fromCharCode(65 + choices.length)}. None of the above`);
+        return choices.slice(0, 4);
+      }
+      const correct = item.answer || "正確答案";
+      const choices = uniqueQuizChoices(matchedEnglishChoices(item, correct)).slice(0, 4);
+      const shift = index % choices.length;
+      return choices.slice(shift).concat(choices.slice(0, shift));
+    }
+
+    function normalizeInlineAnswer(item) {
+      const inlineChoices = parseInlineChoices(item.question, item.answer);
+      if (inlineChoices.length < 2) return item;
+      const answerText = cleanChoiceText(item.answer);
+      const matched = inlineChoices.find(choice => normalizeQuizAnswer(choice) === normalizeQuizAnswer(item.answer))
+        || inlineChoices.find(choice => normalizeQuizAnswer(cleanChoiceText(choice)) === normalizeQuizAnswer(answerText))
+        || inlineChoices.find(choice => normalizeQuizAnswer(item.answer).startsWith(normalizeQuizAnswer(choice[0])));
+      return matched ? { ...item, answer: matched } : item;
+    }
+
+    function renderQuestions() {
+      if (!consumeCredit()) return;
+      const quizItems = expandQuizItems(makeQuestions()).map(normalizeInlineAnswer);
+      questionList.innerHTML = `
+        <div class="card" id="scoreCard" style="display:none;"></div>
+        ${quizItems.map((item, index) => `
+          <article class="question-card" data-answer="${escapeQuizText(item.answer || "正確答案")}">
+            <strong>${index + 1}. ${item.title}</strong>
+            <p>${item.question}</p>
+            <div class="quiz-options" style="display:grid;gap:8px;margin-top:10px;">
+              ${buildQuizChoices(item, index).map(choice => `
+                <label class="secondary" style="display:flex;align-items:center;gap:8px;padding:10px;color:var(--ink);">
+                  <input class="quiz-answer" type="radio" name="quiz-${index}" value="${escapeQuizText(choice)}" style="width:auto;min-height:auto;">
+                  <span>${escapeQuizText(choice)}</span>
+                </label>
+              `).join("")}
+            </div>
+            <div class="solution">${item.solution}</div>
+          </article>
+        `).join("")}
+        <button class="primary" id="submitQuiz" type="button" style="width:100%;margin:4px 0 12px;">提交答案並計分</button>
+      `;
+      document.querySelector("#submitQuiz").addEventListener("click", () => {
+        const cards = [...questionList.querySelectorAll(".question-card")];
+        const selectedAnswers = cards.map((card, index) => card.querySelector(`input[name="quiz-${index}"]:checked`));
+        if (selectedAnswers.some(input => !input)) {
+          appStatus.textContent = "請先答完所有 5 題，再提交計分。";
+          return;
+        }
+        let score = 0;
+        selectedAnswers.forEach(input => {
+          const card = input.closest(".question-card");
+          const expected = card.dataset.answer;
+          const isCorrect = normalizeQuizAnswer(input.value) === normalizeQuizAnswer(expected);
+          card.classList.toggle("correct", isCorrect);
+          card.classList.toggle("incorrect", !isCorrect);
+          if (isCorrect) score += 20;
+        });
+        questionList.querySelector("#scoreCard").style.display = "grid";
+        const tutorHint = score < 60 ? `<p class="subline">分數低於 60 分，建議點選補習班尋求專業教師協助。</p><button class="secondary" id="scoreTutorButton" type="button">前往補習班</button>` : "";
+        questionList.querySelector("#scoreCard").innerHTML = `<h2>總分：${score} / 100</h2><p class="subline">已完成 5 題作答，詳解已解鎖。</p>${tutorHint}`;
+        questionList.querySelector("#scoreTutorButton")?.addEventListener("click", () => showPage("tutoringPage"));
+        questionList.querySelectorAll(".solution").forEach(solution => solution.classList.add("show"));
+        questionList.querySelectorAll(".quiz-answer").forEach(input => input.disabled = true);
+        document.querySelector("#submitQuiz").disabled = true;
+        appStatus.textContent = `已完成計分：${score} / 100 · 詳解已解鎖`;
+      });
+      appStatus.textContent = `已產生 ${selectedStage}${gradeSelect.value} ${englishUnitSelect.value} ${selectedDifficulty} 題庫 5 題 · 每題 20 分`;
+    }
+
+    function solveUploadedProblem() {
+      if (!consumeCredit()) return;
+      const text = manualQuestion.value.trim() || "Choose the correct tense: She ___ to school yesterday.";
+      solveResult.innerHTML = `
+        <h2>詳解結果</h2>
+        <p><strong>題目：</strong>${text}</p>
+        <p><strong>答案判斷：</strong>先找時間副詞、主詞、動詞位置與句意。</p>
+        <p><strong>文法步驟：</strong>若出現 yesterday / last night / ago，通常使用過去式；若出現 now，通常使用現在進行式。</p>
+        <p><strong>例句：</strong>She went to school yesterday. / She is going to school now.</p>
+      `;
+      appStatus.textContent = `已產出英文詳解 · 剩餘 ${credits} 點`;
+    }
+
+    function syncProfileFields() {
+      profileName.value = studentName.value.trim() || "學生";
+      profileEmail.value = studentEmail.value.trim();
+      profilePhone.value = studentPhone.value.trim();
+      profileCity.value = studentCity.value.trim();
+      profileDistrict.value = studentDistrict.value.trim();
+    }
+
+    function userLocation() {
+      return {
+        city: (profileCity.value || studentCity.value || "").trim(),
+        district: (profileDistrict.value || studentDistrict.value || "").trim()
+      };
+    }
+
+    function sortTutorSchools() {
+      const { city, district } = userLocation();
+      const container = document.querySelector("#tutoringPage .card");
+      schoolCards
+        .map((card, index) => ({ card, index }))
+        .sort((a, b) => {
+          const paid = item => item.card.dataset.paid === "true" ? 100 : 0;
+          const score = item => paid(item) + (item.card.dataset.city === city ? 2 : 0) + (item.card.dataset.district === district ? 1 : 0);
+          return score(b) - score(a) || a.index - b.index;
+        })
+        .forEach(item => container.appendChild(item.card));
+      applyTutorFilters();
+    }
+
+    function populateTutorFilters() {
+      const currentCity = tutorCityFilter.value;
+      const currentDistrict = tutorDistrictFilter.value;
+      const cities = [...new Set(schoolCards.map(card => card.dataset.city))];
+      tutorCityFilter.innerHTML = `<option value="">全部縣市</option>${cities.map(city => `<option value="${city}">${city}</option>`).join("")}`;
+      tutorCityFilter.value = cities.includes(currentCity) ? currentCity : "";
+      const districts = [...new Set(schoolCards
+        .filter(card => !tutorCityFilter.value || card.dataset.city === tutorCityFilter.value)
+        .map(card => card.dataset.district))];
+      tutorDistrictFilter.innerHTML = `<option value="">全部區域</option>${districts.map(district => `<option value="${district}">${district}</option>`).join("")}`;
+      tutorDistrictFilter.value = districts.includes(currentDistrict) ? currentDistrict : "";
+    }
+
+    function applyTutorFilters() {
+      const city = tutorCityFilter.value;
+      const district = tutorDistrictFilter.value;
+      schoolCards.forEach(card => {
+        const visible = (!city || card.dataset.city === city) && (!district || card.dataset.district === district);
+        card.style.display = visible ? "" : "none";
+      });
+    }
+
+    function applyTheme() {
+      screen.classList.remove("theme-green", "theme-light");
+      if (themeSelect.value !== "dark") screen.classList.add(`theme-${themeSelect.value}`);
+    }
+
+    function applyFontSize() {
+      screen.classList.remove("font-small", "font-large");
+      if (fontSizeSelect.value !== "normal") screen.classList.add(`font-${fontSizeSelect.value}`);
+    }
+
+    function applyLanguage() {
+      const lang = languageSelect.value;
+      const copy = {
+        zh: { nav: ["題庫", "詳解", "補習班", "升級", "設定"], titles: { practicePage: "英文題庫", solverPage: "英文詳解", tutoringPage: "補習班", plansPage: "升級方案", paymentPage: "信用卡付費", settingsPage: "設定", profilePage: "使用者資料", loginPage: "英文題庫" }, settings: "設定", theme: "App 背景", font: "字體大小", language: "語言", support: "聯繫客服", supportText: "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。", email: "Email：support@app-service.example" },
+        en: { nav: ["Quiz", "Solution", "Tutors", "Upgrade", "Settings"], titles: { practicePage: "English Quiz Bank", solverPage: "English Solution", tutoringPage: "Tutoring Centers", plansPage: "Plans", paymentPage: "Credit Card Payment", settingsPage: "Settings", profilePage: "Profile", loginPage: "English Question Bank" }, settings: "Settings", theme: "App Background", font: "Font Size", language: "Language", support: "Contact Support", supportText: "For issue reports or partnership inquiries, contact us by Email.", email: "Email: support@app-service.example" },
+        ja: { nav: ["問題", "解説", "塾", "プラン", "設定"], titles: { practicePage: "英語問題集", solverPage: "英語解説", tutoringPage: "塾", plansPage: "プラン", paymentPage: "カード決済", settingsPage: "設定", profilePage: "プロフィール", loginPage: "英語問題集" }, settings: "設定", theme: "App 背景", font: "文字サイズ", language: "言語", support: "サポート連絡", supportText: "問題報告、提携相談は Email でお問い合わせください。", email: "Email：support@app-service.example" }
+      }[lang];
+      Object.assign(pageTitles, copy.titles);
+      navButtons.forEach((button, index) => { button.textContent = copy.nav[index]; });
+      const activePage = pages.find(page => page.classList.contains("active"));
+      title.textContent = pageTitles[activePage?.id || "practicePage"];
+      const settingsLabels = document.querySelectorAll("#settingsPage .card:first-child label");
+      document.querySelector("#settingsPage .card:first-child h2").textContent = copy.settings;
+      settingsLabels[0].childNodes[0].textContent = copy.theme;
+      settingsLabels[1].childNodes[0].textContent = copy.font;
+      settingsLabels[2].childNodes[0].textContent = copy.language;
+      const supportCard = document.querySelector("#settingsPage .card:nth-of-type(2)");
+      supportCard.querySelector("h2").textContent = copy.support;
+      supportCard.querySelectorAll(".subline")[0].textContent = copy.supportText;
+      supportCard.querySelectorAll(".subline")[1].textContent = copy.email;
+    }
+
+    navButtons.forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
+    pointsButton.addEventListener("click", () => showPage("plansPage"));
+    creditAlertUpgrade.addEventListener("click", () => showPage("plansPage"));
+    userNameButton.addEventListener("click", () => {
+      syncProfileFields();
+      showPage("profilePage");
+    });
+    saveProfile.addEventListener("click", () => {
+      studentName.value = profileName.value.trim() || "學生";
+      studentEmail.value = profileEmail.value.trim();
+      studentCity.value = profileCity.value.trim();
+      studentDistrict.value = profileDistrict.value.trim();
+      sortTutorSchools();
+      userNameButton.textContent = studentName.value;
+      appStatus.textContent = "使用者資料已更新。";
+      showPage("practicePage");
+    });
+    sendSms.addEventListener("click", () => {
+      smsToken = String(Math.floor(1000 + Math.random() * 9000));
+      smsHint.textContent = `已發送 4 位數簡訊驗證碼。原型示範碼：${smsToken}`;
+    });
+    toggleTermsButton.addEventListener("click", () => {
+      termsOpened = true;
+      termsPanel.classList.toggle("show");
+      toggleTermsButton.textContent = termsPanel.classList.contains("show")
+        ? "收合使用條款、隱私權政策與免責聲明"
+        : "展開使用條款、隱私權政策與免責聲明";
+    });
+    finishLogin.addEventListener("click", () => {
+      if (!smsToken) {
+        smsHint.textContent = "請先發送簡訊驗證碼。";
+        return;
+      }
+      if (smsCode.value.trim() !== smsToken) {
+        smsHint.textContent = "簡訊碼輸入錯誤。";
+        return;
+      }
+      if (!studentCity.value.trim() || !studentDistrict.value.trim()) {
+        smsHint.textContent = "請填入地址縣市與區域後再完成註冊。";
+        return;
+      }
+      if (!termsOpened) {
+        smsHint.textContent = "請先展開條文閱讀後再完成註冊。";
+        return;
+      }
+      if (!agreeTerms.checked) {
+        smsHint.textContent = "請勾選我已打開並同意使用條款、隱私權政策與免責聲明。";
+        return;
+      }
+      loggedIn = true;
+      userNameButton.textContent = studentName.value.trim() || "學生";
+      syncProfileFields();
+      sortTutorSchools();
+      appStatus.textContent = "註冊成功，可以開始產生英文題庫。";
+      showPage("practicePage");
+    });
+
+    schoolStage.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedStage = button.dataset.stage;
+        schoolStage.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button));
+        renderGrades();
+        renderUnits();
+      });
+    });
+
+    difficultyLevel.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedDifficulty = button.dataset.difficulty;
+        difficultyLevel.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button));
+      });
+    });
+
+    generateQuestions.addEventListener("click", renderQuestions);
+    solveProblem.addEventListener("click", solveUploadedProblem);
+    document.querySelector("#goUpgrade").addEventListener("click", () => showPage("plansPage"));
+    schoolCards.forEach(card => {
+      card.addEventListener("click", () => {
+        selectedTutor = { school: card.dataset.school, email: card.dataset.email, phone: card.dataset.phone };
+        selectedTutorTitle.textContent = `補習班洽談：${selectedTutor.school}`;
+        tutorContactName.value = profileName.value || studentName.value;
+        tutorContactPhone.value = profilePhone.value || studentPhone.value;
+        tutorContactResult.textContent = "";
+        tutorContactForm.classList.add("show");
+        tutorContactForm.scrollIntoView({ behavior: "smooth", block: "end" });
+      });
+    });
+    sendTutorContact.addEventListener("click", () => {
+      if (!selectedTutor) return;
+      tutorContactResult.textContent = `感謝您的留言，已自動寄送 Email 並簡訊通知 ${selectedTutor.school}。Email：${selectedTutor.email}｜SMS：${selectedTutor.phone}`;
+    });
+    themeSelect.addEventListener("change", applyTheme);
+    fontSizeSelect.addEventListener("change", applyFontSize);
+    languageSelect.addEventListener("change", applyLanguage);
+    tutorCityFilter.addEventListener("change", () => {
+      populateTutorFilters();
+      applyTutorFilters();
+    });
+    tutorDistrictFilter.addEventListener("change", applyTutorFilters);
+
+    planButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        selectedPlan = button;
+        planButtons.forEach(item => item.classList.toggle("active", item === button));
+        paymentPlan.textContent = `已選擇 ${button.dataset.plan} ${button.dataset.price}，每月 ${button.dataset.points} 次。`;
+      });
+    });
+    confirmPlan.addEventListener("click", () => {
+      if (!selectedPlan) {
+        appStatus.textContent = "請先選擇升級方案。";
+        return;
+      }
+      showPage("paymentPage");
+    });
+    payNow.addEventListener("click", () => {
+      if (!selectedPlan) return;
+      currentPlan = `${selectedPlan.dataset.plan} ${selectedPlan.dataset.price}`;
+      credits += Number(selectedPlan.dataset.points);
+      updateCredits();
+      appStatus.textContent = `付款完成，已升級 ${selectedPlan.dataset.plan}。`;
+      showPage("practicePage");
+    });
+
+    renderGrades();
+    renderUnits();
+    populateTutorFilters();
+    sortTutorSchools();
+    updateCredits();
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

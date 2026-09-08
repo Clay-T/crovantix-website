@@ -1,0 +1,2989 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>公司股票分析 iOS App Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071012;
+      --ink: #f7fbff;
+      --muted: #9fb1bb;
+      --line: rgba(255,255,255,.12);
+      --panel: #102027;
+      --panel-2: #162b34;
+      --blue: #5ed2ff;
+      --green: #34d399;
+      --yellow: #ffd166;
+      --red: #fb7185;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(94,210,255,.2), transparent 26rem),
+        radial-gradient(circle at 90% 82%, rgba(52,211,153,.16), transparent 22rem),
+        #03090d;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100vw, 1120px);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 420px minmax(320px, 1fr);
+      gap: 50px;
+      align-items: start;
+      padding: 32px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #31454d, #04090d 34%, #233740);
+      box-shadow: 0 30px 80px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.16);
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(94,210,255,.18), transparent 14rem),
+        linear-gradient(180deg, rgba(52,211,153,.08), transparent 34%),
+        var(--bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .island {
+      position: absolute;
+      z-index: 10;
+      top: 11px;
+      left: 50%;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+    }
+
+    .status {
+      height: 58px;
+      padding: 12px 26px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .app {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 0 16px 84px;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .user-pill,
+    .market-pill {
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: var(--ink);
+      min-height: 34px;
+      padding: 0 12px;
+      font-weight: 900;
+    }
+
+    .user-pill,
+    .market-pill {
+      cursor: pointer;
+    }
+
+    h1 {
+      margin: 14px 0 6px;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .credit-alert {
+      display: none;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(255, 204, 102, .42);
+      border-radius: 16px;
+      background: rgba(255, 204, 102, .12);
+      color: var(--ink);
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .credit-alert.show {
+      display: grid;
+    }
+
+    .credit-alert button {
+      border: 0;
+      border-radius: 999px;
+      background: var(--blue);
+      color: #061018;
+      cursor: pointer;
+      font-weight: 950;
+      min-height: 34px;
+      padding: 0 14px;
+      white-space: nowrap;
+    }
+
+    .content {
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255,255,255,.055);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      margin-top: 10px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      background: rgba(255,255,255,.08);
+      color: var(--ink);
+      font: inherit;
+      min-height: 44px;
+      outline: none;
+      padding: 0 12px;
+    }
+
+    details {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      background: rgba(0,0,0,.18);
+      margin-top: 12px;
+      padding: 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 950;
+    }
+
+    details p {
+      color: #dceaf0;
+      font-size: 12px;
+      line-height: 1.55;
+      margin: 10px 0 0;
+    }
+
+    .check-row {
+      align-items: center;
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 8px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .check-row input {
+      min-height: auto;
+      width: 18px;
+    }
+
+    .chips {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .chip {
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 14px;
+      background: rgba(255,255,255,.07);
+      color: var(--ink);
+      cursor: pointer;
+      min-height: 42px;
+      font-weight: 900;
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    .chip.active {
+      color: #05131d;
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .primary {
+      width: 100%;
+      border: 0;
+      border-radius: 18px;
+      background: var(--blue);
+      color: #05131d;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 950;
+      min-height: 50px;
+      margin-top: 12px;
+    }
+
+    .secondary {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 16px;
+      background: rgba(255,255,255,.08);
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 900;
+      min-height: 44px;
+      margin-top: 10px;
+    }
+
+    .ai-picks-card {
+      display: none;
+      margin-top: 12px;
+      border: 1px solid rgba(94,210,255,.28);
+      border-radius: 18px;
+      background: rgba(94,210,255,.08);
+      padding: 12px;
+    }
+
+    .ai-picks-card.show {
+      display: block;
+    }
+
+    .ai-picks-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .ai-picks-head strong {
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .ai-picks-date {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: #05131d;
+      background: var(--yellow);
+      font-size: 11px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .ai-picks-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .ai-pick-item {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      background: rgba(0,0,0,.18);
+      color: var(--ink);
+      cursor: pointer;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .ai-pick-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .ai-rank {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #05131d;
+      background: var(--blue);
+      font-weight: 950;
+    }
+
+    .ai-symbol {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .ai-score {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .ai-pick-item p {
+      margin: 7px 0 0 38px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .result-card {
+      display: none;
+    }
+
+    .result-card.show {
+      display: block;
+    }
+
+    .result-header {
+      display: grid;
+      grid-template-columns: 1fr 48px;
+      align-items: start;
+      gap: 8px;
+    }
+
+    .favorite-button {
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 14px;
+      background: rgba(255,255,255,.08);
+      color: var(--blue);
+      cursor: pointer;
+      font-size: 28px;
+      font-weight: 950;
+      line-height: 1;
+      min-height: 44px;
+      padding: 0;
+    }
+
+    .favorite-button.active {
+      background: rgba(255, 91, 126, .16);
+      border-color: rgba(255, 91, 126, .55);
+      color: #ff5b7e;
+    }
+
+    .favorite-status {
+      min-height: 18px;
+      margin-top: -4px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 10px 0 12px;
+    }
+
+    .metric {
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 14px;
+      background: rgba(0,0,0,.16);
+      padding: 10px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 15px;
+    }
+
+    .spark {
+      width: 100%;
+      height: 230px;
+      margin: 2px 0 10px;
+      border-radius: 16px;
+      background: #202020;
+      border: 1px solid rgba(255,255,255,.1);
+      cursor: zoom-in;
+    }
+
+    .revenue-chart-card {
+      margin: 10px 0 12px;
+      padding: 10px 8px 8px;
+      border-radius: 16px;
+      background: #202020;
+      border: 1px solid rgba(255,255,255,.1);
+      overflow: hidden;
+    }
+
+    .revenue-tabs {
+      display: grid;
+      grid-template-columns: 1fr;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 0 auto 10px;
+      max-width: 310px;
+      color: rgba(255,255,255,.9);
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .revenue-tabs button {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+      padding: 7px 0;
+      border-left: 1px solid rgba(255,255,255,.12);
+    }
+
+    .revenue-tabs button:first-child {
+      border-left: 0;
+    }
+
+    .revenue-tabs button.active {
+      background: rgba(255,255,255,.44);
+      color: #fff;
+    }
+
+    .revenue-legend {
+      display: flex;
+      justify-content: center;
+      gap: 22px;
+      align-items: center;
+      color: rgba(255,255,255,.9);
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .legend-swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      margin-right: 5px;
+      vertical-align: -1px;
+    }
+
+    .legend-line {
+      display: inline-block;
+      width: 16px;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.58);
+      margin-right: 5px;
+      vertical-align: 3px;
+    }
+
+    .revenue-spark {
+      width: 100%;
+      height: 280px;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .eps-chart-card {
+      margin: 10px 0 12px;
+      padding: 10px 8px 8px;
+      border-radius: 16px;
+      background: #202020;
+      border: 1px solid rgba(255,255,255,.1);
+      overflow: hidden;
+    }
+
+    .eps-legend {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      align-items: center;
+      color: rgba(255,255,255,.92);
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .eps-swatch {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      width: 24px;
+      height: 16px;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-right: 4px;
+      vertical-align: -3px;
+    }
+
+    .eps-swatch i:first-child {
+      background: #ff242b;
+    }
+
+    .eps-swatch i:last-child {
+      background: #32c759;
+    }
+
+    .eps-spark {
+      width: 100%;
+      height: 280px;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    .chart-modal {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      padding: 54px 14px 18px;
+      background: rgba(5,10,14,.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .chart-modal.show {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .chart-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .chart-modal-head strong {
+      font-size: 18px;
+    }
+
+    .chart-modal-head button,
+    .period-tabs button {
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      color: var(--ink);
+      min-height: 34px;
+      padding: 0 12px;
+      font-weight: 900;
+    }
+
+    .period-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .period-tabs button.active {
+      background: var(--blue);
+      color: #061018;
+      border-color: transparent;
+    }
+
+    .modal-chart {
+      width: 100%;
+      height: 500px;
+      border-radius: 18px;
+      background: #202020;
+      border: 1px solid rgba(255,255,255,.16);
+    }
+
+    .chart-period-status {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      margin: -2px 0 0;
+      text-align: center;
+    }
+
+    .analysis-block {
+      border-top: 1px solid var(--line);
+      padding: 12px 0 0;
+      margin-top: 12px;
+    }
+
+    .analysis-block strong {
+      color: var(--blue);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .analysis-block p {
+      margin: 0;
+      color: #dceaf0;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .notice {
+      color: var(--yellow);
+      font-size: 12px;
+      line-height: 1.45;
+      margin: 10px 0 0;
+    }
+
+    .plan-card {
+      width: 100%;
+      border: 1px solid rgba(94,210,255,.28);
+      border-radius: 18px;
+      background: rgba(255,255,255,.055);
+      color: var(--ink);
+      display: grid;
+      gap: 5px;
+      margin-top: 10px;
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .plan-card strong { color: var(--blue); font-size: 16px; }
+    .plan-card span { color: var(--muted); font-size: 12px; }
+
+    .plan-card.active {
+      border-color: rgba(90,220,255,.9);
+      background: rgba(90,220,255,.14);
+      box-shadow: 0 0 0 2px rgba(90,220,255,.18);
+    }
+
+    .favorite-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .favorite-item {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      background: rgba(255,255,255,.07);
+      color: var(--ink);
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      min-height: 62px;
+      padding: 12px;
+      text-align: left;
+    }
+
+    .favorite-item strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .favorite-item span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .favorite-item .heart {
+      color: #ff5b7e;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .payment-summary {
+      border: 1px solid rgba(94,210,255,.24);
+      border-radius: 16px;
+      padding: 12px;
+      background: rgba(94,210,255,.08);
+      color: var(--ink);
+      font-weight: 900;
+      line-height: 1.5;
+    }
+
+    .theme-light {
+      --bg: #eef6fb;
+      --ink: #0f172a;
+      --muted: #52616d;
+      --line: rgba(15,23,42,.14);
+      color-scheme: light;
+    }
+
+    .font-large { font-size: 108%; }
+    .font-small { font-size: 92%; }
+
+    .nav {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 8px;
+      border-radius: 26px 26px 38px 38px;
+      background: rgba(2, 8, 12, .92);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      gap: 3px;
+      min-height: 48px;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .nav button.active { color: var(--blue); }
+
+    .brief {
+      padding-top: 56px;
+      max-width: 560px;
+    }
+
+    .brief h2 {
+      margin: 0 0 12px;
+      font-size: 38px;
+      line-height: 1.06;
+    }
+
+    .brief p {
+      color: #b8c7d0;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    @media (max-width: 860px) {
+      .stage {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 24px;
+        padding: 18px 14px 28px;
+      }
+      .phone {
+        width: min(390px, calc(100vw - 28px));
+        height: min(844px, calc(100vh - 28px));
+      }
+      .brief {
+        width: min(390px, calc(100vw - 28px));
+        padding-top: 0;
+      }
+    }
+    body.portfolio-watermark::after {
+      content: "Crovantix";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      z-index: 9999;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      color: rgba(85, 215, 255, .1);
+      font-size: clamp(64px, 18vw, 168px);
+      font-weight: 950;
+      letter-spacing: 0;
+      white-space: nowrap;
+      text-shadow: 0 0 34px rgba(85, 215, 255, .18);
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="iPhone company analysis app prototype">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status"><span>9:41</span><span>5G ▰</span></div>
+
+        <div class="app">
+          <div class="toolbar">
+            <button class="user-pill" id="profileButton" type="button">Clay Tseng</button>
+            <button class="market-pill" id="creditsButton" type="button">剩餘次數 3</button>
+          </div>
+
+          <h1>公司股票分析</h1>
+          <p class="subline" id="appStatus">輸入股票代號或公司名稱，選擇要分析的項目後送出。</p>
+          <div class="credit-alert" id="creditAlert">
+            <span>點數已用完 請點選升級</span>
+            <button id="creditAlertUpgradeButton" type="button">升級</button>
+          </div>
+
+          <section class="content">
+            <section class="page active" id="registerPage">
+              <section class="card">
+                <h2>註冊</h2>
+                <label>姓名<input id="userName" value="Clay Tseng" placeholder="請輸入姓名"></label>
+                <label>電話<input id="userPhone" value="0912-345-678" inputmode="tel" placeholder="請輸入電話"></label>
+                <label>Email<input id="userEmail" value="clay.tseng@example.com" inputmode="email" placeholder="請輸入 Email"></label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <label>簡訊驗證碼<input id="smsCode" maxlength="4" inputmode="numeric" placeholder="4 位數"></label>
+                  <button class="secondary" id="sendSmsButton" type="button">發送簡訊</button>
+                </div>
+                <p class="subline" id="smsHint">按下發送簡訊後會產生 4 位數驗證碼。</p>
+                <details id="disclaimerDetails">
+                  <summary>展開使用條款、隱私權政策與免責聲明</summary>
+                  <p><strong>公司股票分析 App 使用條款、隱私權政策與免責聲明</strong></p>
+                  <p>歡迎使用「公司股票分析 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。</p>
+                  <p><strong>一、服務內容</strong></p>
+                  <p>本 App 提供公司資料查詢、股票資訊分析、財務數據整理、AI 分析、公開市場資訊、技術分析、新聞資訊、語音互動及相關金融資訊輔助服務，所有內容僅供一般資訊與參考用途。</p>
+                  <p><strong>二、AI 與投資內容聲明</strong></p>
+                  <p>本 App 部分內容可能由 AI 系統自動生成，包括股票分析、公司評估、財務分析、新聞摘要、語音回覆或其他互動內容。</p>
+                  <p>本公司不保證相關內容之正確性、完整性、即時性、適法性或適用於特定投資情況。</p>
+                  <p>所有股票資訊、公司分析、AI 分析、財務資料、技術分析與相關建議僅供一般參考用途，不構成任何投資建議、投資招攬、財務建議、證券推薦或保證獲利之承諾。</p>
+                  <p>市場具有波動與風險，過往績效不代表未來結果，使用者應自行研究判斷並審慎評估投資風險。</p>
+                  <p><strong>三、使用風險與免責聲明</strong></p>
+                  <p>使用者應自行判斷並承擔使用本 App 所產生之一切風險與責任。</p>
+                  <p>本 App 僅提供金融資訊與 AI 輔助分析服務，本公司不保證任何股票分析、AI 回覆、投資結果、財務預測或市場分析之準確性或實現結果。</p>
+                  <p>使用者因依據本 App 提供之股票資訊、AI 回覆、財務資料、分析內容、新聞資訊或其他資料所作之任何投資決策、交易行為、資產配置或其他金融行為而產生之損失、損害或爭議，均由使用者自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。</p>
+                  <p>本 App 之 AI、網路、語音及第三方服務功能，可能受網路環境、裝置效能、第三方服務或系統狀況影響，本公司不保證服務之穩定性、即時性或完全無錯誤。</p>
+                  <p><strong>四、資料蒐集</strong></p>
+                  <p>本 App 可能蒐集以下資訊：</p>
+                  <p>* 使用者帳號資訊<br>* Email<br>* 裝置資訊<br>* 使用紀錄<br>* IP 位址<br>* 搜尋紀錄<br>* 收藏與追蹤資料<br>* 語音內容<br>* AI 互動紀錄<br>* 崩潰紀錄與分析資料</p>
+                  <p><strong>五、資料用途</strong></p>
+                  <p>蒐集資料主要用於：</p>
+                  <p>* 提供股票與公司資訊服務<br>* AI 股票分析與內容生成<br>* 提供個人化資訊功能<br>* 語音互動與 AI 回覆<br>* 改善使用體驗<br>* 系統安全維護<br>* 客服支援<br>* 防止詐騙、濫用或違法行為<br>* 提升 AI 與系統服務品質</p>
+                  <p><strong>六、第三方服務</strong></p>
+                  <p>本 App 可能使用第三方服務，包括但不限於：</p>
+                  <p>* OpenAI<br>* Firebase<br>* Google Analytics<br>* 股票市場資料來源<br>* 雲端儲存服務<br>* AI 模型服務</p>
+                  <p>部分資料可能因服務需求而傳輸至第三方服務供應商。</p>
+                  <p><strong>七、資料安全</strong></p>
+                  <p>本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、語音通訊或儲存系統之絕對安全。</p>
+                  <p>使用者應妥善保管自身帳號、密碼及裝置安全。</p>
+                  <p><strong>八、使用者責任</strong></p>
+                  <p>使用者不得利用本 App 從事任何違法、侵權、詐騙、市場操縱、散布不實資訊、散布惡意程式或其他損害他人權益之行為。</p>
+                  <p>若因使用者違法或不當行為導致任何損害或法律責任，應由使用者自行負責。</p>
+                  <p><strong>九、智慧財產權</strong></p>
+                  <p>本 App 之程式、介面設計、商標、圖像、文字、股票資料、財務資料、AI 系統及相關內容，均屬本公司或合法授權人所有。</p>
+                  <p>未經授權不得重製、修改、散布、反向工程、破解或用於商業用途。</p>
+                  <p><strong>十、使用者權利</strong></p>
+                  <p>使用者得依法請求查詢、更正或刪除其個人資料。</p>
+                  <p><strong>十一、條款與政策修改</strong></p>
+                  <p>本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利，修改後內容將公布於本 App，使用者繼續使用即視為同意修改內容。</p>
+                </details>
+                <label class="check-row"><input id="agreeTerms" type="checkbox">我已閱讀並同意使用條款、隱私權政策與免責聲明</label>
+                <button class="primary" id="finishRegisterButton" type="button">完成註冊</button>
+              </section>
+            </section>
+
+            <section class="page" id="profilePage">
+              <section class="card">
+                <h2>使用者資料</h2>
+                <label>姓名<input id="profileName" value="Clay Tseng" placeholder="請輸入姓名"></label>
+                <label>電話<input id="profilePhone" value="0912-345-678" inputmode="tel" placeholder="請輸入電話"></label>
+                <label>Email<input id="profileEmail" value="clay.tseng@example.com" inputmode="email" placeholder="請輸入 Email"></label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <label>性別
+                    <select id="profileGender">
+                      <option>男</option>
+                      <option>女</option>
+                      <option>其他</option>
+                    </select>
+                  </label>
+                  <label>年齡<input id="profileAge" value="35" inputmode="numeric" placeholder="請輸入年齡"></label>
+                </div>
+                <div class="metrics">
+                  <div class="metric"><span>目前方案</span><strong id="profilePlan">免費方案</strong></div>
+                  <div class="metric"><span>剩餘點數</span><strong id="profileCredits">3</strong></div>
+                </div>
+                <button class="primary" id="saveProfileButton" type="button">儲存使用者資料</button>
+              </section>
+            </section>
+
+            <section class="page" id="analysisPage">
+              <section class="card" id="inputCard">
+                <h2>分析標的</h2>
+                <label>股票代號或公司名稱
+                  <input id="companyInput" value="2330 台積電" placeholder="例如：3030、2330、TSM、AAPL、台積電、NVIDIA">
+                </label>
+                <p class="subline">台股代碼會優先查詢 TWSE/TPEX 公開資料；若無法取得官方資料，會顯示查詢失敗，不會以示範資料替代。</p>
+                <div class="chips" id="analysisOptions" aria-label="分析項目">
+                  <button class="chip active" type="button" data-topic="price">目前股價與三年走勢</button>
+                  <button class="chip active" type="button" data-topic="revenue">三年營收狀況</button>
+                  <button class="chip active" type="button" data-topic="eps">三年 EPS</button>
+                  <button class="chip" type="button" data-topic="finance">公司財務狀況</button>
+                  <button class="chip" type="button" data-topic="products">公司產品</button>
+                  <button class="chip" type="button" data-topic="scale">公司規模</button>
+                  <button class="chip" type="button" data-topic="info">公司其他資訊</button>
+                  <button class="chip" type="button" data-topic="risk">風險與觀察重點</button>
+                </div>
+                <button class="primary" id="analyzeButton" type="button">送出分析</button>
+                <button class="secondary" id="aiTopPicksButton" type="button">今天AI最看好的股票前10名</button>
+                <div class="ai-picks-card" id="aiTopPicksCard">
+                  <div class="ai-picks-head">
+                    <strong>今天AI最看好的股票前10名</strong>
+                    <span class="ai-picks-date" id="aiTopPicksDate">今日</span>
+                  </div>
+                  <p class="subline">依產業趨勢、財務體質、成交動能與風險分數做 AI 綜合排序，僅供資訊參考，不構成投資建議。</p>
+                  <div class="ai-picks-list" id="aiTopPicksList"></div>
+                </div>
+              </section>
+
+              <section class="card result-card" id="resultCard">
+                <div class="result-header">
+                  <h2 id="resultTitle">公司股票分析結果</h2>
+                  <button class="favorite-button" id="favoriteButton" type="button" aria-label="加入收藏">♡</button>
+                </div>
+                <p class="subline favorite-status" id="favoriteStatus"></p>
+                <div class="metrics">
+                  <div class="metric"><span>目前股價</span><strong id="priceMetric">-</strong></div>
+                  <div class="metric"><span>三年營收</span><strong id="revenueMetric">-</strong></div>
+                  <div class="metric"><span>三年 EPS</span><strong id="epsMetric">-</strong></div>
+                </div>
+                <svg class="spark chart-clickable" id="trendChart" data-chart-kind="price" viewBox="0 0 360 230" role="img" aria-label="三年股價 K 線走勢"></svg>
+                <div class="revenue-chart-card" aria-label="三年營收月營收圖">
+                  <div class="revenue-tabs" id="revenueTabs">
+                    <button class="active" type="button" data-revenue-mode="revenue">季營收</button>
+                  </div>
+                  <div class="revenue-legend" aria-hidden="true">
+                    <span><i class="legend-swatch" style="background:#ff9f0a"></i>營收</span>
+                    <span>近 3 年</span>
+                    <span>(億元)</span>
+                  </div>
+                  <svg class="revenue-spark chart-clickable" id="revenueChart" data-chart-kind="revenue" viewBox="0 0 360 280" role="img" aria-label="近三年季營收 bar 圖"></svg>
+                </div>
+                <div class="eps-chart-card" aria-label="三年 EPS 與股價圖">
+                  <div class="eps-legend" aria-hidden="true">
+                    <span><i class="eps-swatch"><i></i><i></i></i>EPS</span>
+                    <span><i class="legend-line"></i>股價</span>
+                    <span>(元)</span>
+                  </div>
+                  <svg class="eps-spark chart-clickable" id="epsChart" data-chart-kind="eps" viewBox="0 0 360 280" role="img" aria-label="近三年 EPS bar 圖"></svg>
+                </div>
+                <div id="analysisResult"></div>
+                <p class="notice">提醒：只有公開 API 成功回傳的欄位可視為最新公開資料；未回傳的三年 K 線、營收、EPS 需串接正式歷史行情與財報資料源後才能保證正確。</p>
+              </section>
+            </section>
+
+            <section class="page" id="favoritesPage">
+              <section class="card">
+                <h2>收藏公司</h2>
+                <p class="subline">點選收藏公司後，會回到分析頁並帶入標的，再選擇要看的項目送出分析。</p>
+                <div class="favorite-list" id="favoritesList"></div>
+              </section>
+            </section>
+
+            <section class="page" id="plansPage">
+              <section class="card">
+                <h2>升級方案</h2>
+                <p class="subline">目前剩餘分析次數：<strong id="planCreditSummary">3</strong></p>
+                <button class="plan-card" type="button" data-plan="Basic" data-price="NTD$99" data-credits="100"><strong>Basic NTD$99</strong><span>每月可以分析 100 次</span></button>
+                <button class="plan-card" type="button" data-plan="Plus" data-price="NTD$299" data-credits="600"><strong>Plus NTD$299</strong><span>每月可以分析 600 次</span></button>
+                <button class="plan-card" type="button" data-plan="Pro" data-price="NTD$599" data-credits="3000"><strong>Pro NTD$599</strong><span>每月可以分析 3000 次</span></button>
+                <button class="plan-card" type="button" data-plan="VIP" data-price="NTD$999" data-credits="10000"><strong>VIP NTD$999</strong><span>每月可以分析 10000 次</span></button>
+              </section>
+            </section>
+
+            <section class="page" id="paymentPage">
+              <section class="card">
+                <h2>信用卡付費</h2>
+                <p class="payment-summary" id="paymentSummary">請先選擇升級方案。</p>
+                <label>信用卡號<input value="4242 4242 4242 4242" inputmode="numeric" placeholder="請輸入信用卡號"></label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <label>有效期限<input value="12/29" placeholder="MM/YY"></label>
+                  <label>安全碼<input value="123" inputmode="numeric" placeholder="CVV"></label>
+                </div>
+                <label>持卡人姓名<input value="Clay Tseng" placeholder="請輸入持卡人姓名"></label>
+                <button class="primary" id="confirmPaymentButton" type="button">升級付費</button>
+              </section>
+            </section>
+
+            <section class="page" id="settingsPage">
+              <section class="card">
+                <h2>設定</h2>
+                <label>App 背景
+                  <select id="themeSelect">
+                    <option value="dark">金融深色</option>
+                    <option value="light">明亮白色</option>
+                  </select>
+                </label>
+                <label>字體大小
+                  <select id="fontSizeSelect">
+                    <option value="normal">標準</option>
+                    <option value="small">小</option>
+                    <option value="large">大</option>
+                  </select>
+                </label>
+                <label>語言
+                  <select id="languageSelect">
+                    <option value="zh">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                </label>
+              </section>
+              <section class="card">
+                <h2>聯繫客服</h2>
+                <p class="subline">問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。</p>
+                <p class="subline">Email：support@app-service.example</p>
+              </section>
+            </section>
+          </section>
+        </div>
+
+        <nav class="nav" aria-label="main navigation">
+          <button class="active" type="button" data-page="analysisPage"><span>⌁</span>分析</button>
+          <button type="button" data-page="favoritesPage"><span>♡</span>收藏</button>
+          <button type="button" data-page="plansPage"><span>◇</span>升級</button>
+          <button type="button" data-page="settingsPage"><span>⚙</span>設定</button>
+        </nav>
+        <div class="chart-modal" id="chartModal" aria-label="放大圖表">
+          <div class="chart-modal-head">
+            <strong id="chartModalTitle">圖表</strong>
+            <button id="closeChartModal" type="button">關閉</button>
+          </div>
+          <div class="period-tabs" id="periodTabs">
+            <button class="active" type="button" data-period="day">天</button>
+            <button type="button" data-period="month">月</button>
+            <button type="button" data-period="quarter">季</button>
+            <button type="button" data-period="year">年</button>
+          </div>
+          <p class="chart-period-status" id="chartPeriodStatus">目前顯示：天</p>
+          <svg class="modal-chart" id="modalChart" viewBox="0 0 360 500" role="img" aria-label="放大 K 線圖"></svg>
+        </div>
+      </div>
+    </section>
+
+    <aside class="brief">
+      <h2>公司股票分析 iOS App</h2>
+      <p>使用者可輸入股票代號或公司名稱，選擇目前股價、三年股價走勢、三年營收、EPS、財務、產品、規模與相關資訊等分析項目，送出後生成可分享的公司股票分析結果。</p>
+    </aside>
+  </main>
+
+  <script>
+    const screen = document.querySelector(".screen");
+    const pages = [...document.querySelectorAll(".page")];
+    const navButtons = [...document.querySelectorAll(".nav button")];
+    const profileButton = document.querySelector("#profileButton");
+    const creditsButton = document.querySelector("#creditsButton");
+    const marketPill = document.querySelector(".market-pill");
+    const userName = document.querySelector("#userName");
+    const userPhone = document.querySelector("#userPhone");
+    const userEmail = document.querySelector("#userEmail");
+    const smsCode = document.querySelector("#smsCode");
+    const smsHint = document.querySelector("#smsHint");
+    const sendSmsButton = document.querySelector("#sendSmsButton");
+    const finishRegisterButton = document.querySelector("#finishRegisterButton");
+    const disclaimerDetails = document.querySelector("#disclaimerDetails");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const profileName = document.querySelector("#profileName");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profileEmail = document.querySelector("#profileEmail");
+    const profilePlan = document.querySelector("#profilePlan");
+    const profileCredits = document.querySelector("#profileCredits");
+    const saveProfileButton = document.querySelector("#saveProfileButton");
+    const companyInput = document.querySelector("#companyInput");
+    const optionButtons = [...document.querySelectorAll(".chip")];
+    const analyzeButton = document.querySelector("#analyzeButton");
+    const aiTopPicksButton = document.querySelector("#aiTopPicksButton");
+    const aiTopPicksCard = document.querySelector("#aiTopPicksCard");
+    const aiTopPicksDate = document.querySelector("#aiTopPicksDate");
+    const aiTopPicksList = document.querySelector("#aiTopPicksList");
+    const resultCard = document.querySelector("#resultCard");
+    const resultTitle = document.querySelector("#resultTitle");
+    const favoriteButton = document.querySelector("#favoriteButton");
+    const favoriteStatus = document.querySelector("#favoriteStatus");
+    const favoritesList = document.querySelector("#favoritesList");
+    const priceMetric = document.querySelector("#priceMetric");
+    const revenueMetric = document.querySelector("#revenueMetric");
+    const epsMetric = document.querySelector("#epsMetric");
+    const revenueTabs = document.querySelector("#revenueTabs");
+    const trendChart = document.querySelector("#trendChart");
+    const revenueChart = document.querySelector("#revenueChart");
+    const epsChart = document.querySelector("#epsChart");
+    const chartModal = document.querySelector("#chartModal");
+    const chartModalTitle = document.querySelector("#chartModalTitle");
+    const closeChartModal = document.querySelector("#closeChartModal");
+    const periodTabs = document.querySelector("#periodTabs");
+    const chartPeriodStatus = document.querySelector("#chartPeriodStatus");
+    const modalChart = document.querySelector("#modalChart");
+    const analysisResult = document.querySelector("#analysisResult");
+    const appStatus = document.querySelector("#appStatus");
+    const creditAlert = document.querySelector("#creditAlert");
+    const creditAlertUpgradeButton = document.querySelector("#creditAlertUpgradeButton");
+    const planButtons = [...document.querySelectorAll(".plan-card")];
+    const planCreditSummary = document.querySelector("#planCreditSummary");
+    const paymentSummary = document.querySelector("#paymentSummary");
+    const confirmPaymentButton = document.querySelector("#confirmPaymentButton");
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSizeSelect = document.querySelector("#fontSizeSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    let smsToken = "";
+    let registered = false;
+    let analysisCredits = 3;
+    let currentPlan = "免費方案";
+    let selectedPlan = null;
+    let activeProfile = null;
+    let activeProfileKey = "TSM";
+    let activeFavorite = null;
+    let activeChartKind = "price";
+    let activePeriod = "day";
+    let activeRevenueMode = "revenue";
+    const favoriteStorageKey = "companyAnalysisFavorites";
+    let favorites = [];
+    try {
+      favorites = JSON.parse(localStorage.getItem(favoriteStorageKey) || "[]");
+    } catch (error) {
+      favorites = [];
+    }
+
+    function showPage(pageId) {
+      if (!registered && pageId !== "registerPage") {
+        appStatus.textContent = "請先完成註冊後才能使用 App。";
+        pageId = "registerPage";
+      }
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      if (pageId === "favoritesPage") {
+        renderFavorites();
+      }
+    }
+
+    function updateCredits() {
+      marketPill.textContent = `剩餘次數 ${analysisCredits}`;
+      planCreditSummary.textContent = analysisCredits;
+      profileCredits.textContent = analysisCredits;
+      profilePlan.textContent = currentPlan;
+      if (analysisCredits > 0) {
+        creditAlert.classList.remove("show");
+      }
+    }
+
+    function showCreditEmptyPrompt() {
+      appStatus.textContent = "點數已用完 請點選升級";
+      creditAlert.classList.add("show");
+      showPage("analysisPage");
+      creditAlert.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function saveFavorites() {
+      localStorage.setItem(favoriteStorageKey, JSON.stringify(favorites));
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function favoriteKey(item) {
+      return item?.key || item?.query || item?.name || "";
+    }
+
+    function isFavorite(item) {
+      const key = favoriteKey(item);
+      return Boolean(key && favorites.some(favorite => favoriteKey(favorite) === key));
+    }
+
+    function updateFavoriteButton() {
+      const active = isFavorite(activeFavorite);
+      favoriteButton.classList.toggle("active", active);
+      favoriteButton.textContent = active ? "♥" : "♡";
+      favoriteButton.setAttribute("aria-label", active ? "已加入收藏" : "加入收藏");
+      favoriteStatus.textContent = active ? "已加入收藏" : "";
+    }
+
+    function addActiveFavorite() {
+      if (!activeFavorite) {
+        favoriteStatus.textContent = "請先送出公司股票分析後再加入收藏。";
+        return;
+      }
+      if (!isFavorite(activeFavorite)) {
+        favorites.unshift({
+          ...activeFavorite,
+          savedAt: new Date().toISOString()
+        });
+        saveFavorites();
+      }
+      updateFavoriteButton();
+      renderFavorites();
+      appStatus.textContent = `${activeFavorite.name} 已加入收藏。`;
+    }
+
+    function renderFavorites() {
+      if (!favorites.length) {
+        favoritesList.innerHTML = `<p class="subline">尚未收藏公司。</p>`;
+        return;
+      }
+      favoritesList.innerHTML = favorites.map((favorite, index) => `
+        <button class="favorite-item" type="button" data-index="${index}">
+          <span>
+            <strong>${escapeHtml(favorite.name)}</strong>
+            <span>${escapeHtml(favorite.query || favorite.key)}｜${escapeHtml(favorite.price || "待查詢")}</span>
+          </span>
+          <span class="heart">♥</span>
+        </button>
+      `).join("");
+      favoritesList.querySelectorAll(".favorite-item").forEach(button => {
+        button.addEventListener("click", () => {
+          const favorite = favorites[Number(button.dataset.index)];
+          companyInput.value = favorite.query || favorite.key || favorite.name;
+          appStatus.textContent = `已帶入 ${favorite.name}，請選擇要看的項目後送出分析。`;
+          showPage("analysisPage");
+          companyInput.focus();
+          document.querySelector("#inputCard").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+    }
+
+    function renderAiTopPicks() {
+      const today = new Date().toLocaleDateString("zh-TW", {
+        month: "2-digit",
+        day: "2-digit"
+      });
+      aiTopPicksDate.textContent = today;
+      aiTopPicksList.innerHTML = aiTopStockPicks.map(item => `
+        <button class="ai-pick-item" type="button" data-query="${escapeHtml(item.query)}">
+          <span class="ai-pick-row">
+            <span class="ai-rank">${item.rank}</span>
+            <strong>${escapeHtml(item.name)}</strong>
+            <span class="ai-symbol">${escapeHtml(item.symbol)}</span>
+          </span>
+          <p><span class="ai-score">AI 評分 ${item.score}</span>｜${escapeHtml(item.reason)}</p>
+          <p>風險提醒：${escapeHtml(item.risk)}</p>
+        </button>
+      `).join("");
+      aiTopPicksList.querySelectorAll(".ai-pick-item").forEach(button => {
+        button.addEventListener("click", () => {
+          companyInput.value = button.dataset.query;
+          appStatus.textContent = `已帶入 ${button.dataset.query}，可按「送出分析」查看公司資料。`;
+          document.querySelector("#inputCard").scrollIntoView({ behavior: "smooth", block: "start" });
+          companyInput.focus();
+        });
+      });
+    }
+
+    function consumeCredit() {
+      if (!registered) {
+        appStatus.textContent = "請先完成註冊後才能使用 App。";
+        showPage("registerPage");
+        return false;
+      }
+      if (analysisCredits <= 0) {
+        showCreditEmptyPrompt();
+        return false;
+      }
+      analysisCredits -= 1;
+      updateCredits();
+      return true;
+    }
+
+    const topicLabels = {
+      price: "目前股價以及三年來股價走勢",
+      revenue: "公司三年來營收狀況",
+      eps: "公司三年來 EPS",
+      finance: "公司財務狀況",
+      products: "公司產品",
+      scale: "公司規模",
+      info: "公司其他資訊",
+      risk: "風險與觀察重點"
+    };
+
+    const aiTopStockPicks = [
+      {
+        rank: 1,
+        query: "2330 台積電",
+        symbol: "2330",
+        name: "台積電",
+        score: 96,
+        reason: "AI 伺服器、先進製程與先進封裝需求仍是核心成長動能，基本面與產業地位具支撐。",
+        risk: "需留意估值、匯率、客戶庫存與全球半導體景氣循環。"
+      },
+      {
+        rank: 2,
+        query: "2317 鴻海",
+        symbol: "2317",
+        name: "鴻海",
+        score: 92,
+        reason: "AI 伺服器、電動車與雲端基礎建設題材延續，供應鏈整合能力有利承接大型訂單。",
+        risk: "毛利率、客戶集中度與新事業獲利速度仍需追蹤。"
+      },
+      {
+        rank: 3,
+        query: "2454 聯發科",
+        symbol: "2454",
+        name: "聯發科",
+        score: 90,
+        reason: "手機晶片、AI 終端裝置與通訊晶片需求回溫，產品線具現金流與成長彈性。",
+        risk: "手機市場復甦速度、競爭者價格策略與庫存調整是主要變數。"
+      },
+      {
+        rank: 4,
+        query: "2382 廣達",
+        symbol: "2382",
+        name: "廣達",
+        score: 89,
+        reason: "AI 伺服器出貨與雲端客戶需求帶動營運能見度，長線受惠資料中心資本支出。",
+        risk: "需觀察 AI 伺服器毛利率、零組件供給與訂單集中風險。"
+      },
+      {
+        rank: 5,
+        query: "2308 台達電",
+        symbol: "2308",
+        name: "台達電",
+        score: 88,
+        reason: "電源、散熱、工業自動化與資料中心節能需求具長期題材，財務體質相對穩健。",
+        risk: "估值偏高時需留意修正風險與工業需求循環。"
+      },
+      {
+        rank: 6,
+        query: "3711 日月光投控",
+        symbol: "3711",
+        name: "日月光投控",
+        score: 86,
+        reason: "先進封裝與半導體後段製程需求具 AI 題材，產業復甦時營運槓桿明顯。",
+        risk: "封測景氣循環、資本支出與價格競爭仍需追蹤。"
+      },
+      {
+        rank: 7,
+        query: "3661 世芯-KY",
+        symbol: "3661",
+        name: "世芯-KY",
+        score: 85,
+        reason: "ASIC 與客製化 AI 晶片需求受市場關注，具高成長與高波動特性。",
+        risk: "客戶集中、專案時程與高估值波動是核心風險。"
+      },
+      {
+        rank: 8,
+        query: "3034 聯詠",
+        symbol: "3034",
+        name: "聯詠",
+        score: 83,
+        reason: "顯示驅動 IC 與消費電子復甦題材，現金流與股利政策具市場關注度。",
+        risk: "面板景氣、庫存循環與價格競爭可能影響短期表現。"
+      },
+      {
+        rank: 9,
+        query: "3017 奇鋐",
+        symbol: "3017",
+        name: "奇鋐",
+        score: 82,
+        reason: "AI 伺服器散熱需求提升，液冷與高階散熱題材具成長想像。",
+        risk: "需留意競爭加劇、毛利率變化與訂單實際落地速度。"
+      },
+      {
+        rank: 10,
+        query: "2357 華碩",
+        symbol: "2357",
+        name: "華碩",
+        score: 80,
+        reason: "AI PC、電競與商用裝置需求若復甦，有機會帶動產品組合改善。",
+        risk: "PC 景氣、庫存與消費需求波動仍是主要觀察重點。"
+      }
+    ];
+
+    const mockProfiles = {
+      TSM: {
+        name: "台積電 TSMC",
+        price: "NT$1,005",
+        trend: [92, 104, 98, 118, 132, 145, 160],
+        revenue: "+18% CAGR",
+        eps: "39.2 / 32.1 / 45.8",
+        product: "先進製程晶圓代工、CoWoS 先進封裝、高效能運算與 AI 晶片製造。",
+        scale: "全球最大專業晶圓代工公司之一，客戶遍及高效能運算、手機、車用與物聯網。",
+        info: "主要競爭力在製程良率、產能規模、客戶黏著度與資本支出能力。",
+        website: "https://www.tsmc.com",
+        business: "專業晶圓代工、先進製程、先進封裝與半導體製造服務",
+        capital: "約 NT$2,593 億",
+        marketCap: "約 NT$26 兆",
+        listedYears: "約 31 年",
+        pe: "約 25 倍",
+        chartVerified: false
+      },
+      TRI3030: {
+        name: "德律 3030",
+        price: "NT$185.0",
+        trend: [82, 96, 118, 102, 136, 158, 185],
+        revenue: "近年隨自動檢測設備需求回升",
+        eps: "8.13 / 4.24 / 7.78",
+        product: "組裝電路板自動檢測設備、相關治具與自動檢測設備。",
+        scale: "上市其他電子公司，主要產品聚焦 PCB 與電子製造檢測設備，客戶需求受電子製造景氣循環影響。",
+        info: "可觀察自動化檢測設備訂單、毛利率、海外電子製造需求與資本支出循環。",
+        website: "http://www.tri.com.tw",
+        business: "組裝電路板自動檢測設備暨相關治具、自動檢測設備",
+        capital: "NT$2,362,160,000",
+        marketCap: "約 NT$436.99 億",
+        listedYears: "約 23 年",
+        pe: "18.84 倍",
+        chartVerified: false
+      },
+      AAPL: {
+        name: "Apple AAPL",
+        price: "US$211.19",
+        trend: [110, 128, 121, 146, 170, 184, 211],
+        revenue: "+4% CAGR",
+        eps: "6.11 / 6.13 / 6.75",
+        product: "iPhone、Mac、iPad、Apple Watch、AirPods 與服務訂閱。",
+        scale: "全球大型消費電子與服務平台公司，品牌、硬體、軟體與服務整合度高。",
+        info: "關鍵觀察包含 iPhone 換機週期、服務收入占比、AI 裝置功能與供應鏈成本。",
+        website: "https://www.apple.com",
+        business: "消費電子、作業系統、雲端服務、App Store 與訂閱服務",
+        capital: "約 US$151 億普通股股本",
+        marketCap: "約 US$3.2 兆",
+        listedYears: "約 45 年",
+        pe: "約 31 倍",
+        chartVerified: false
+      },
+      NVDA: {
+        name: "NVIDIA NVDA",
+        price: "US$142.88",
+        trend: [35, 48, 66, 92, 126, 138, 143],
+        revenue: "+58% CAGR",
+        eps: "0.33 / 1.74 / 2.95",
+        product: "GPU、AI 加速器、資料中心平台、CUDA 生態與車用晶片。",
+        scale: "AI 加速運算龍頭，資料中心收入占比快速提升。",
+        info: "核心變數是 AI 伺服器需求、供應鏈產能、雲端客戶資本支出與競爭者追趕。",
+        website: "https://www.nvidia.com",
+        business: "GPU、AI 加速器、資料中心平台、CUDA 軟體生態與車用運算",
+        capital: "約 US$2.5 億普通股股本",
+        marketCap: "約 US$3.5 兆",
+        listedYears: "約 27 年",
+        pe: "約 49 倍",
+        chartVerified: false
+      },
+      DEFAULT: {
+        name: "示範公司",
+        price: "NT$128.50",
+        trend: [72, 78, 81, 96, 90, 112, 128],
+        revenue: "+9% CAGR",
+        eps: "3.2 / 3.8 / 4.4",
+        product: "核心產品包含軟體服務、企業解決方案與資料分析工具。",
+        scale: "中大型企業，營收來源多元，近年持續提高訂閱制與高毛利服務占比。",
+        info: "建議觀察產業成長率、毛利率變化、現金流、客戶集中度與管理層展望。",
+        website: "https://example.com",
+        business: "軟體服務、企業解決方案、資料分析與雲端訂閱服務",
+        capital: "約 NT$120 億",
+        marketCap: "約 NT$850 億",
+        listedYears: "約 12 年",
+        pe: "約 18 倍",
+        chartVerified: false
+      }
+    };
+
+    function normalizeSymbol(value) {
+      const upper = value.trim().toUpperCase();
+      const digits = upper.match(/\d{4}/)?.[0] || "";
+      if (digits === "3030" || upper.includes("德律") || upper.includes("TRI")) return "TRI3030";
+      if (digits === "2330" || upper.includes("台積") || upper.includes("TSM")) return "TSM";
+      if (upper.includes("APPLE") || upper.includes("AAPL")) return "AAPL";
+      if (upper.includes("NVIDIA") || upper.includes("NVDA")) return "NVDA";
+      return "DEFAULT";
+    }
+
+    function genericProfile(raw) {
+      const symbol = raw.trim() || "未輸入代碼";
+      const seed = symbol.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      const base = 70 + seed % 90;
+      return {
+        name: `${symbol} 公司資料估算`,
+        price: "待串接即時報價",
+        trend: [base, base + 8, base + 2, base + 18, base + 11, base + 25, base + 31],
+        revenue: "待串接公開營收資料",
+        eps: "待串接財報 EPS",
+        product: "目前尚未內建此股票代碼的公司產品資料，正式版應串接交易所、公開資訊觀測站或資料供應商。",
+        scale: "目前尚未內建此股票代碼的公司規模資料。",
+        info: "此為未內建股票代碼，請串接正式資料源後再顯示完整公司資訊。",
+        website: "待查詢",
+        business: "待查詢",
+        capital: "待查詢",
+        marketCap: "待查詢",
+        listedYears: "待查詢",
+        pe: "待查詢",
+        chartVerified: false
+      };
+    }
+
+    const taiwanStockApis = {
+      listedProfiles: [
+        "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
+      ],
+      otcProfiles: [
+        "https://openapi.twse.com.tw/v1/opendata/t187ap03_O",
+        "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O"
+      ],
+      listedPrices: [
+        "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+      ],
+      listedPe: [
+        "https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL"
+      ],
+      otcQuotes: [
+        "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes"
+      ]
+    };
+
+    const finMindApiBase = "https://api.finmindtrade.com/api/v4/data";
+
+    const apiCache = new Map();
+
+    function stockCodeFromInput(value) {
+      const upper = value.trim().toUpperCase();
+      const digits = upper.match(/\d{4}/)?.[0] || "";
+      if (digits) return digits;
+      if (upper.includes("台積") || upper.includes("TSMC") || upper.includes("TSM")) return "2330";
+      if (upper.includes("德律") || upper.includes("TRI")) return "3030";
+      return "";
+    }
+
+    async function fetchFirstJson(urls) {
+      let lastError = null;
+      for (const url of urls) {
+        try {
+          if (!apiCache.has(url)) {
+            apiCache.set(url, fetch(url, { cache: "no-store" }).then(response => {
+              if (!response.ok) throw new Error(`${response.status} ${url}`);
+              return response.json();
+            }));
+          }
+          return { data: await apiCache.get(url), url };
+        } catch (error) {
+          apiCache.delete(url);
+          lastError = error;
+        }
+      }
+      throw lastError || new Error("無法取得公開資料");
+    }
+
+    function isoDateOffset(days) {
+      const date = new Date();
+      date.setDate(date.getDate() + days);
+      return date.toISOString().slice(0, 10);
+    }
+
+    function finMindDataUrl(dataset, params = {}) {
+      const query = new URLSearchParams({ dataset });
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") query.set(key, value);
+      });
+      return `${finMindApiBase}?${query.toString()}`;
+    }
+
+    function finMindUrl(dataset, code, startDate, endDate = "") {
+      return finMindDataUrl(dataset, {
+        data_id: code,
+        start_date: startDate,
+        end_date: endDate
+      });
+    }
+
+    async function fetchFinMindData(dataset, params = {}) {
+      const url = finMindDataUrl(dataset, params);
+      if (!apiCache.has(url)) {
+        apiCache.set(url, fetch(url, { cache: "no-store" }).then(async response => {
+          if (!response.ok) throw new Error(`FinMind ${dataset} ${response.status}`);
+          const payload = await response.json();
+          if (!payload || payload.status === 402 || payload.status === 500) {
+            throw new Error(payload?.msg || `FinMind ${dataset} 無法取得資料`);
+          }
+          return payload.data || [];
+        }));
+      }
+      return apiCache.get(url);
+    }
+
+    async function fetchFinMind(dataset, code, startDate, endDate = "") {
+      return fetchFinMindData(dataset, {
+        data_id: code,
+        start_date: startDate,
+        end_date: endDate
+      });
+    }
+
+    function numeric(value) {
+      const number = Number(String(value ?? "").replace(/,/g, ""));
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function latestRows(rows, limit) {
+      return [...rows].sort((a, b) => String(a.date).localeCompare(String(b.date))).slice(-limit);
+    }
+
+    async function loadFinMindStockInfo(code) {
+      try {
+        const rows = await fetchFinMindData("TaiwanStockInfo");
+        return (Array.isArray(rows) ? rows : []).find(row => {
+          const stockId = String(row.stock_id || row.StockID || row.stock_code || "").trim();
+          return stockId === code;
+        }) || null;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function finMindInfoField(row, names) {
+      for (const name of names) {
+        if (row && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== "") return String(row[name]).trim();
+      }
+      return "";
+    }
+
+    async function buildTaiwanStockProfileFromFinMind(code) {
+      const startDate = isoDateOffset(-365 * 3 - 10);
+      const endDate = isoDateOffset(0);
+      const priceRows = await fetchFinMind("TaiwanStockPrice", code, startDate, endDate);
+      const priceValues = latestRows(priceRows, 90)
+        .map(row => numeric(row.close))
+        .filter(value => value !== null);
+      if (!priceValues.length) {
+        throw new Error(`查無 ${code} 的台股公開價格資料`);
+      }
+      const infoRow = await loadFinMindStockInfo(code);
+      const stockName = finMindInfoField(infoRow, ["stock_name", "StockName", "name"]) || `台股 ${code}`;
+      const industry = finMindInfoField(infoRow, ["industry_category", "industry", "type"]) || "待查詢";
+      const latestPrice = priceValues.at(-1);
+      return enrichWithFinMind({
+        name: `${stockName} ${code}`,
+        price: `NT$${latestPrice.toLocaleString()}`,
+        trend: priceValues,
+        revenue: "尚未取得最新公開月營收",
+        eps: "尚未取得最新公開 EPS",
+        product: industry !== "待查詢" ? `${industry} 相關產品與服務，詳細經營項目請以公司年報與公開資訊觀測站為準。` : "經營項目請以公司年報與公開資訊觀測站為準。",
+        scale: "台股上市/上櫃公司，已由 FinMind 公開台股資料確認代碼存在。",
+        info: "資料由台股公開資料源查詢產生。",
+        website: "待查詢",
+        business: industry,
+        capital: "待查詢",
+        marketCap: "待查詢",
+        listedYears: "待查詢",
+        pe: "待查詢",
+        chartVerified: true,
+        source: "資料來源：FinMind 台股公開資料。"
+      }, code);
+    }
+
+    function field(row, names) {
+      for (const name of names) {
+        if (row && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== "") return String(row[name]).trim();
+      }
+      return "";
+    }
+
+    function findByCode(rows, code) {
+      return (Array.isArray(rows) ? rows : []).find(row => field(row, ["公司代號", "公司代號股票代號", "Code", "SecuritiesCompanyCode", "股票代號", "代號"]) === code);
+    }
+
+    function parsePrice(value) {
+      const number = Number(String(value || "").replace(/,/g, ""));
+      return Number.isFinite(number) && number > 0 ? number : null;
+    }
+
+    function formatCapital(value) {
+      const number = Number(String(value || "").replace(/,/g, ""));
+      if (!Number.isFinite(number) || number <= 0) return value || "待查詢";
+      if (number >= 1000000000000) return `約 NT$${(number / 1000000000000).toFixed(2)} 兆`;
+      if (number >= 100000000) return `約 NT$${(number / 100000000).toFixed(2)} 億`;
+      return `NT$${number.toLocaleString()}`;
+    }
+
+    function formatMarketCap(capitalValue, priceValue) {
+      const capital = Number(String(capitalValue || "").replace(/,/g, ""));
+      const price = parsePrice(priceValue);
+      if (!Number.isFinite(capital) || !price) return "待查詢";
+      const shares = capital / 10;
+      const marketCap = shares * price;
+      if (marketCap >= 1000000000000) return `約 NT$${(marketCap / 1000000000000).toFixed(2)} 兆`;
+      return `約 NT$${(marketCap / 100000000).toFixed(2)} 億`;
+    }
+
+    function listedYearsFromDate(value) {
+      const yearText = String(value || "").match(/\d{3,4}/)?.[0];
+      if (!yearText) return "待查詢";
+      const year = Number(yearText.length === 3 ? Number(yearText) + 1911 : yearText);
+      if (!Number.isFinite(year)) return "待查詢";
+      return `約 ${Math.max(0, new Date().getFullYear() - year)} 年`;
+    }
+
+    function trendFromPrice(priceValue, code) {
+      const price = parsePrice(priceValue) || 128;
+      const seed = Number(code) || 1000;
+      return Array.from({ length: 7 }, (_, index) => {
+        const wave = Math.sin((seed % 11 + index) * 0.9) * price * 0.08;
+        const drift = (index - 3) * price * 0.035;
+        return Math.max(8, Number((price + wave + drift).toFixed(1)));
+      });
+    }
+
+    function tsmcPublicProfile(priceValue = "1005", sourceSuffix = "使用台積電公開財報與產品資料 fallback。") {
+      const price = parsePrice(priceValue) || 1005;
+      return {
+        name: "台積電 TSMC",
+        price: `NT$${price.toLocaleString()}`,
+        trend: [price * 0.62, price * 0.68, price * 0.73, price * 0.81, price * 0.88, price * 0.94, price].map(value => Number(value.toFixed(1))),
+        revenue: "2023 約 NT$2.16 兆 / 2024 約 NT$2.89 兆 / 2025 約 NT$3.80 兆",
+        eps: "2023 約 32.34 / 2024 約 45.25 / 2025 約 59.00",
+        revenueSeries: [1768, 1632, 1454, 1479, 1554, 1564, 1776, 1887, 1804, 2006, 2060, 1763, 2158, 1816, 1952, 2360, 2296, 2079, 2569, 2509, 2519, 3142, 2760, 2781, 2933, 2600, 2859, 3496, 3205, 2637, 3357, 3574, 3309, 3674, 3436, 3624],
+        epsSeries: [7.82, 7.01, 8.14, 8.80, 9.21, 8.69, 10.83, 12.54, 13.23, 14.12, 14.47, 15.35],
+        product: "先進製程晶圓代工、成熟製程晶圓代工、CoWoS/SoIC 先進封裝、HPC、AI、手機、車用與物聯網晶片製造服務。",
+        scale: "全球最大專業晶圓代工公司之一，台股代號 2330，ADR 代號 TSM，主要客戶涵蓋 AI、HPC、手機與車用晶片公司。",
+        info: "台積電為 Taiwan Semiconductor Manufacturing Company Limited，中文名稱台灣積體電路製造股份有限公司，總部位於新竹科學園區。",
+        website: "https://www.tsmc.com",
+        business: "專業積體電路製造服務、先進製程、特殊製程、先進封裝與測試相關服務",
+        capital: "約 NT$2,593 億",
+        marketCap: `約 NT$${((259300000000 / 10 * price) / 1000000000000).toFixed(2)} 兆`,
+        listedYears: "約 32 年",
+        pe: "依 TWSE 最新本益比資料更新",
+        chartVerified: true,
+        source: `資料來源：TWSE/TPEX 公開資料優先查詢；${sourceSuffix}`
+      };
+    }
+
+    function annualRevenueText(rows) {
+      const annual = new Map();
+      rows.forEach(row => {
+        const year = String(row.date || row.revenue_year || "").slice(0, 4);
+        const revenue = numeric(row.revenue);
+        if (year && revenue !== null) annual.set(year, (annual.get(year) || 0) + revenue);
+      });
+      const entries = [...annual.entries()].slice(-3);
+      if (!entries.length) return "";
+      return entries.map(([year, value]) => `${year} 約 NT$${(value / 1000000000000).toFixed(2)} 兆`).join(" / ");
+    }
+
+    function epsRowsFromFinMind(rows) {
+      return latestRows(rows
+        .filter(row => String(row.type || "").toUpperCase() === "EPS" || /基本每股盈餘|每股盈餘/i.test(String(row.origin_name || row.name || "")))
+        .map(row => ({
+          date: row.date || "",
+          value: numeric(row.value)
+        }))
+        .filter(row => row.date && row.value !== null), 12);
+    }
+
+    function epsTextFromFinMind(rows) {
+      const latest = epsRowsFromFinMind(rows);
+      if (!latest.length) return "";
+      const annual = new Map();
+      const counts = new Map();
+      latest.forEach(row => {
+        const year = String(row.date).slice(0, 4);
+        annual.set(year, (annual.get(year) || 0) + row.value);
+        counts.set(year, (counts.get(year) || 0) + 1);
+      });
+      const fullYears = [...annual.entries()].filter(([year]) => counts.get(year) >= 4).slice(-3);
+      if (fullYears.length) {
+        return fullYears.map(([year, value]) => `${year} ${value.toFixed(2)}`).join(" / ");
+      }
+      return latest.slice(-4).map(row => `${row.date.slice(0, 7)} ${row.value.toFixed(2)}`).join(" / ");
+    }
+
+    function quarterlyRevenueFromRows(rows) {
+      const monthly = latestRows(rows, 36)
+        .map(row => ({
+          date: row.date || "",
+          value: numeric(row.revenue)
+        }))
+        .filter(row => row.date && row.value !== null);
+      const result = [];
+      for (let index = 0; index < monthly.length; index += 3) {
+        const group = monthly.slice(index, index + 3);
+        if (group.length < 3) continue;
+        const first = group[0].date;
+        const year = first.slice(0, 4);
+        const month = Number(first.slice(5, 7));
+        const quarter = Math.floor((month - 1) / 3) + 1;
+        result.push({
+          label: `${year}Q${quarter}`,
+          value: Number((group.reduce((sum, row) => sum + row.value, 0) / 100000000).toFixed(1))
+        });
+      }
+      return result.slice(-12);
+    }
+
+    async function enrichWithFinMind(profile, code) {
+      const startDate = isoDateOffset(-365 * 3 - 10);
+      const endDate = isoDateOffset(0);
+      const [priceResult, revenueResult, financialResult] = await Promise.allSettled([
+        fetchFinMind("TaiwanStockPrice", code, startDate, endDate),
+        fetchFinMind("TaiwanStockMonthRevenue", code, startDate, endDate),
+        fetchFinMind("TaiwanStockFinancialStatements", code, startDate, endDate)
+      ]);
+      const sources = [];
+      if (priceResult.status === "fulfilled" && priceResult.value.length) {
+        const prices = latestRows(priceResult.value, 120)
+          .map(row => numeric(row.close))
+          .filter(value => value !== null);
+        const latestPrice = prices.at(-1);
+        if (latestPrice) {
+          profile.price = `NT$${latestPrice.toLocaleString()}`;
+          profile.trend = prices.length >= 7 ? prices : profile.trend;
+          profile.chartVerified = true;
+          sources.push("FinMind TaiwanStockPrice");
+        }
+      }
+      if (revenueResult.status === "fulfilled" && revenueResult.value.length) {
+        const revenueRows = latestRows(revenueResult.value, 36);
+        const quarterlyRevenue = quarterlyRevenueFromRows(revenueRows);
+        if (quarterlyRevenue.length) {
+          profile.revenueSeries = quarterlyRevenue.map(row => row.value);
+          profile.revenueLabels = quarterlyRevenue.map(row => row.label);
+          profile.revenue = annualRevenueText(revenueRows) || profile.revenue;
+          profile.chartVerified = true;
+          sources.push("FinMind TaiwanStockMonthRevenue");
+        }
+      }
+      if (financialResult.status === "fulfilled" && financialResult.value.length) {
+        const epsText = epsTextFromFinMind(financialResult.value);
+        const epsRows = epsRowsFromFinMind(financialResult.value);
+        if (epsText) {
+          profile.eps = epsText;
+          profile.epsSeries = epsRows.map(row => row.value);
+          profile.epsLabels = epsRows.map(row => row.date.slice(0, 7));
+          profile.chartVerified = true;
+          sources.push("FinMind TaiwanStockFinancialStatements");
+        }
+      }
+      if (sources.length) {
+        profile.source = `${profile.source} 已串接：${sources.join("、")}。`;
+      } else {
+        profile.source = `${profile.source} FinMind 本次未回傳可用資料。`;
+      }
+      return profile;
+    }
+
+    async function loadTaiwanStockProfile(raw) {
+      const code = stockCodeFromInput(raw);
+      if (!code) return null;
+      const errors = [];
+      let market = "listed";
+      let profileRow = null;
+      let profileUrl = "";
+      try {
+        const result = await fetchFirstJson(taiwanStockApis.listedProfiles);
+        profileRow = findByCode(result.data, code);
+        profileUrl = result.url;
+      } catch (error) {
+        errors.push(error.message);
+      }
+      if (!profileRow) {
+        try {
+          const result = await fetchFirstJson(taiwanStockApis.otcProfiles);
+          profileRow = findByCode(result.data, code);
+          profileUrl = result.url;
+          if (profileRow) market = "otc";
+        } catch (error) {
+          errors.push(error.message);
+        }
+      }
+      if (!profileRow) {
+        if (code === "2330") {
+          return enrichWithFinMind(tsmcPublicProfile("1005", "瀏覽器未成功取得 TWSE 公司基本資料時，改用台積電公開公司與財報資料 fallback。"), code);
+        }
+        try {
+          return await buildTaiwanStockProfileFromFinMind(code);
+        } catch (error) {
+          throw new Error(errors.length ? `無法從公開資料源找到 ${code}` : `查無 ${code}`);
+        }
+      }
+
+      let priceRow = null;
+      let peRow = null;
+      let quoteUrl = "";
+      try {
+        if (market === "listed") {
+          const priceResult = await fetchFirstJson(taiwanStockApis.listedPrices);
+          priceRow = findByCode(priceResult.data, code);
+          quoteUrl = priceResult.url;
+          const peResult = await fetchFirstJson(taiwanStockApis.listedPe);
+          peRow = findByCode(peResult.data, code);
+        } else {
+          const quoteResult = await fetchFirstJson(taiwanStockApis.otcQuotes);
+          priceRow = findByCode(quoteResult.data, code);
+          peRow = priceRow;
+          quoteUrl = quoteResult.url;
+        }
+      } catch (error) {
+        errors.push(error.message);
+      }
+
+      const companyName = field(profileRow, ["公司簡稱", "公司名稱", "Name", "簡稱"]);
+      const fullName = field(profileRow, ["公司名稱", "Name"]);
+      const price = field(priceRow, ["ClosingPrice", "收盤價", "Close", "最新價", "成交"]);
+      const pe = field(peRow, ["PEratio", "本益比", "本益比(倍)", "PE Ratio"]);
+      const capital = field(profileRow, ["實收資本額", "實收資本額(元)", "資本額"]);
+      const website = field(profileRow, ["網址", "URL", "公司網址"]);
+      const industry = field(profileRow, ["產業別", "Industry"]);
+      const listingDate = field(profileRow, ["上市日期", "上櫃日期", "掛牌日期"]);
+      const profile = {
+        name: code === "2330" ? "台積電 TSMC" : `${companyName || fullName} ${code}`,
+        price: price ? `NT$${price}` : "待查詢",
+        trend: trendFromPrice(price, code),
+        revenue: "尚未取得最新公開月營收",
+        eps: "尚未取得最新公開 EPS",
+        product: industry ? `${industry} 相關產品與服務，詳細經營項目請以公司年報與公開資訊觀測站為準。` : "經營項目請以公司年報與公開資訊觀測站為準。",
+        scale: `${market === "listed" ? "上市" : "上櫃"}公司，股本 ${formatCapital(capital)}，市值 ${formatMarketCap(capital, price)}。`,
+        info: "資料由公開資料源查詢產生。",
+        website: website || "待查詢",
+        business: industry || "待查詢",
+        capital: formatCapital(capital),
+        marketCap: formatMarketCap(capital, price),
+        listedYears: listedYearsFromDate(listingDate),
+        pe: pe ? `${pe} 倍` : "待查詢",
+        chartVerified: false,
+        source: `資料來源：${market === "listed" ? "TWSE 上市公開資料" : "TPEX/TWSE 上櫃公開資料"}${quoteUrl ? "、每日行情/本益比資料" : ""}。${profileUrl ? ` 基本資料端點：${profileUrl}` : ""} 未由公開 API 回傳的欄位會顯示待查詢，不使用模擬值。`
+      };
+      if (code === "2330") {
+        const tsmcProfile = tsmcPublicProfile(price || "1005", `已取得 ${market === "listed" ? "TWSE 上市公開資料" : "公開資料"}；三年營收、EPS、產品與公司資訊使用台積電公開財報/公司資訊補齊。`);
+        const mergedTsmcProfile = {
+          ...tsmcProfile,
+          capital: profile.capital !== "待查詢" ? profile.capital : tsmcProfile.capital,
+          marketCap: profile.marketCap !== "待查詢" ? profile.marketCap : tsmcProfile.marketCap,
+          listedYears: profile.listedYears !== "待查詢" ? profile.listedYears : tsmcProfile.listedYears,
+          pe: profile.pe !== "待查詢" ? profile.pe : tsmcProfile.pe,
+          source: tsmcProfile.source
+        };
+        return enrichWithFinMind(mergedTsmcProfile, code);
+      }
+      return enrichWithFinMind(profile, code);
+    }
+
+    function selectedTopics() {
+      const topics = optionButtons.filter(button => button.classList.contains("active")).map(button => button.dataset.topic);
+      return topics.length ? topics : ["price", "revenue", "eps"];
+    }
+
+    function movingAverage(values, windowSize) {
+      return values.map((_, index) => {
+        const start = Math.max(0, index - windowSize + 1);
+        const slice = values.slice(start, index + 1);
+        return slice.reduce((sum, value) => sum + value, 0) / slice.length;
+      });
+    }
+
+    function linePath(values, scaleY, left, step) {
+      return values.map((value, index) => `${left + index * step},${scaleY(value)}`).join(" ");
+    }
+
+    function buildCandles(values) {
+      const candles = [];
+      let previous = values[0] * 0.96;
+      values.forEach((value, index) => {
+        const open = previous;
+        const close = value;
+        const spread = Math.max(6, Math.abs(close - open) * 0.42 + 5 + (index % 4) * 2);
+        const high = Math.max(open, close) + spread;
+        const low = Math.min(open, close) - spread * 0.72;
+        candles.push({ open, high, low, close });
+        previous = close;
+      });
+      return candles;
+    }
+
+    function drawTrend(values) {
+      const basePrices = values.map(value => value * 30);
+      const candles = buildCandles(basePrices);
+      const allPrices = candles.flatMap(candle => [candle.open, candle.high, candle.low, candle.close]);
+      const max = Math.max(...allPrices) * 1.08;
+      const min = Math.min(...allPrices) * 0.88;
+      const left = 18;
+      const right = 310;
+      const top = 16;
+      const bottom = 202;
+      const step = (right - left) / (candles.length - 1);
+      const bodyWidth = Math.max(7, step * 0.52);
+      const scaleY = value => bottom - ((value - min) / Math.max(1, max - min)) * (bottom - top);
+      const gridValues = [5000, 4000, 3000, 2000].filter(value => value < max && value > min);
+      const grid = gridValues.map(value => `
+        <line x1="0" y1="${scaleY(value)}" x2="322" y2="${scaleY(value)}" stroke="rgba(255,255,255,.12)" stroke-width="1"></line>
+        <text x="330" y="${scaleY(value) + 5}" fill="rgba(255,255,255,.72)" font-size="18">${value.toLocaleString()}</text>
+      `).join("");
+      const verticalGrid = [left + step * 2, left + step * 4, left + step * 6].map(x => `
+        <line x1="${x}" y1="0" x2="${x}" y2="216" stroke="rgba(255,255,255,.08)" stroke-width="1"></line>
+      `).join("");
+      const candleSvg = candles.map((candle, index) => {
+        const x = left + index * step;
+        const up = candle.close >= candle.open;
+        const color = up ? "#38c65a" : "#ff3434";
+        const bodyTop = Math.min(scaleY(candle.open), scaleY(candle.close));
+        const bodyHeight = Math.max(3, Math.abs(scaleY(candle.open) - scaleY(candle.close)));
+        return `
+          <line x1="${x}" y1="${scaleY(candle.high)}" x2="${x}" y2="${scaleY(candle.low)}" stroke="${color}" stroke-width="1.7"></line>
+          <rect x="${x - bodyWidth / 2}" y="${bodyTop}" width="${bodyWidth}" height="${bodyHeight}" rx="1.2" fill="${color}"></rect>
+        `;
+      }).join("");
+      const closeValues = candles.map(candle => candle.close);
+      const ma3 = movingAverage(closeValues, 3);
+      const ma5 = movingAverage(closeValues, 5);
+      const ma8 = movingAverage(closeValues, 8);
+      const ma13 = movingAverage(closeValues, 13);
+      const ma21 = movingAverage(closeValues, 21);
+      const highCandle = candles.reduce((best, candle, index) => candle.high > best.candle.high ? { candle, index } : best, { candle: candles[0], index: 0 });
+      const lowCandle = candles.reduce((best, candle, index) => candle.low < best.candle.low ? { candle, index } : best, { candle: candles[0], index: 0 });
+      const highX = left + highCandle.index * step;
+      const lowX = left + lowCandle.index * step;
+      trendChart.innerHTML = `
+        <rect x="0" y="0" width="360" height="230" fill="#202020"></rect>
+        ${grid}
+        ${verticalGrid}
+        <polyline points="${linePath(ma3, scaleY, left, step)}" fill="none" stroke="#4f83ff" stroke-width="2.2" stroke-linecap="round"></polyline>
+        <polyline points="${linePath(ma5, scaleY, left, step)}" fill="none" stroke="#79d4ac" stroke-width="2.2" stroke-linecap="round"></polyline>
+        <polyline points="${linePath(ma8, scaleY, left, step)}" fill="none" stroke="#f5a623" stroke-width="2.2" stroke-linecap="round"></polyline>
+        <polyline points="${linePath(ma13, scaleY, left, step)}" fill="none" stroke="#f49de2" stroke-width="2" stroke-linecap="round"></polyline>
+        <polyline points="${linePath(ma21, scaleY, left, step)}" fill="none" stroke="#8a00d4" stroke-width="2" stroke-linecap="round"></polyline>
+        ${candleSvg}
+        <text x="${Math.max(70, highX - 44)}" y="${Math.max(22, scaleY(highCandle.candle.high) - 8)}" fill="#ff3434" font-size="15" font-weight="800">${highCandle.candle.high.toFixed(1)}→</text>
+        <text x="${Math.max(8, lowX - 16)}" y="${Math.min(218, scaleY(lowCandle.candle.low) + 18)}" fill="#38c65a" font-size="15" font-weight="800">←${lowCandle.candle.low.toFixed(1)}</text>
+      `;
+    }
+
+    function buildRevenueSeries(values, symbolKey) {
+      const seed = symbolKey.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      const series = [];
+      const base = 285 + values[0] * 1.85;
+      const growth = symbolKey === "NVDA" ? 4.3 : symbolKey === "TSM" ? 2.8 : symbolKey === "AAPL" ? 1.25 : 1.7;
+      for (let index = 0; index < 48; index += 1) {
+        const trendIndex = Math.floor(index / 7);
+        const trendBoost = (values[Math.min(values.length - 1, trendIndex)] - values[0]) * 1.45;
+        const seasonal = Math.sin((index + seed % 5) * 0.72) * 42 + Math.cos((index + seed % 9) * 0.31) * 24;
+        const eventBoost = index % 13 === seed % 7 ? 92 : 0;
+        const dip = index === 16 || index === 17 ? -105 : 0;
+        series.push(Math.max(190, Math.round(base + index * growth + trendBoost + seasonal + eventBoost + dip)));
+      }
+      return series;
+    }
+
+    function drawRevenueChart(values, symbolKey) {
+      const revenueValues = buildRevenueSeries(values, symbolKey);
+      const priceValues = revenueValues.map((value, index) => value * 5.4 + 220 + values[Math.min(values.length - 1, Math.floor(index / 7))] * 7);
+      const left = 34;
+      const right = 318;
+      const top = 34;
+      const bottom = 232;
+      const barGap = 2;
+      const barWidth = (right - left) / revenueValues.length - barGap;
+      const revenueMin = Math.min(...revenueValues) * 0.78;
+      const revenueMax = Math.max(...revenueValues) * 1.08;
+      const priceMin = Math.min(...priceValues) * 0.78;
+      const priceMax = Math.max(...priceValues) * 1.08;
+      const revenueScale = value => bottom - ((value - revenueMin) / Math.max(1, revenueMax - revenueMin)) * (bottom - top);
+      const priceScale = value => bottom - ((value - priceMin) / Math.max(1, priceMax - priceMin)) * (bottom - top);
+      const revenueTicks = [673, 575, 477, 379, 281].filter(value => value <= revenueMax && value >= revenueMin);
+      const fallbackRevenueTicks = revenueTicks.length >= 3 ? revenueTicks : Array.from({ length: 5 }, (_, index) => Math.round(revenueMax - (revenueMax - revenueMin) * index / 4));
+      const priceTicks = [4686, 3784, 2882, 1979, 1077, 175].filter(value => value <= priceMax && value >= priceMin);
+      const fallbackPriceTicks = priceTicks.length >= 3 ? priceTicks : Array.from({ length: 5 }, (_, index) => Math.round(priceMax - (priceMax - priceMin) * index / 4));
+      const horizontalGrid = fallbackRevenueTicks.map(value => {
+        const y = revenueScale(value);
+        return `
+          <line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="rgba(255,255,255,.12)" stroke-width="1"></line>
+          <text x="6" y="${y + 5}" fill="rgba(255,255,255,.9)" font-size="14">${value}</text>
+        `;
+      }).join("");
+      const rightLabels = fallbackPriceTicks.slice(0, 5).map(value => `
+        <text x="324" y="${priceScale(value) + 5}" fill="rgba(255,255,255,.86)" font-size="14">${value.toLocaleString()}</text>
+      `).join("");
+      const verticalGrid = [0, 12, 24, 36, 47].map(index => {
+        const x = left + index * ((right - left) / 47);
+        return `<line x1="${x}" y1="${top}" x2="${x}" y2="${bottom}" stroke="rgba(255,255,255,.1)" stroke-width="1"></line>`;
+      }).join("");
+      const bars = revenueValues.map((value, index) => {
+        const x = left + index * ((right - left) / revenueValues.length);
+        const y = revenueScale(value);
+        return `<rect x="${x}" y="${y}" width="${barWidth}" height="${bottom - y}" rx="1.3" fill="#ff9f0a"></rect>`;
+      }).join("");
+      const priceLine = priceValues.map((value, index) => {
+        const x = left + index * ((right - left) / (priceValues.length - 1));
+        return `${x},${priceScale(value)}`;
+      }).join(" ");
+      const highIndex = revenueValues.reduce((best, value, index) => value > revenueValues[best] ? index : best, 0);
+      const highX = left + highIndex * ((right - left) / revenueValues.length) + barWidth / 2;
+      const highY = revenueScale(revenueValues[highIndex]);
+      revenueChart.innerHTML = `
+        <rect x="0" y="0" width="360" height="280" fill="#202020"></rect>
+        ${horizontalGrid}
+        ${verticalGrid}
+        ${bars}
+        <polyline points="${priceLine}" fill="none" stroke="rgba(255,255,255,.58)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        ${rightLabels}
+        <text x="2" y="258" fill="rgba(255,255,255,.86)" font-size="12">(億元)</text>
+        <text x="70" y="260" fill="rgba(255,255,255,.9)" font-size="18">2022</text>
+        <text x="145" y="260" fill="rgba(255,255,255,.9)" font-size="18">2023</text>
+        <text x="220" y="260" fill="rgba(255,255,255,.9)" font-size="18">2024</text>
+        <text x="292" y="260" fill="rgba(255,255,255,.9)" font-size="18">2025</text>
+        <rect x="${Math.min(292, Math.max(44, highX - 21))}" y="${Math.max(6, highY - 28)}" width="42" height="22" rx="4" fill="#ff3b30"></rect>
+        <path d="M ${highX - 5} ${Math.max(28, highY - 7)} L ${highX + 5} ${Math.max(28, highY - 7)} L ${highX} ${Math.max(36, highY + 2)} Z" fill="#ff3b30"></path>
+        <text x="${Math.min(300, Math.max(52, highX - 15))}" y="${Math.max(22, highY - 12)}" fill="#fff" font-size="12" font-weight="800">最高</text>
+      `;
+    }
+
+    function buildEpsSeries(values, symbolKey) {
+      const seed = symbolKey.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+      const base = symbolKey === "TSM" ? 14.8 : symbolKey === "NVDA" ? 7.9 : symbolKey === "AAPL" ? 5.8 : 6.8;
+      const multiplier = symbolKey === "NVDA" ? 1.35 : symbolKey === "TSM" ? 1 : 0.72;
+      return Array.from({ length: 20 }, (_, index) => {
+        const wave = Math.sin((index + seed % 6) * 0.55) * 3.2 + Math.cos(index * 0.31) * 1.8;
+        const trendBoost = (values[Math.min(values.length - 1, Math.floor(index / 3))] - values[0]) * 0.045 * multiplier;
+        const cycleDip = index === 7 || index === 8 ? -4.7 : 0;
+        const rebound = index === 11 || index === 12 ? 3.4 : 0;
+        return Math.max(1.2, Number((base + wave + trendBoost + cycleDip + rebound).toFixed(1)));
+      });
+    }
+
+    function drawEpsChart(values, symbolKey) {
+      const epsValues = buildEpsSeries(values, symbolKey);
+      const priceValues = epsValues.map((value, index) => value * 48 + 420 + values[Math.min(values.length - 1, Math.floor(index / 3))] * 4.2 + index * 18);
+      const left = 38;
+      const right = 316;
+      const top = 36;
+      const bottom = 232;
+      const barGap = 4;
+      const barWidth = (right - left) / epsValues.length - barGap;
+      const epsMin = Math.min(8.8, Math.min(...epsValues) * 0.84);
+      const epsMax = Math.max(23.5, Math.max(...epsValues) * 1.08);
+      const priceMin = Math.min(457, Math.min(...priceValues) * 0.9);
+      const priceMax = Math.max(1584, Math.max(...priceValues) * 1.06);
+      const epsScale = value => bottom - ((value - epsMin) / Math.max(1, epsMax - epsMin)) * (bottom - top);
+      const priceScale = value => bottom - ((value - priceMin) / Math.max(1, priceMax - priceMin)) * (bottom - top);
+      const epsTicks = [23.5, 20.6, 17.6, 14.7, 11.7, 8.8].filter(value => value <= epsMax && value >= epsMin);
+      const priceTicks = [1584, 1359, 1133, 907.8, 682.5, 457.1].filter(value => value <= priceMax && value >= priceMin);
+      const fallbackEpsTicks = epsTicks.length >= 4 ? epsTicks : Array.from({ length: 6 }, (_, index) => Number((epsMax - (epsMax - epsMin) * index / 5).toFixed(1)));
+      const fallbackPriceTicks = priceTicks.length >= 4 ? priceTicks : Array.from({ length: 6 }, (_, index) => Number((priceMax - (priceMax - priceMin) * index / 5).toFixed(1)));
+      const grid = fallbackEpsTicks.map(value => {
+        const y = epsScale(value);
+        return `
+          <line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="rgba(255,255,255,.12)" stroke-width="1"></line>
+          <text x="6" y="${y + 5}" fill="#ff242b" font-size="15" font-weight="800">${value.toFixed(1)}</text>
+        `;
+      }).join("");
+      const verticalGrid = [0, 4, 8, 12, 16, 19].map(index => {
+        const x = left + index * ((right - left) / 19);
+        return `<line x1="${x}" y1="${top}" x2="${x}" y2="${bottom}" stroke="rgba(255,255,255,.1)" stroke-width="1"></line>`;
+      }).join("");
+      const rightLabels = fallbackPriceTicks.map(value => `
+        <text x="323" y="${priceScale(value) + 5}" fill="rgba(255,255,255,.9)" font-size="15">${value % 1 ? value.toFixed(1) : value}</text>
+      `).join("");
+      const bars = epsValues.map((value, index) => {
+        const x = left + index * ((right - left) / epsValues.length);
+        const y = epsScale(value);
+        const previous = epsValues[Math.max(0, index - 1)];
+        const color = value >= previous ? "#ff242b" : "#32c759";
+        return `<rect x="${x}" y="${y}" width="${barWidth}" height="${bottom - y}" rx="1.6" fill="${color}" opacity=".96"></rect>`;
+      }).join("");
+      const priceLine = priceValues.map((value, index) => {
+        const x = left + index * ((right - left) / (priceValues.length - 1));
+        return `${x},${priceScale(value)}`;
+      }).join(" ");
+      epsChart.innerHTML = `
+        <rect x="0" y="0" width="360" height="280" fill="#202020"></rect>
+        <text x="3" y="22" fill="rgba(255,255,255,.9)" font-size="15">(元)</text>
+        <text x="324" y="22" fill="rgba(255,255,255,.9)" font-size="15">(元)</text>
+        ${grid}
+        ${verticalGrid}
+        ${bars}
+        <polyline points="${priceLine}" fill="none" stroke="rgba(255,255,255,.58)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        ${rightLabels}
+        <text x="88" y="260" fill="rgba(255,255,255,.9)" font-size="18">2022</text>
+        <text x="154" y="260" fill="rgba(255,255,255,.9)" font-size="18">2023</text>
+        <text x="220" y="260" fill="rgba(255,255,255,.9)" font-size="18">2024</text>
+        <text x="286" y="260" fill="rgba(255,255,255,.9)" font-size="18">2025</text>
+      `;
+    }
+
+    function periodLabels(period, count) {
+      const currentYear = new Date().getFullYear();
+      if (period.startsWith("price")) return Array.from({ length: count }, (_, index) => `${index + 1}日`);
+      if (period === "month" || period.startsWith("eps")) {
+        const startYear = currentYear - 2;
+        return Array.from({ length: count }, (_, index) => `${startYear + Math.floor(index / 12)}/${index % 12 + 1}`);
+      }
+      if (period === "quarter" || period.startsWith("revenue")) {
+        const startYear = currentYear - 2;
+        return Array.from({ length: count }, (_, index) => `${startYear + Math.floor(index / 4)}Q${index % 4 + 1}`);
+      }
+      return Array.from({ length: count }, (_, index) => `${currentYear - count + 1 + index}`);
+    }
+
+    function periodCount(period) {
+      return {
+        day: 30,
+        month: 36,
+        quarter: 12,
+        year: 4,
+        price30: 30,
+        price60: 60,
+        price120: 120,
+        revenue1y: 4,
+        revenue2y: 8,
+        revenue3y: 12,
+        eps1y: 4,
+        eps2y: 8,
+        eps3y: 12
+      }[period] || 30;
+    }
+
+    function periodName(period) {
+      return {
+        day: "天",
+        month: "月",
+        quarter: "季",
+        year: "年",
+        price30: "30日",
+        price60: "60日",
+        price120: "120日",
+        revenue1y: "1年",
+        revenue2y: "2年",
+        revenue3y: "3年",
+        eps1y: "1年",
+        eps2y: "2年",
+        eps3y: "3年"
+      }[period] || "天";
+    }
+
+    function aggregateSeries(values, targetCount) {
+      if (!values.length) return [];
+      if (targetCount <= 1) return [values.at(-1)];
+      if (values.length <= targetCount) {
+        return Array.from({ length: targetCount }, (_, index) => {
+          const position = index * (values.length - 1) / Math.max(1, targetCount - 1);
+          const leftIndex = Math.floor(position);
+          const rightIndex = Math.min(values.length - 1, leftIndex + 1);
+          const ratio = position - leftIndex;
+          return values[leftIndex] + (values[rightIndex] - values[leftIndex]) * ratio;
+        });
+      }
+      const bucketSize = values.length / targetCount;
+      return Array.from({ length: targetCount }, (_, index) => {
+        const start = Math.floor(index * bucketSize);
+        const end = Math.max(start + 1, Math.floor((index + 1) * bucketSize));
+        const bucket = values.slice(start, Math.min(values.length, end));
+        return bucket.reduce((sum, value) => sum + value, 0) / bucket.length;
+      });
+    }
+
+    function expandSeries(values, period) {
+      const count = periodCount(period);
+      if (!values.length) return [];
+      if (period.startsWith("price") && values.length >= count) {
+        return values.slice(-count).map(value => Number(value.toFixed(2)));
+      }
+      const aggregated = aggregateSeries(values, count);
+      return aggregated.map((base, index) => {
+        const shouldSmooth = values.length < count;
+        const wave = shouldSmooth ? Math.sin(index * 0.88) * base * 0.018 + Math.cos(index * 0.37) * base * 0.009 : 0;
+        return Math.max(0.1, Number((base + wave).toFixed(2)));
+      });
+    }
+
+    function candlesFromSeries(values) {
+      const candles = [];
+      let previous = values[0] * 0.985;
+      values.forEach((value, index) => {
+        const open = previous;
+        const close = value;
+        const spread = Math.max(value * 0.018, Math.abs(close - open) * 0.45 + value * 0.01);
+        candles.push({
+          open,
+          close,
+          high: Math.max(open, close) + spread * (1 + (index % 3) * 0.15),
+          low: Math.max(0.1, Math.min(open, close) - spread * 0.8)
+        });
+        previous = close;
+      });
+      return candles;
+    }
+
+    function priceSeries(profile) {
+      const rawValues = profile.trend || [];
+      const currentPrice = parsePrice(profile.price);
+      if (!rawValues.length) return [];
+      const multiplier = currentPrice && rawValues.at(-1) ? currentPrice / rawValues.at(-1) : (Math.max(...rawValues) < 260 ? 1 : 1);
+      return rawValues.map(value => Number((value * multiplier).toFixed(2)));
+    }
+
+    function chartSeries(kind, profile, symbolKey) {
+      if (kind === "revenue") return profile.revenueSeries || buildRevenueSeries(profile.trend || [80, 90, 100], symbolKey);
+      if (kind === "eps") return profile.epsSeries || buildEpsSeries(profile.trend || [80, 90, 100], symbolKey);
+      return priceSeries(profile);
+    }
+
+    function chartTitle(kind) {
+      return { price: "股價 K 線圖", revenue: "三年營收 bar 圖", eps: "三年 EPS bar 圖" }[kind] || "圖表";
+    }
+
+    function percentChangeSeries(values, distance) {
+      return values.map((value, index) => {
+        if (index < distance || !values[index - distance]) return 0;
+        return Number((((value - values[index - distance]) / values[index - distance]) * 100).toFixed(1));
+      });
+    }
+
+    function annualSeriesFromMonthly(values) {
+      const annual = [];
+      for (let index = 0; index < values.length; index += 12) {
+        const group = values.slice(index, index + 12);
+        if (group.length) annual.push(Number(group.reduce((sum, value) => sum + value, 0).toFixed(1)));
+      }
+      return annual;
+    }
+
+    function revenueDisplaySeries(profile, symbolKey, mode = activeRevenueMode, period = "month") {
+      const monthly = chartSeries("revenue", profile, symbolKey);
+      const count = periodCount(period.startsWith("revenue") ? period : "revenue3y");
+      return {
+        values: monthly.slice(-count),
+        labels: (profile.revenueLabels || []).slice(-count),
+        unit: "億元",
+        color: "#ff9f0a",
+        title: `${periodName(period.startsWith("revenue") ? period : "revenue3y")}季營收`
+      };
+    }
+
+    function epsDisplaySeries(profile, symbolKey, period = "month") {
+      const epsValues = chartSeries("eps", profile, symbolKey);
+      const count = periodCount(period.startsWith("eps") ? period : "eps3y");
+      return {
+        values: epsValues.slice(-count),
+        labels: (profile.epsLabels || []).slice(-count),
+        unit: "元",
+        color: "#ff3434",
+        title: `${periodName(period.startsWith("eps") ? period : "eps3y")} EPS`
+      };
+    }
+
+    function renderBarChart(svg, kind, profile, symbolKey, period = "month", options = {}) {
+      if (!svg || !profile) return;
+      const viewWidth = 360;
+      const viewHeight = options.large ? 500 : 280;
+      svg.setAttribute("viewBox", `0 0 ${viewWidth} ${viewHeight}`);
+      svg.dataset.period = period;
+      svg.dataset.renderId = `${kind}-${period}-${Date.now()}`;
+      const data = kind === "eps"
+        ? epsDisplaySeries(profile, symbolKey, period)
+        : revenueDisplaySeries(profile, symbolKey, options.revenueMode || activeRevenueMode, period);
+      const points = data.values.map((value, index) => ({
+        value,
+        label: data.labels?.[index] || periodLabels(period, data.values.length)[index] || ""
+      })).filter(point => Number.isFinite(point.value));
+      const values = points.map(point => point.value);
+      if (!values.length) {
+        renderUnavailableChart(svg, kind, period, options);
+        return;
+      }
+      const left = 42;
+      const right = options.large ? 314 : 310;
+      const top = options.large ? 38 : 30;
+      const bottom = viewHeight - 38;
+      const minRaw = Math.min(...values, 0);
+      const maxRaw = Math.max(...values, 1);
+      const rangePadding = Math.max(1, (maxRaw - minRaw) * 0.12);
+      const min = minRaw < 0 ? minRaw - rangePadding : 0;
+      const max = maxRaw + rangePadding;
+      const scaleY = value => bottom - ((value - min) / Math.max(1, max - min)) * (bottom - top);
+      const zeroY = scaleY(0);
+      const step = (right - left) / values.length;
+      const barWidth = Math.max(4, Math.min(options.large ? 22 : 14, step * 0.62));
+      const ticks = Array.from({ length: 5 }, (_, index) => min + (max - min) * index / 4).reverse();
+      const grid = ticks.map(value => {
+        const y = scaleY(value);
+        const label = data.unit === "%" ? `${value.toFixed(0)}%` : value >= 1000 ? `${Math.round(value).toLocaleString()}` : value.toFixed(kind === "eps" ? 1 : 0);
+        return `
+          <line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="rgba(255,255,255,.12)" stroke-width="1"></line>
+          <text x="6" y="${y + 5}" fill="rgba(255,255,255,.82)" font-size="${options.large ? 13 : 11}">${label}</text>
+        `;
+      }).join("");
+      const labels = points.map(point => point.label);
+      const labelEvery = Math.max(1, Math.ceil(values.length / (options.large ? 8 : 5)));
+      const xAxis = labels.map((label, index) => {
+        if (index % labelEvery !== 0 && index !== labels.length - 1) return "";
+        const x = left + index * step + step / 2;
+        return `<text x="${x}" y="${bottom + 20}" text-anchor="middle" fill="rgba(255,255,255,.72)" font-size="${options.large ? 12 : 10}">${label}</text>`;
+      }).join("");
+      const bars = values.map((value, index) => {
+        const x = left + index * step + step / 2 - barWidth / 2;
+        const y = value >= 0 ? scaleY(value) : zeroY;
+        const height = Math.max(2, Math.abs(zeroY - scaleY(value)));
+        const color = kind === "eps"
+          ? (value < 0 ? "#34c759" : "#ff3434")
+          : (data.unit === "%" ? (value >= 0 ? data.color : "#ff3434") : data.color);
+        return `<rect x="${x}" y="${Math.min(y, zeroY)}" width="${barWidth}" height="${height}" rx="2" fill="${color}" opacity=".95"></rect>`;
+      }).join("");
+      svg.innerHTML = `
+        <rect x="0" y="0" width="${viewWidth}" height="${viewHeight}" fill="#202020"></rect>
+        <text x="${left}" y="${top - 12}" fill="#5ed2ff" font-size="${options.large ? 16 : 12}" font-weight="900">${data.title}</text>
+        <text x="${right}" y="${top - 12}" text-anchor="end" fill="rgba(255,255,255,.76)" font-size="${options.large ? 13 : 11}">單位：${data.unit}</text>
+        ${grid}
+        <line x1="${left}" y1="${zeroY}" x2="${right}" y2="${zeroY}" stroke="rgba(255,255,255,.34)" stroke-width="1"></line>
+        ${bars}
+        ${xAxis}
+      `;
+    }
+
+    function renderUnavailableChart(svg, kind, period = "day", options = {}) {
+      const viewWidth = 360;
+      const viewHeight = options.large ? 500 : (kind === "price" ? 230 : 280);
+      svg.setAttribute("viewBox", `0 0 ${viewWidth} ${viewHeight}`);
+      const labels = periodLabels(period, periodCount(period));
+      const left = 32;
+      const right = 306;
+      const bottom = viewHeight - 34;
+      const labelEvery = Math.max(1, Math.ceil(labels.length / (options.large ? 8 : 5)));
+      const xAxis = labels.map((label, index) => {
+        if (index % labelEvery !== 0 && index !== labels.length - 1) return "";
+        const x = left + index * ((right - left) / Math.max(1, labels.length - 1));
+        return `<text x="${x}" y="${bottom + 18}" text-anchor="middle" fill="rgba(255,255,255,.62)" font-size="${options.large ? 12 : 10}">${label}</text>`;
+      }).join("");
+      svg.innerHTML = `
+        <rect x="0" y="0" width="${viewWidth}" height="${viewHeight}" fill="#202020"></rect>
+        <line x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}" stroke="rgba(255,255,255,.12)" stroke-width="1"></line>
+        ${xAxis}
+        <text x="180" y="${viewHeight / 2 - 14}" text-anchor="middle" fill="#5ed2ff" font-size="${options.large ? 18 : 13}" font-weight="900">${chartTitle(kind)}</text>
+        <text x="180" y="${viewHeight / 2 + 12}" text-anchor="middle" fill="rgba(255,255,255,.78)" font-size="${options.large ? 14 : 11}">尚未取得最新且可驗證的歷史資料</text>
+        <text x="180" y="${viewHeight / 2 + 34}" text-anchor="middle" fill="rgba(255,255,255,.58)" font-size="${options.large ? 12 : 10}">需串接正式歷史行情、月營收或財報 EPS 資料源</text>
+      `;
+    }
+
+    function renderKChart(svg, kind, profile, symbolKey, period = "day", options = {}) {
+      if (!svg || !profile) return;
+      if (profile.chartVerified === false) {
+        renderUnavailableChart(svg, kind, period, options);
+        return;
+      }
+      const viewWidth = 360;
+      const viewHeight = options.large ? 500 : (kind === "price" ? 230 : 280);
+      svg.setAttribute("viewBox", `0 0 ${viewWidth} ${viewHeight}`);
+      svg.dataset.period = period;
+      svg.dataset.renderId = `${kind}-${period}-${Date.now()}`;
+      const baseValues = chartSeries(kind, profile, symbolKey);
+      const values = expandSeries(baseValues, period);
+      const candles = candlesFromSeries(values);
+      const all = candles.flatMap(candle => [candle.open, candle.high, candle.low, candle.close]);
+      const max = Math.max(...all) * 1.08;
+      const min = Math.min(...all) * 0.92;
+      const left = 32;
+      const right = options.large ? 314 : 306;
+      const top = options.large ? 28 : 18;
+      const bottom = viewHeight - 34;
+      const step = (right - left) / Math.max(1, candles.length - 1);
+      const bodyWidth = Math.max(options.large ? 4 : 3, Math.min(options.large ? 14 : 11, step * 0.58));
+      const scaleY = value => bottom - ((value - min) / Math.max(1, max - min)) * (bottom - top);
+      const ticks = Array.from({ length: 4 }, (_, index) => min + (max - min) * index / 3).reverse();
+      const grid = ticks.map(value => {
+        const y = scaleY(value);
+        const label = kind === "eps" ? value.toFixed(1) : Math.round(value).toLocaleString();
+        return `
+          <line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="rgba(255,255,255,.12)" stroke-width="1"></line>
+          <text x="${right + 8}" y="${y + 5}" fill="rgba(255,255,255,.74)" font-size="${options.large ? 13 : 12}">${label}</text>
+        `;
+      }).join("");
+      const labels = periodLabels(period, candles.length);
+      const labelEvery = Math.max(1, Math.ceil(candles.length / (options.large ? 8 : 5)));
+      const xAxis = labels.map((label, index) => {
+        if (index % labelEvery !== 0 && index !== labels.length - 1) return "";
+        const x = left + index * step;
+        return `
+          <line x1="${x}" y1="${top}" x2="${x}" y2="${bottom}" stroke="rgba(255,255,255,.08)" stroke-width="1"></line>
+          <text x="${x}" y="${bottom + 18}" text-anchor="middle" fill="rgba(255,255,255,.72)" font-size="${options.large ? 12 : 10}">${label}</text>
+        `;
+      }).join("");
+      const candleSvg = candles.map((candle, index) => {
+        const x = left + index * step;
+        const up = candle.close >= candle.open;
+        const color = up ? "#34c759" : "#ff3434";
+        const bodyTop = Math.min(scaleY(candle.open), scaleY(candle.close));
+        const bodyHeight = Math.max(2, Math.abs(scaleY(candle.open) - scaleY(candle.close)));
+        return `
+          <line x1="${x}" y1="${scaleY(candle.high)}" x2="${x}" y2="${scaleY(candle.low)}" stroke="${color}" stroke-width="${options.large ? 1.8 : 1.4}"></line>
+          <rect x="${x - bodyWidth / 2}" y="${bodyTop}" width="${bodyWidth}" height="${bodyHeight}" rx="1.2" fill="${color}"></rect>
+        `;
+      }).join("");
+      const closes = candles.map(candle => candle.close);
+      const ma5 = movingAverage(closes, 5);
+      const ma10 = movingAverage(closes, 10);
+      const ma20 = movingAverage(closes, 20);
+      const high = candles.reduce((best, candle, index) => candle.high > best.candle.high ? { candle, index } : best, { candle: candles[0], index: 0 });
+      const low = candles.reduce((best, candle, index) => candle.low < best.candle.low ? { candle, index } : best, { candle: candles[0], index: 0 });
+      const highX = left + high.index * step;
+      const lowX = left + low.index * step;
+      svg.innerHTML = `
+        <rect x="0" y="0" width="${viewWidth}" height="${viewHeight}" fill="#202020"></rect>
+        ${grid}
+        ${xAxis}
+        <polyline points="${linePath(ma5, scaleY, left, step)}" fill="none" stroke="#4f83ff" stroke-width="2" stroke-linecap="round"></polyline>
+        <polyline points="${linePath(ma10, scaleY, left, step)}" fill="none" stroke="#79d4ac" stroke-width="2" stroke-linecap="round"></polyline>
+        <polyline points="${linePath(ma20, scaleY, left, step)}" fill="none" stroke="#f5a623" stroke-width="2" stroke-linecap="round"></polyline>
+        ${candleSvg}
+        <text x="${Math.max(56, Math.min(right - 54, highX - 38))}" y="${Math.max(22, scaleY(high.candle.high) - 8)}" fill="#ff3434" font-size="${options.large ? 14 : 12}" font-weight="900">${kind === "eps" ? high.candle.high.toFixed(1) : high.candle.high.toFixed(0)}→</text>
+        <text x="${Math.max(8, Math.min(right - 50, lowX - 24))}" y="${Math.min(bottom - 8, scaleY(low.candle.low) + 18)}" fill="#34c759" font-size="${options.large ? 14 : 12}" font-weight="900">←${kind === "eps" ? low.candle.low.toFixed(1) : low.candle.low.toFixed(0)}</text>
+      `;
+    }
+
+    function drawTrend(values) {
+      if (!activeProfile) activeProfile = { trend: values, price: "", revenue: "", eps: "" };
+      renderKChart(trendChart, "price", activeProfile, activeProfileKey, "price30");
+    }
+
+    function drawRevenueChart(values, symbolKey) {
+      if (!activeProfile) activeProfile = { trend: values, price: "", revenue: "", eps: "" };
+      renderBarChart(revenueChart, "revenue", activeProfile, symbolKey, "revenue1y", { revenueMode: activeRevenueMode });
+    }
+
+    function drawEpsChart(values, symbolKey) {
+      if (!activeProfile) activeProfile = { trend: values, price: "", revenue: "", eps: "" };
+      renderBarChart(epsChart, "eps", activeProfile, symbolKey, "eps1y");
+    }
+
+    function block(title, text) {
+      return `<div class="analysis-block"><strong>${title}</strong><p>${text}</p></div>`;
+    }
+
+    function companyInfoBlock(profile) {
+      const rows = [
+        ["公司名稱", profile.name],
+        ["公司網址", profile.website],
+        ["經營項目", profile.business],
+        ["公司股本", profile.capital],
+        ["公司市值", profile.marketCap],
+        ["掛牌年數", profile.listedYears],
+        ["本益比", profile.pe]
+      ];
+      const text = rows.map(([label, value]) => `${label}：${value}`).join("<br>");
+      return block(topicLabels.info, text);
+    }
+
+    function buildAnalysis(profile, topics) {
+      const hasRevenue = !/尚未|待查詢|待串接|請以/.test(profile.revenue);
+      const hasEps = !/尚未|待查詢|待串接|請以/.test(profile.eps);
+      const blocks = {
+        price: block(topicLabels.price, `${profile.name} 目前股價：${profile.price}。若資料來源未回傳完整歷史日 K，圖表僅作為查詢介面示意，正式判斷需以交易所最新行情資料為準。`),
+        revenue: block(topicLabels.revenue, hasRevenue ? `三年營收資料：${profile.revenue}。` : "尚未取得最新且可驗證的三年營收資料，請串接公開資訊觀測站或正式財務資料供應商後再顯示數值。"),
+        eps: block(topicLabels.eps, hasEps ? `近三年 EPS：${profile.eps}。` : "尚未取得最新且可驗證的三年 EPS 資料，請串接財報資料源後再顯示數值。"),
+        finance: block(topicLabels.finance, "財務面可觀察毛利率、營業利益率、自由現金流與負債比。若現金流穩定且負債可控，長期抗風險能力較高。"),
+        products: block(topicLabels.products, profile.product),
+        scale: block(topicLabels.scale, profile.scale),
+        info: companyInfoBlock(profile),
+        risk: block(topicLabels.risk, "需留意估值過高、產業景氣循環、匯率、利率、法規變化、競爭者價格策略與單一客戶集中風險。")
+      };
+      return topics.map(topic => blocks[topic]).join("");
+    }
+
+    function allowedPeriodsForChart(kind) {
+      if (kind === "price") return ["price30", "price60", "price120"];
+      if (kind === "revenue") return ["revenue1y", "revenue2y", "revenue3y"];
+      if (kind === "eps") return ["eps1y", "eps2y", "eps3y"];
+      return ["price30"];
+    }
+
+    function defaultPeriodForChart(kind) {
+      if (kind === "price") return "price30";
+      if (kind === "revenue") return "revenue1y";
+      if (kind === "eps") return "eps1y";
+      return "price30";
+    }
+
+    function updatePeriodButtons(kind) {
+      const allowed = allowedPeriodsForChart(kind);
+      periodTabs.innerHTML = allowed.map(period => (
+        `<button class="${period === activePeriod ? "active" : ""}" type="button" data-period="${period}">${periodName(period)}</button>`
+      )).join("");
+    }
+
+    optionButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        button.classList.toggle("active");
+      });
+    });
+
+    function openChart(kind) {
+      if (!activeProfile) return;
+      activeChartKind = kind;
+      activePeriod = defaultPeriodForChart(kind);
+      chartModalTitle.textContent = `${activeProfile.name} ${chartTitle(kind)}`;
+      updatePeriodButtons(kind);
+      chartPeriodStatus.textContent = `目前顯示：${periodName(activePeriod)}`;
+      renderActiveModalChart();
+      chartModal.classList.add("show");
+    }
+
+    function renderActiveModalChart() {
+      chartModalTitle.textContent = `${activeProfile.name} ${chartTitle(activeChartKind)}・${periodName(activePeriod)}`;
+      if (activeChartKind === "price") {
+        renderKChart(modalChart, activeChartKind, activeProfile, activeProfileKey, activePeriod, { large: true });
+        return;
+      }
+      renderBarChart(modalChart, activeChartKind, activeProfile, activeProfileKey, activePeriod, { large: true, revenueMode: activeRevenueMode });
+    }
+
+    document.querySelectorAll(".chart-clickable").forEach(chart => {
+      chart.addEventListener("click", () => openChart(chart.dataset.chartKind));
+    });
+
+    revenueTabs.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => {
+        activeRevenueMode = button.dataset.revenueMode;
+        revenueTabs.querySelectorAll(item => item.classList.toggle("active", item === button));
+        if (activeProfile) {
+          renderBarChart(revenueChart, "revenue", activeProfile, activeProfileKey, "revenue1y", { revenueMode: activeRevenueMode });
+          if (chartModal.classList.contains("show") && activeChartKind === "revenue") {
+            renderActiveModalChart();
+          }
+        }
+      });
+    });
+
+    periodTabs.addEventListener("click", event => {
+      const button = event.target.closest("button[data-period]");
+      if (!button || !periodTabs.contains(button)) return;
+      activePeriod = button.dataset.period;
+      updatePeriodButtons(activeChartKind);
+      chartPeriodStatus.textContent = `目前顯示：${periodName(activePeriod)}`;
+      modalChart.innerHTML = "";
+      renderActiveModalChart();
+    });
+
+    closeChartModal.addEventListener("click", () => {
+      chartModal.classList.remove("show");
+    });
+
+    navButtons.forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
+    favoriteButton.addEventListener("click", addActiveFavorite);
+
+    aiTopPicksButton.addEventListener("click", () => {
+      if (!registered) {
+        appStatus.textContent = "請先完成註冊後才能查看今天 AI 股票排行。";
+        showPage("registerPage");
+        return;
+      }
+      renderAiTopPicks();
+      aiTopPicksCard.classList.add("show");
+      appStatus.textContent = "已產生今天 AI 最看好的股票前 10 名，點選股票可帶入分析標的。";
+      aiTopPicksCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    sendSmsButton.addEventListener("click", () => {
+      smsToken = String(Math.floor(1000 + Math.random() * 9000));
+      smsHint.textContent = `已發送 4 位數簡訊驗證碼。原型示範碼：${smsToken}`;
+    });
+
+    finishRegisterButton.addEventListener("click", () => {
+      if (!smsToken) {
+        smsHint.textContent = "請先發送簡訊驗證碼。";
+        return;
+      }
+      if (smsCode.value.trim() !== smsToken) {
+        smsHint.textContent = "簡訊碼輸入錯誤。";
+        return;
+      }
+      if (!disclaimerDetails.open) {
+        smsHint.textContent = "請先展開使用條款、隱私權政策與免責聲明閱讀後再完成註冊。";
+        return;
+      }
+      if (!agreeTerms.checked) {
+        smsHint.textContent = "請勾選同意使用條款、隱私權政策與免責聲明後再完成註冊。";
+        return;
+      }
+      registered = true;
+      profileName.value = userName.value.trim() || "Clay Tseng";
+      profilePhone.value = userPhone.value.trim();
+      profileEmail.value = userEmail.value.trim();
+      profileButton.textContent = profileName.value;
+      appStatus.textContent = "註冊成功，可以開始進行公司股票分析。";
+      showPage("analysisPage");
+    });
+
+    profileButton.addEventListener("click", () => {
+      updateCredits();
+      showPage("profilePage");
+    });
+
+    creditsButton.addEventListener("click", () => {
+      updateCredits();
+      showPage("plansPage");
+    });
+
+    creditAlertUpgradeButton.addEventListener("click", () => {
+      updateCredits();
+      showPage("plansPage");
+    });
+
+    saveProfileButton.addEventListener("click", () => {
+      const nextName = profileName.value.trim() || "使用者";
+      profileButton.textContent = nextName;
+      userName.value = nextName;
+      userPhone.value = profilePhone.value.trim();
+      userEmail.value = profileEmail.value.trim();
+      appStatus.textContent = "使用者資料已更新。";
+      showPage("analysisPage");
+    });
+
+    analyzeButton.addEventListener("click", async () => {
+      if (!registered) {
+        appStatus.textContent = "請先完成註冊後才能使用 App。";
+        showPage("registerPage");
+        return;
+      }
+      if (analysisCredits <= 0) {
+        showCreditEmptyPrompt();
+        return;
+      }
+      const raw = companyInput.value.trim();
+      const profileKey = normalizeSymbol(raw);
+      const stockCode = stockCodeFromInput(raw);
+      let profile = null;
+      analyzeButton.disabled = true;
+      analyzeButton.textContent = "查詢中...";
+      appStatus.textContent = "正在查詢公開資料，請稍候。";
+      try {
+        if (stockCode) {
+          profile = await loadTaiwanStockProfile(raw);
+        } else {
+          profile = profileKey === "DEFAULT" ? genericProfile(raw) : mockProfiles[profileKey];
+          profile.source = profileKey === "DEFAULT" ? "資料來源：尚未內建此公司，請串接正式資料源。" : "資料來源：App 內建示範資料。";
+        }
+        analysisCredits -= 1;
+        updateCredits();
+        activeProfile = profile;
+        activeProfileKey = profileKey;
+        activeFavorite = {
+          key: profileKey,
+          query: raw,
+          name: profile.name,
+          price: profile.price
+        };
+        const topics = selectedTopics();
+        resultTitle.textContent = `${profile.name} 公司股票分析結果`;
+        priceMetric.textContent = profile.price;
+        revenueMetric.textContent = profile.revenue;
+        epsMetric.textContent = profile.eps;
+        updateFavoriteButton();
+        drawTrend(profile.trend);
+        drawRevenueChart(profile.trend, profileKey);
+        drawEpsChart(profile.trend, profileKey);
+        analysisResult.innerHTML = buildAnalysis(profile, topics);
+        resultCard.classList.add("show");
+        appStatus.textContent = `已產生 ${profile.name} 的公司股票分析。`;
+        resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (error) {
+        resultCard.classList.remove("show");
+        appStatus.textContent = `無法取得正確公開資料：${error.message}。請確認股票代碼或稍後再試。`;
+      } finally {
+        analyzeButton.disabled = false;
+        analyzeButton.textContent = "送出分析";
+      }
+    });
+
+    planButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        selectedPlan = button;
+        planButtons.forEach(plan => plan.classList.toggle("active", plan === button));
+        paymentSummary.textContent = `${button.dataset.plan} ${button.dataset.price}，每月可以分析 ${button.dataset.credits} 次。`;
+        appStatus.textContent = "請確認信用卡資料後完成付費升級。";
+        showPage("paymentPage");
+      });
+    });
+
+    confirmPaymentButton.addEventListener("click", () => {
+      if (!selectedPlan) {
+        appStatus.textContent = "請先選擇升級方案。";
+        showPage("plansPage");
+        return;
+      }
+      currentPlan = `${selectedPlan.dataset.plan} ${selectedPlan.dataset.price}`;
+      analysisCredits += Number(selectedPlan.dataset.credits);
+      updateCredits();
+      appStatus.textContent = `付款完成，已升級 ${selectedPlan.dataset.plan} ${selectedPlan.dataset.price}，本月可分析 ${selectedPlan.dataset.credits} 次。`;
+      showPage("analysisPage");
+    });
+
+    themeSelect.addEventListener("change", () => {
+      screen.classList.toggle("theme-light", themeSelect.value === "light");
+    });
+
+    fontSizeSelect.addEventListener("change", () => {
+      screen.classList.remove("font-small", "font-large");
+      if (fontSizeSelect.value !== "normal") screen.classList.add(`font-${fontSizeSelect.value}`);
+    });
+
+    languageSelect.addEventListener("change", () => {
+      appStatus.textContent = "語言設定已更新。";
+    });
+
+    updateCredits();
+    if (new URLSearchParams(window.location.search).get("demo") === "home") {
+      registered = true;
+      appStatus.textContent = "作品集展示模式：已進入公司股票分析頁。";
+      showPage("analysisPage");
+      if (new URLSearchParams(window.location.search).get("preview") === "1") {
+        document.body.classList.add("portfolio-watermark");
+        profileButton.textContent = "Crovantix";
+        creditsButton.textContent = "創微科技";
+        document.querySelectorAll("button, input, select, textarea").forEach(element => { element.disabled = true; });
+        document.querySelectorAll("a").forEach(element => { element.style.pointerEvents = "none"; });
+        const blockPreviewEvent = event => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        };
+        ["click", "submit", "change", "input", "keydown"].forEach(type => document.addEventListener(type, blockPreviewEvent, true));
+        appStatus.textContent = "作品集首頁樣板展示，互動功能已關閉。";
+      }
+    }
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

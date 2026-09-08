@@ -1,0 +1,1600 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lawyer iOS App Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071019;
+      --ink: #f7fbff;
+      --muted: #9baabc;
+      --line: rgba(255,255,255,.12);
+      --panel: #101923;
+      --panel-2: #182635;
+      --panel-3: #22364b;
+      --accent: #64d2ff;
+      --gold: #ffd60a;
+      --green: #30d158;
+      --red: #ff453a;
+      --font: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      padding: 28px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 8%, rgba(100,210,255,.18), transparent 24rem),
+        radial-gradient(circle at 90% 90%, rgba(255,214,10,.12), transparent 22rem),
+        #050b12;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100%, 1060px);
+      display: grid;
+      grid-template-columns: 390px minmax(280px, 1fr);
+      gap: 44px;
+      align-items: start;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #334252, #05070a 34%, #3b4d5f);
+      box-shadow: 0 30px 80px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.16);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(100,210,255,.18), transparent 13rem),
+        linear-gradient(180deg, rgba(255,214,10,.08), transparent 34%),
+        var(--bg);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      font-size: var(--font);
+    }
+
+    .screen.theme-ink {
+      --bg: #09090d;
+      --panel: #15151d;
+      --panel-2: #20202b;
+      --panel-3: #2a2a38;
+      --accent: #a7f3d0;
+    }
+
+    .screen.theme-light {
+      color-scheme: light;
+      --bg: #f5f8fc;
+      --ink: #112033;
+      --muted: #5f7084;
+      --line: rgba(17,32,51,.13);
+      --panel: #ffffff;
+      --panel-2: #edf3f9;
+      --panel-3: #dfeaf4;
+      --accent: #0a84ff;
+    }
+
+    .screen.font-small { --font: 12px; }
+    .screen.font-large { --font: 16px; }
+
+    .island {
+      position: absolute;
+      z-index: 10;
+      top: 11px;
+      left: 50%;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+    }
+
+    .status {
+      height: 58px;
+      padding: 12px 26px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .app {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 84px;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-button,
+    .pill-button,
+    .primary,
+    .secondary {
+      border: 0;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .user-button {
+      max-width: 178px;
+      height: 36px;
+      padding: 0 12px;
+      color: #061018;
+      background: linear-gradient(135deg, #fff, #c7efff 45%, var(--accent));
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .pill-button {
+      height: 36px;
+      padding: 0 12px;
+      margin-left: auto;
+      color: #061018;
+      background: var(--gold);
+    }
+
+    .credit-button {
+      height: 36px;
+      min-width: 72px;
+      margin-left: auto;
+      border: 0;
+      border-radius: 999px;
+      color: #061018;
+      background: var(--gold);
+      font: inherit;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    h1 {
+      margin: 14px 0 6px;
+      font-size: calc(var(--font) + 20px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: calc(var(--font) - 1px);
+      line-height: 1.35;
+    }
+
+    .content {
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-right: 2px;
+    }
+
+    .content::-webkit-scrollbar { width: 0; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: calc(var(--font) + 4px);
+      line-height: 1.18;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: calc(var(--font) - 2px);
+      font-weight: 850;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 132px;
+      padding: 12px;
+      line-height: 1.45;
+      resize: none;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.05);
+      padding: 10px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      padding: 4px;
+      border-radius: 8px;
+      background: var(--panel-2);
+    }
+
+    .segmented button {
+      min-height: 36px;
+      border: 0;
+      border-radius: 6px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .segmented button.active {
+      color: #061018;
+      background: var(--accent);
+    }
+
+    .primary,
+    .secondary {
+      min-height: 44px;
+      color: #061018;
+      background: var(--accent);
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: var(--panel-3);
+      border-radius: 8px;
+    }
+
+    .primary:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: calc(var(--font) - 2px);
+      line-height: 1.35;
+    }
+
+    .terms {
+      display: none;
+      max-height: 138px;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font-size: calc(var(--font) - 2px);
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+
+    .terms.show { display: block; }
+
+    .consent {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .consent input {
+      width: 18px;
+      min-height: 18px;
+      accent-color: var(--green);
+    }
+
+    .result {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(100,210,255,.12);
+      border: 1px solid rgba(100,210,255,.22);
+    }
+
+    .result.hidden { display: none; }
+
+    .result-block {
+      display: grid;
+      gap: 4px;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--panel-2);
+    }
+
+    .result-block strong {
+      color: var(--accent);
+      font-size: calc(var(--font) - 1px);
+    }
+
+    .result-block p {
+      margin: 0;
+      color: var(--ink);
+      font-size: calc(var(--font) - 1px);
+      line-height: 1.45;
+    }
+
+    .upgrade-alert {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      color: #061018;
+      background: var(--gold);
+      font-weight: 950;
+    }
+
+    .upgrade-alert.show { display: flex; }
+
+    .upgrade-alert button {
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: #fff;
+      background: #111827;
+      font: inherit;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .office,
+    .plan {
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
+    }
+
+    .office {
+      width: 100%;
+      color: var(--ink);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .office strong,
+    .plan strong {
+      color: var(--accent);
+      font-size: calc(var(--font) + 1px);
+    }
+
+    .office a {
+      color: var(--accent);
+      font-weight: 850;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .plan.selected {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(255,214,10,.18);
+    }
+
+    .modal {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(3,8,14,.68);
+      backdrop-filter: blur(12px);
+    }
+
+    .modal.show { display: grid; }
+
+    .modal-card {
+      width: 100%;
+      max-height: 86%;
+      overflow-y: auto;
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .modal-card h2 {
+      margin: 0;
+      font-size: calc(var(--font) + 5px);
+    }
+
+    .nav {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      height: 64px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-radius: 0 0 38px 38px;
+      background: rgba(16,25,35,.86);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav button {
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 3px;
+      font-size: calc(var(--font) - 2px);
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .nav button.active {
+      color: var(--accent);
+    }
+
+    .locked .main-ui,
+    .locked .nav { display: none; }
+
+    .registration { display: none; }
+    .locked .registration {
+      display: block;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 0 2px 18px 0;
+      scrollbar-width: none;
+    }
+
+    .locked .registration::-webkit-scrollbar { width: 0; }
+
+    .side {
+      padding-top: 24px;
+    }
+
+    .side h2 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.05;
+    }
+
+    .side p {
+      margin: 0 0 14px;
+      color: #a9b5c5;
+      line-height: 1.65;
+    }
+
+    .specs {
+      display: grid;
+      gap: 10px;
+    }
+
+    .spec {
+      padding: 14px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .spec b { display: block; margin-bottom: 5px; }
+    .spec span { color: #b7c2d0; line-height: 1.45; }
+
+    @media (max-width: 860px) {
+      body { padding: 18px 12px; }
+      .stage { grid-template-columns: 1fr; place-items: center; }
+      .side { display: none; }
+    }
+    body.portfolio-watermark::after {
+      content: "Crovantix";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      z-index: 9999;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      color: rgba(85, 215, 255, .1);
+      font-size: clamp(64px, 18vw, 168px);
+      font-weight: 950;
+      letter-spacing: 0;
+      white-space: nowrap;
+      text-shadow: 0 0 34px rgba(85, 215, 255, .18);
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="lawyer ios app prototype">
+      <div class="screen locked" id="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status"><span>9:41</span><span>5G ▰</span></div>
+        <div class="app">
+          <div class="toolbar main-ui">
+            <button class="user-button" id="userButton" type="button">Clay Tseng</button>
+            <button class="credit-button" id="creditButton" type="button">點數 3</button>
+          </div>
+          <h1 id="appTitle">法律助理</h1>
+          <p class="subline" id="appStatus">請先完成首次註冊與條文同意。</p>
+          <div class="upgrade-alert main-ui" id="upgradeAlert">
+            <span>點數已用完，請點選升級</span>
+            <button id="upgradeAlertButton" type="button">升級</button>
+          </div>
+
+          <section class="registration">
+            <div class="card">
+              <h2 id="registerTitle">首次使用註冊</h2>
+              <label>姓名<input id="regName" value="Clay Tseng" placeholder="請輸入姓名"></label>
+              <label>電話<input id="regPhone" value="0912-345-678" inputmode="tel" placeholder="請輸入電話"></label>
+              <label>Email<input id="regEmail" value="clay.tseng@example.com" inputmode="email" placeholder="請輸入 Email"></label>
+              <div class="segmented" id="regGender">
+                <button class="active" type="button" data-gender="男">男</button>
+                <button type="button" data-gender="女">女</button>
+              </div>
+              <label>年齡<input id="regAge" value="32" inputmode="numeric" placeholder="請輸入年齡"></label>
+              <div class="row">
+                <input id="regCode" maxlength="4" inputmode="numeric" placeholder="4 位數驗證碼">
+                <button class="secondary" id="sendRegCode" type="button">傳送驗證碼</button>
+              </div>
+              <p class="hint" id="regHint">尚未傳送驗證碼。</p>
+              <button class="secondary" id="toggleTerms" type="button">展開使用條款、隱私權政策與免責聲明</button>
+              <div class="terms" id="termsText">法律助理 App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「法律助理 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供法律資訊查詢、法條搜尋、案例分析、AI 法律助理、文件整理、法律問題參考、語音互動及相關法律輔助服務，所有內容僅供一般法律資訊與參考用途。
+
+二、AI 與法律內容聲明
+
+本 App 部分內容可能由 AI 系統自動生成，包括法律分析、法條說明、案例參考、文件建議、語音回覆或其他互動內容。
+
+本公司不保證相關內容之正確性、完整性、即時性、適法性或適用於特定案件。
+
+所有法律資訊、AI 分析、法條說明、案例內容與建議僅供一般參考用途，不構成正式法律意見、律師委任關係、訴訟保證或任何法律承諾。
+
+重大法律案件、契約簽署、訴訟程序或權利義務事項，建議使用者另行諮詢合格律師或專業法律人士。
+
+三、使用風險與免責聲明
+
+使用者應自行判斷並承擔使用本 App 所產生之一切風險與責任。
+
+本 App 僅提供法律資訊與 AI 輔助服務，本公司不保證任何法律分析、AI 回覆、案件結果、訴訟結果或法律建議之準確性或實現結果。
+
+使用者因依據本 App 提供之法律資訊、AI 回覆、法條內容、案例分析、文件建議或其他資訊所作之任何決定、法律行為、契約簽署、訴訟程序或其他行為而產生之損失、損害或爭議，均由使用者自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+本 App 之語音、AI、網路及第三方服務功能，可能受網路環境、裝置效能、第三方服務或系統狀況影響，本公司不保證服務之穩定性、即時性或完全無錯誤。
+
+四、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+* 使用者帳號資訊
+* Email
+* 裝置資訊
+* 使用紀錄
+* IP 位址
+* 法律問題內容
+* 文件與筆記資料
+* 語音內容
+* AI 互動紀錄
+* 崩潰紀錄與分析資料
+
+五、資料用途
+
+蒐集資料主要用於：
+
+* 提供法律資訊與 AI 助理服務
+* AI 法律分析與內容生成
+* 提供個人化法律輔助功能
+* 語音互動與 AI 回覆
+* 改善使用體驗
+* 系統安全維護
+* 客服支援
+* 防止詐騙、濫用或違法行為
+* 提升 AI 與系統服務品質
+
+六、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+* OpenAI
+* Firebase
+* Google Analytics
+* 語音辨識服務
+* 雲端儲存服務
+* AI 模型服務
+
+部分資料可能因服務需求而傳輸至第三方服務供應商。
+
+七、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、語音通訊或儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及裝置安全。
+
+八、使用者責任
+
+使用者不得利用本 App 從事任何違法、侵權、詐騙、騷擾、散布惡意程式或其他損害他人權益之行為。
+
+若因使用者違法或不當行為導致任何損害或法律責任，應由使用者自行負責。
+
+九、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、法律資料、AI 系統及相關內容，均屬本公司或合法授權人所有。
+
+未經授權不得重製、修改、散布、反向工程、破解或用於商業用途。
+
+十、使用者權利
+
+使用者得依法請求查詢、更正或刪除其個人資料。
+
+十一、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利，修改後內容將公布於本 App，使用者繼續使用即視為同意修改內容。</div>
+              <label class="consent"><input id="agreeTerms" type="checkbox">我已閱讀並同意使用條款、隱私權政策與免責聲明</label>
+              <button class="primary" id="finishRegister" type="button">完成註冊</button>
+              <p class="hint" id="registerMessage"></p>
+            </div>
+          </section>
+
+          <section class="content main-ui">
+            <div class="page active" id="casePage">
+              <div class="card">
+                <h2 id="caseTitle">輸入目前遇到的情形</h2>
+                <label>法律大類
+                  <select id="caseGroup">
+                    <option value="civil">民事類</option>
+                    <option value="family">家庭類</option>
+                    <option value="realestate">不動產類</option>
+                    <option value="labor">勞資類</option>
+                    <option value="criminal">刑事類</option>
+                    <option value="tech">網路 / 科技類</option>
+                    <option value="business">商業 / 公司類</option>
+                    <option value="admin">行政類</option>
+                    <option value="other">其他</option>
+                  </select>
+                </label>
+                <label>問題細項
+                  <select id="caseType"></select>
+                </label>
+                <label>
+                  <span id="caseLabel">情況說明（最多 200 字）</span>
+                  <textarea id="caseInput" maxlength="200" placeholder="例如：對方收了訂金後不履約，也不回訊息，我有匯款紀錄和對話截圖。"></textarea>
+                </label>
+                <p class="hint" id="counter">0 / 200</p>
+                <div class="row">
+                  <button class="secondary" id="clearCase" type="button">清除內容</button>
+                  <button class="primary" id="submitCase" type="button">送出分析</button>
+                </div>
+              </div>
+              <div class="result hidden" id="legalResult"></div>
+            </div>
+
+            <div class="page" id="consultPage">
+              <div class="card">
+                <h2>可聯繫法律事務所</h2>
+                <p class="hint">以下為原型示範資訊，實際委任前請自行確認律師資格、收費方式與服務範圍。</p>
+                <button class="office" type="button" data-office="明衡法律事務所" data-email="contact@mingheng-law.example" data-phone="02-2345-6789">
+                  <strong>明衡法律事務所</strong>
+                  <span>民事契約、消費糾紛、債務求償</span>
+                  <a href="https://example.com/mingheng-law" target="_blank" rel="noreferrer">https://example.com/mingheng-law</a>
+                  <span>Email：contact@mingheng-law.example</span>
+                  <span>電話：02-2345-6789</span>
+                </button>
+                <button class="office" type="button" data-office="承信聯合法律事務所" data-email="service@trust-law.example" data-phone="02-2766-8899">
+                  <strong>承信聯合法律事務所</strong>
+                  <span>刑事告訴、家事事件、勞資爭議</span>
+                  <a href="https://example.com/trust-law" target="_blank" rel="noreferrer">https://example.com/trust-law</a>
+                  <span>Email：service@trust-law.example</span>
+                  <span>電話：02-2766-8899</span>
+                </button>
+                <button class="office" type="button" data-office="和曜法律顧問中心" data-email="service@heyao-legal.example" data-phone="02-2555-1188">
+                  <strong>和曜法律顧問中心</strong>
+                  <span>企業法務、契約審閱、智慧財產</span>
+                  <a href="https://example.com/heyao-legal" target="_blank" rel="noreferrer">https://example.com/heyao-legal</a>
+                  <span>Email：service@heyao-legal.example</span>
+                  <span>電話：02-2555-1188</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="page" id="settingsPage">
+              <div class="card">
+                <h2 id="settingsTitle">設定</h2>
+                <label>App 背景顏色
+                  <select id="themeSelect">
+                    <option value="default">深色藍黑</option>
+                    <option value="ink">律師墨黑</option>
+                    <option value="light">明亮白</option>
+                  </select>
+                </label>
+                <label>字體大小
+                  <select id="fontSelect">
+                    <option value="normal">標準</option>
+                    <option value="small">小</option>
+                    <option value="large">大</option>
+                  </select>
+                </label>
+                <label>語言
+                  <select id="languageSelect">
+                    <option value="zh">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                </label>
+              </div>
+              <div class="card">
+                <h2>聯繫客服</h2>
+                <div class="result-block">
+                  <strong>問題回報、廣告投放、合作洽談</strong>
+                  <p>問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。</p>
+                </div>
+                <p class="hint">Email：support@law-assistant.example</p>
+              </div>
+            </div>
+
+            <div class="page" id="profilePage">
+              <div class="card">
+                <h2 id="profileTitle">使用者設定</h2>
+                <label>姓名<input id="profileName"></label>
+                <label>電話<input id="profilePhone" inputmode="tel"></label>
+                <div class="row">
+                  <input id="phoneCode" maxlength="4" inputmode="numeric" placeholder="電話驗證碼">
+                  <button class="secondary" id="sendPhoneCode" type="button">傳送碼</button>
+                </div>
+                <label>Email<input id="profileEmail" inputmode="email"></label>
+                <div class="row">
+                  <input id="emailCode" maxlength="4" inputmode="numeric" placeholder="Email 驗證碼">
+                  <button class="secondary" id="sendEmailCode" type="button">傳送碼</button>
+                </div>
+                <div class="segmented" id="profileGender">
+                  <button class="active" type="button" data-gender="男">男</button>
+                  <button type="button" data-gender="女">女</button>
+                </div>
+                <label>年齡<input id="profileAge" inputmode="numeric"></label>
+                <div class="row">
+                  <div class="stat"><span>目前方案</span><strong id="profilePlan">免費方案</strong></div>
+                  <div class="stat"><span>剩餘點數</span><strong id="profileCredits">3</strong></div>
+                </div>
+                <p class="hint" id="profileHint">修改電話或 Email 需先輸入對應驗證碼。</p>
+                <button class="primary" id="saveProfile" type="button">儲存資料</button>
+              </div>
+            </div>
+
+            <div class="page" id="upgradePage">
+              <div class="card">
+                <h2>升級方案</h2>
+                <p class="hint">選擇方案後按下升級付費，會進入信用卡付費頁面。</p>
+                <button class="plan selected" type="button" data-plan="Basic" data-credits="30" data-price="NTD$59">
+                  <strong>Basic NTD$59</strong>
+                  <span>每月可以 30 次</span>
+                </button>
+                <button class="plan" type="button" data-plan="Plus" data-credits="120" data-price="NTD$199">
+                  <strong>Plus NTD$199</strong>
+                  <span>每月可以 120 次</span>
+                </button>
+                <button class="plan" type="button" data-plan="Pro" data-credits="300" data-price="NTD$399">
+                  <strong>Pro NTD$399</strong>
+                  <span>每月可以 300 次</span>
+                </button>
+                <button class="plan" type="button" data-plan="VIP" data-credits="1000" data-price="NTD$999">
+                  <strong>VIP NTD$999</strong>
+                  <span>每月可以 1000 次</span>
+                </button>
+                <button class="primary" id="payUpgrade" type="button">升級付費</button>
+              </div>
+            </div>
+
+            <div class="page" id="paymentPage">
+              <div class="card">
+                <h2>信用卡付費</h2>
+                <p class="hint" id="paymentSummary">Basic NTD$59，每月可以 30 次。</p>
+                <label>信用卡號<input inputmode="numeric" placeholder="4242 4242 4242 4242"></label>
+                <div class="row">
+                  <label>有效期限<input inputmode="numeric" placeholder="MM / YY"></label>
+                  <label>安全碼<input inputmode="numeric" placeholder="CVC"></label>
+                </div>
+                <label>持卡人姓名<input placeholder="Clay Tseng"></label>
+                <button class="primary" id="completePayment" type="button">確認付款</button>
+              </div>
+            </div>
+          </section>
+
+          <nav class="nav" aria-label="main navigation">
+            <button class="active" data-page="casePage" type="button">諮詢</button>
+            <button data-page="consultPage" type="button">專業律師</button>
+            <button data-page="settingsPage" type="button">設定</button>
+          </nav>
+          <div class="modal" id="lawyerModal" aria-hidden="true">
+            <div class="modal-card">
+              <h2 id="lawyerModalTitle">聯繫法律事務所</h2>
+              <p class="hint" id="lawyerModalHint">請留下資料，後續將由專人聯繫。</p>
+              <label>姓名<input id="lawyerContactName" placeholder="請輸入姓名"></label>
+              <label>電話<input id="lawyerContactPhone" inputmode="tel" placeholder="請輸入電話"></label>
+              <label>要諮詢的問題<textarea id="lawyerContactQuestion" maxlength="200" placeholder="請簡述想諮詢的法律問題"></textarea></label>
+              <p class="hint" id="lawyerContactResult"></p>
+              <div class="row">
+                <button class="secondary" id="closeLawyerModal" type="button">取消</button>
+                <button class="primary" id="sendLawyerContact" type="button">送出</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <h2>法律助理 iOS App</h2>
+      <p>使用者先完成資料、驗證碼與條文同意，再輸入 200 字內情境，App 會整理處理建議、違法風險、提告成功機會與相關法條方向。</p>
+      <div class="specs">
+        <div class="spec"><b>首次使用</b><span>姓名、電話、Email、性別、年齡、4 位數驗證碼與條文同意。</span></div>
+        <div class="spec"><b>法律分析</b><span>回覆處理方式、違法疑慮、提告機率與參考法條。</span></div>
+        <div class="spec"><b>個人設定</b><span>電話與 Email 變更需重新傳送 4 位數驗證碼確認。</span></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const screen = document.querySelector("#screen");
+    const appStatus = document.querySelector("#appStatus");
+    const userButton = document.querySelector("#userButton");
+    const creditButton = document.querySelector("#creditButton");
+    const upgradeAlert = document.querySelector("#upgradeAlert");
+    const upgradeAlertButton = document.querySelector("#upgradeAlertButton");
+    const navButtons = [...document.querySelectorAll(".nav button")];
+    const pages = [...document.querySelectorAll(".page")];
+    const officeButtons = [...document.querySelectorAll(".office")];
+    const lawyerModal = document.querySelector("#lawyerModal");
+    const lawyerModalTitle = document.querySelector("#lawyerModalTitle");
+    const lawyerContactName = document.querySelector("#lawyerContactName");
+    const lawyerContactPhone = document.querySelector("#lawyerContactPhone");
+    const lawyerContactQuestion = document.querySelector("#lawyerContactQuestion");
+    const lawyerContactResult = document.querySelector("#lawyerContactResult");
+    const closeLawyerModal = document.querySelector("#closeLawyerModal");
+    const sendLawyerContact = document.querySelector("#sendLawyerContact");
+    const regName = document.querySelector("#regName");
+    const regPhone = document.querySelector("#regPhone");
+    const regEmail = document.querySelector("#regEmail");
+    const regAge = document.querySelector("#regAge");
+    const regCode = document.querySelector("#regCode");
+    const sendRegCode = document.querySelector("#sendRegCode");
+    const regHint = document.querySelector("#regHint");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const toggleTerms = document.querySelector("#toggleTerms");
+    const termsText = document.querySelector("#termsText");
+    const finishRegister = document.querySelector("#finishRegister");
+    const registerMessage = document.querySelector("#registerMessage");
+    const regGenderButtons = [...document.querySelectorAll("#regGender button")];
+    const profileGenderButtons = [...document.querySelectorAll("#profileGender button")];
+    const caseGroup = document.querySelector("#caseGroup");
+    const caseType = document.querySelector("#caseType");
+    const caseInput = document.querySelector("#caseInput");
+    const counter = document.querySelector("#counter");
+    const clearCase = document.querySelector("#clearCase");
+    const submitCase = document.querySelector("#submitCase");
+    const legalResult = document.querySelector("#legalResult");
+    const profileName = document.querySelector("#profileName");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profileEmail = document.querySelector("#profileEmail");
+    const profileAge = document.querySelector("#profileAge");
+    const profilePlan = document.querySelector("#profilePlan");
+    const profileCredits = document.querySelector("#profileCredits");
+    const phoneCode = document.querySelector("#phoneCode");
+    const emailCode = document.querySelector("#emailCode");
+    const sendPhoneCode = document.querySelector("#sendPhoneCode");
+    const sendEmailCode = document.querySelector("#sendEmailCode");
+    const profileHint = document.querySelector("#profileHint");
+    const saveProfile = document.querySelector("#saveProfile");
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSelect = document.querySelector("#fontSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const planButtons = [...document.querySelectorAll(".plan")];
+    const payUpgrade = document.querySelector("#payUpgrade");
+    const paymentSummary = document.querySelector("#paymentSummary");
+    const completePayment = document.querySelector("#completePayment");
+
+    let registerCode = "";
+    let phoneVerifyCode = "";
+    let emailVerifyCode = "";
+    let hasOpenedTerms = false;
+    let currentGender = "男";
+    let registeredPhone = regPhone.value;
+    let registeredEmail = regEmail.value;
+    let currentLanguage = "zh";
+    let lastAnalyzedText = "";
+    let credits = 3;
+    let currentPlan = "免費方案";
+    let selectedOffice = {
+      name: "",
+      email: "",
+      phone: ""
+    };
+    let selectedPlan = {
+      name: "Basic",
+      credits: 30,
+      price: "NTD$59"
+    };
+
+    const caseTypeGroups = {
+      civil: ["車禍事故", "金錢糾紛", "債務問題", "損害賠償", "合約糾紛", "消費爭議", "網購糾紛", "借貸問題", "保證人問題", "詐騙案件"],
+      family: ["婚姻", "離婚", "子女監護權", "扶養費", "遺產繼承", "遺囑", "家暴", "親權問題"],
+      realestate: ["租房", "房屋買賣", "公寓大廈", "鄰居糾紛", "漏水問題", "違建問題", "土地糾紛", "管委會問題"],
+      labor: ["資遣", "非法解雇", "加班費", "工資拖欠", "職場霸凌", "勞保問題", "職災", "競業條款"],
+      criminal: ["傷害", "恐嚇", "誹謗", "妨害名譽", "詐欺", "侵占", "背信", "性騷擾", "跟蹤騷擾", "毒品案件"],
+      tech: ["網路詐騙", "帳號被盜", "個資外洩", "AI 侵權", "著作權", "商標問題", "網路霸凌", "數位性犯罪"],
+      business: ["公司設立", "股東糾紛", "投資爭議", "合夥問題", "營業秘密", "智慧財產權", "商業合約"],
+      admin: ["交通罰單", "行政罰鍰", "稅務問題", "政府申訴", "警察案件"],
+      other: ["其他"]
+    };
+
+    const copy = {
+      zh: {
+        statusReady: "請輸入情況後送出法律分析。",
+        registered: "註冊成功，可以開始使用法律助理。",
+        codeSent: target => `已傳送 4 位數驗證碼到 ${target}。原型示範碼：`,
+        needOpenTerms: "請先展開條文閱讀後再完成註冊。",
+        needRegister: "請完成資料、驗證碼與條文同意。",
+        wrongCode: "驗證碼輸入錯誤。",
+        saved: "使用者資料已更新。",
+        phoneNeedCode: "電話已變更，請輸入新電話驗證碼。",
+        emailNeedCode: "Email 已變更，請輸入新 Email 驗證碼。",
+        noCredits: "點數已用完，請點選升級。",
+        paid: plan => `${plan} 方案付款成功，點數已更新。`,
+        nav: ["諮詢", "專業律師", "設定"],
+        settingsTitle: "設定",
+        background: "App 背景顏色",
+        fontSize: "字體大小",
+        language: "語言",
+        supportTitle: "聯繫客服",
+        reportTitle: "問題回報、廣告投放、合作洽談",
+        reportText: "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。",
+        partnerTitle: "Email",
+        partnerText: "support@law-assistant.example",
+        resultTitle: "法律初步分析",
+        blocks: ["建議如何處理", "是否可能有違法問題", "提告成功機會", "相關法條方向", "建議參考法條"],
+        disclaimer: "提醒：此為一般法律資訊整理，重大案件請點選專業律師。"
+      },
+      en: {
+        statusReady: "Enter your situation to generate a legal analysis.",
+        registered: "Registration complete. You can use Legal Assistant.",
+        codeSent: target => `A 4-digit code was sent to ${target}. Prototype code: `,
+        needOpenTerms: "Open and read the terms before completing registration.",
+        needRegister: "Complete profile, verification code, and terms consent.",
+        wrongCode: "Verification code is incorrect.",
+        saved: "Profile updated.",
+        phoneNeedCode: "Phone changed. Enter the new phone verification code.",
+        emailNeedCode: "Email changed. Enter the new email verification code.",
+        noCredits: "Credits are used up. Please upgrade.",
+        paid: plan => `${plan} payment complete. Credits updated.`,
+        nav: ["Consult", "Lawyers", "Settings"],
+        settingsTitle: "Settings",
+        background: "App Background",
+        fontSize: "Font Size",
+        language: "Language",
+        supportTitle: "Contact Support",
+        reportTitle: "Issue Report",
+        reportText: "App issues, payment errors, or legal category suggestions.",
+        partnerTitle: "Partnership",
+        partnerText: "Law firm cooperation, enterprise plans, and content partnerships.",
+        resultTitle: "Initial Legal Analysis",
+        blocks: ["Recommended handling", "Possible legal issue", "Chance of claim success", "Related legal category", "Suggested statutes"],
+        disclaimer: "Note: This is general legal information. Consult a qualified lawyer for major cases."
+      },
+      ja: {
+        statusReady: "状況を入力して法律分析を送信してください。",
+        registered: "登録完了。法律アシスタントを使用できます。",
+        codeSent: target => `${target} に4桁認証コードを送信しました。プロトタイプコード：`,
+        needOpenTerms: "登録前に規約を開いて確認してください。",
+        needRegister: "プロフィール、認証コード、規約同意を完了してください。",
+        wrongCode: "認証コードが正しくありません。",
+        saved: "ユーザー情報を更新しました。",
+        phoneNeedCode: "電話を変更しました。新しい電話認証コードを入力してください。",
+        emailNeedCode: "Email を変更しました。新しい Email 認証コードを入力してください。",
+        noCredits: "ポイントがなくなりました。アップグレードしてください。",
+        paid: plan => `${plan} の支払いが完了しました。ポイントを更新しました。`,
+        nav: ["相談", "専門弁護士", "設定"],
+        settingsTitle: "設定",
+        background: "App 背景色",
+        fontSize: "文字サイズ",
+        language: "言語",
+        supportTitle: "サポート連絡",
+        reportTitle: "問題報告",
+        reportText: "App の問題、支払い異常、法律分類の修正提案。",
+        partnerTitle: "提携相談",
+        partnerText: "法律事務所提携、企業プラン、コンテンツ提携。",
+        resultTitle: "初期法律分析",
+        blocks: ["対応の提案", "違法性の可能性", "訴訟成功可能性", "関連する法律分野", "参考条文"],
+        disclaimer: "注意：これは一般的な法律情報です。重要案件は弁護士に相談してください。"
+      }
+    };
+
+    function code() {
+      return String(Math.floor(1000 + Math.random() * 9000));
+    }
+
+    function showPage(pageId) {
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+    }
+
+    function populateCaseTypes() {
+      const items = [...(caseTypeGroups[caseGroup.value] || [])];
+      if (!items.includes("其他")) items.push("其他");
+      caseType.innerHTML = items.map(item => `<option value="${item}">${item}</option>`).join("");
+      caseType.disabled = caseGroup.value === "other";
+    }
+
+    function updateCredits() {
+      creditButton.textContent = `點數 ${credits}`;
+      profileCredits.textContent = credits;
+      profilePlan.textContent = currentPlan;
+      upgradeAlert.classList.toggle("show", credits <= 0);
+    }
+
+    function openUpgradePage() {
+      showPage("upgradePage");
+      appStatus.textContent = credits <= 0 ? copy[currentLanguage].noCredits : "選擇升級方案。";
+    }
+
+    function openLawyerModal(office) {
+      selectedOffice = {
+        name: office.dataset.office,
+        email: office.dataset.email,
+        phone: office.dataset.phone
+      };
+      lawyerModal.classList.add("show");
+      lawyerModal.setAttribute("aria-hidden", "false");
+      lawyerModalTitle.textContent = `聯繫 ${selectedOffice.name}`;
+      lawyerContactName.value = profileName.value || regName.value;
+      lawyerContactPhone.value = profilePhone.value || regPhone.value;
+      lawyerContactQuestion.value = caseInput.value.trim();
+      lawyerContactResult.textContent = "";
+    }
+
+    function closeLawyerContactModal() {
+      lawyerModal.classList.remove("show");
+      lawyerModal.setAttribute("aria-hidden", "true");
+    }
+
+    function syncProfileFromRegistration() {
+      profileName.value = regName.value.trim();
+      profilePhone.value = regPhone.value.trim();
+      profileEmail.value = regEmail.value.trim();
+      profileAge.value = regAge.value.trim();
+      userButton.textContent = profileName.value || "使用者";
+    }
+
+    function setGender(buttons, gender) {
+      currentGender = gender;
+      buttons.forEach(button => button.classList.toggle("active", button.dataset.gender === gender));
+      profileGenderButtons.forEach(button => button.classList.toggle("active", button.dataset.gender === gender));
+      regGenderButtons.forEach(button => button.classList.toggle("active", button.dataset.gender === gender));
+    }
+
+    function analyzeCase(text, type) {
+      const lower = text.toLowerCase();
+      const moneyTypes = ["金錢糾紛", "債務問題", "損害賠償", "合約糾紛", "消費爭議", "網購糾紛", "借貸問題", "保證人問題", "詐騙案件", "詐欺", "網路詐騙", "投資爭議"];
+      const familyTypes = ["婚姻", "離婚", "子女監護權", "扶養費", "遺產繼承", "遺囑", "家暴", "親權問題"];
+      const realEstateTypes = ["公寓大廈", "違建問題", "土地糾紛", "管委會問題"];
+      const laborTypes = ["資遣", "非法解雇", "加班費", "工資拖欠", "職場霸凌", "勞保問題", "職災", "競業條款"];
+      const injuryTypes = ["傷害", "恐嚇", "誹謗", "妨害名譽", "侵占", "背信", "性騷擾", "跟蹤騷擾", "毒品案件", "網路霸凌", "數位性犯罪", "警察案件"];
+      const techTypes = ["帳號被盜", "個資外洩", "AI 侵權", "著作權", "商標問題", "智慧財產權", "營業秘密"];
+      const businessTypes = ["公司設立", "股東糾紛", "合夥問題", "商業合約"];
+      const adminTypes = ["交通罰單", "行政罰鍰", "稅務問題", "政府申訴"];
+      const isMoney = moneyTypes.includes(type) || /錢|借|匯款|訂金|付款|欠|詐|騙|商品|買|賣|合約|契約/.test(text);
+      const isTraffic = type === "車禍事故" || /車禍|事故|撞|肇事|逃逸|開走|報警|行車紀錄|車損|受傷|機車|汽車|交通/.test(text);
+      const isInjury = injuryTypes.includes(type) || /打|傷|恐嚇|威脅|跟蹤|騷擾|辱罵|毀謗|誹謗/.test(text);
+      const isWork = laborTypes.includes(type) || /公司|老闆|薪水|加班|資遣|解雇|勞工|工作/.test(text);
+      const isFamily = familyTypes.includes(type) || /離婚|小孩|扶養|家暴|夫妻|監護|婚姻|配偶|遺產|遺囑/.test(text);
+      const isNeighborNoise = type === "鄰居糾紛" || /鄰居|隔壁|樓上|樓下|半夜|吵|噪音|安寧|睡覺|震動|腳步聲|施工聲/.test(text);
+      const isApartment = realEstateTypes.includes(type) || ["鄰居糾紛", "漏水問題"].includes(type) || /公寓|大廈|管委會|管理費|住戶|區分所有權|漏水|噪音|鄰居|隔壁|樓上|樓下|半夜|吵|安寧|土地|違建/.test(text);
+      const isRent = type === "租房" || /租|房東|房客|押金|租約|退租|修繕|租金/.test(text);
+      const isHomeBuy = type === "房屋買賣" || /買房|賣房|房屋|不動產|仲介|斡旋|履保|產權|瑕疵/.test(text);
+      const isTech = techTypes.includes(type);
+      const isBusiness = businessTypes.includes(type);
+      const isAdmin = adminTypes.includes(type);
+      let advice = "先保存完整證據，例如對話紀錄、匯款紀錄、契約、照片、錄音或證人資料，再用書面方式要求對方限期回覆。";
+      let illegal = "需視完整事證判斷。若有欺罔、侵害權利、違反契約或造成損害，可能涉及民事責任，嚴重時也可能有刑事疑慮。";
+      let chance = "中等。若證據完整、對方身分明確、損害金額可證明，成功機會會提高。";
+      let category = "民法侵權行為、契約責任、刑事責任或消費爭議方向。";
+      let statutes = "建議參考：民法第184條、第227條、第229條；刑法第339條；消費者保護法相關規定。";
+
+      if (isMoney || lower.includes("deposit")) {
+        advice = "先整理付款證明、交易約定、對方承諾與催告紀錄，可先寄發存證信函或正式訊息要求履約或退款。";
+        illegal = "若只是單純不履約，通常先屬民事契約糾紛；若一開始即無履約意思並用話術收款，可能有詐欺疑慮。";
+        chance = "中高。若有匯款紀錄、對話截圖、商品或服務約定，民事請求成功機會較高；刑事詐欺需證明對方主觀欺騙意圖。";
+        category = "契約不履行、返還價金、損害賠償、詐欺取財。";
+        statutes = "建議參考：民法第179條、第184條、第227條、第229條、第259條；刑法第339條。";
+      } else if (isTraffic) {
+        advice = "先記下車牌、時間地點、車型與對方特徵，保留行車紀錄器、監視器、照片與維修估價單；若對方直接開走，建議盡快報警備案並申請事故資料。";
+        illegal = "若只有車損通常偏向民事侵權賠償；若有人受傷、未留資料或疑似肇事逃逸，可能涉及道路交通管理與刑事過失傷害等問題。";
+        chance = "中高。若能取得車牌、行車紀錄器、監視器或警方事故紀錄，求償與追究責任的成功機會會明顯提高。";
+        category = "交通事故、侵權行為損害賠償、肇事逃逸、過失傷害。";
+        statutes = "建議參考：民法第184條、第191條之2、第213條、第216條；刑法第284條；道路交通管理處罰條例第62條。";
+      } else if (isInjury) {
+        advice = "先保留醫療診斷、照片、錄音、監視器與證人資料，必要時報警並申請驗傷。";
+        illegal = "可能涉及傷害、恐嚇、公然侮辱、誹謗或跟蹤騷擾等刑事問題，也可能產生民事損害賠償。";
+        chance = "視證據而定。若有驗傷單、錄音錄影、證人或公開發文紀錄，提告成功機會較高。";
+        category = "刑事告訴、侵權行為損害賠償、保護令或跟騷防制。";
+        statutes = "建議參考：刑法第277條、第305條、第309條、第310條；民法第184條、第195條；跟蹤騷擾防制法。";
+      } else if (isWork) {
+        advice = "先保存薪資單、出勤紀錄、勞動契約、公司通知與對話紀錄，可向勞工局申請勞資爭議調解。";
+        illegal = "若涉及未給薪、違法資遣、超時加班或未依法給付資遣費，可能違反勞動法規。";
+        chance = "中高。勞動案件若有出勤與薪資資料，調解或請求給付成功機會通常較高。";
+        category = "工資給付、加班費、資遣、勞資爭議調解。";
+        statutes = "建議參考：勞動基準法第22條、第24條、第30條、第38條；勞資爭議處理法。";
+      } else if (isFamily) {
+        advice = "先整理戶籍、照顧事實、金流、通訊紀錄與安全風險；若有暴力或威脅，優先報警或聲請保護令。";
+        illegal = "家庭事件多屬民事或家事程序；若有家暴、傷害、恐嚇，則可能另涉刑事責任。";
+        chance = "需看照顧事實、證據與子女最佳利益。若能提出穩定照顧和風險證明，成功機會較高。";
+        category = "離婚、親權、扶養費、保護令、家庭暴力。";
+        statutes = "建議參考：民法親屬編；家事事件法；家庭暴力防治法。";
+      } else if (isNeighborNoise) {
+        advice = "先連續記錄噪音發生時間、頻率與持續多久，保留錄音錄影、分貝 App 截圖、管委會或房東溝通紀錄；可先請管委會、里長或警方協助勸導，必要時向環保局檢舉或寄發正式通知。";
+        illegal = "若噪音已超過一般生活可忍受範圍，可能涉及民事相鄰關係、侵害居住安寧或公寓大廈管理問題；若深夜持續喧嘩，也可能涉及社會秩序維護或噪音管制。";
+        chance = "中等。若能提出多次、具體、可驗證的錄音紀錄、分貝資料、管委會通知或警方/環保局紀錄，要求改善或求償的成功機會會提高。";
+        category = "鄰居噪音、居住安寧、公寓大廈管理、相鄰關係。";
+        statutes = "建議參考：民法第184條、第793條；公寓大廈管理條例；噪音管制法；社會秩序維護法第72條。";
+      } else if (isApartment) {
+        advice = "先確認規約、區分所有權人會議決議、管委會公告與繳費紀錄，並保存照片、錄音或修繕通知等證據。";
+        illegal = "若涉及管委會決議程序、管理費、公共設施使用、漏水或噪音，通常先屬公寓大廈管理與民事權利義務問題。";
+        chance = "中等。若規約、會議紀錄或修繕責任清楚，主張權利的成功機會會提高。";
+        category = "公寓大廈管理、區分所有權、管理費、相鄰關係。";
+        statutes = "建議參考：公寓大廈管理條例；民法第184條、第767條、第793條。";
+      } else if (isRent) {
+        advice = "先整理租約、押金收據、租金付款紀錄、修繕通知與屋況照片，重要溝通盡量用文字保存。";
+        illegal = "常見爭點包含押金返還、提前解約、修繕責任、違約金或房東任意進入租屋處，需看租約與事實。";
+        chance = "中高。若租約與付款、屋況證據完整，請求押金、修繕或損害賠償的機會較高。";
+        category = "租賃契約、押金返還、修繕責任、居住權益。";
+        statutes = "建議參考：民法租賃章第421條以下；租賃住宅市場發展及管理條例。";
+      } else if (isHomeBuy) {
+        advice = "先確認買賣契約、斡旋單、履約保證、產權資料、屋況說明書與瑕疵照片，必要時請地政士或律師審閱。";
+        illegal = "若有隱瞞重大瑕疵、產權不清、仲介說明不實或違約不履行，可能涉及民事契約責任，嚴重時可能有詐欺疑慮。";
+        chance = "中等偏高。若瑕疵重大且有交屋前後證據、仲介或賣方告知紀錄，求償或解除契約機會較高。";
+        category = "不動產買賣、瑕疵擔保、契約解除、仲介責任。";
+        statutes = "建議參考：民法第354條、第359條、第360條；不動產經紀業管理條例；消費者保護法。";
+      } else if (isTech) {
+        advice = "先保存帳號登入紀錄、平台通知、截圖、網址、交易紀錄與對方帳號資訊，並盡快向平台申訴、變更密碼或報案。";
+        illegal = "可能涉及個資保護、著作權、商標權、妨害電腦使用、詐欺或數位性犯罪，需依內容與證據判斷。";
+        chance = "中等。若有完整數位紀錄、平台後台資料或金流，後續追查與主張權利的機會會提高。";
+        category = "網路科技、個資、智慧財產、平台申訴與刑事責任。";
+        statutes = "建議參考：個人資料保護法；著作權法；商標法；刑法妨害電腦使用罪章、第339條。";
+      } else if (isBusiness) {
+        advice = "先整理公司章程、股東名冊、合約、出資證明、會議紀錄與往來訊息，重大決策應以書面確認。";
+        illegal = "可能涉及公司治理、股東權益、合夥契約、商業合約或營業秘密保護，嚴重時可能有背信或侵占疑慮。";
+        chance = "中等。若出資、決議程序、契約義務與損害可清楚證明，主張權利或談判的成功機會較高。";
+        category = "公司法務、股東糾紛、合夥、商業合約、營業秘密。";
+        statutes = "建議參考：公司法；民法契約與合夥規定；營業秘密法；公平交易法。";
+      } else if (isAdmin) {
+        advice = "先確認處分書、罰單日期、申訴期限與證據資料，注意救濟期間，必要時先提出陳述意見或訴願。";
+        illegal = "多屬行政處分、行政罰或稅務爭議，重點在期限、程序是否合法與事實認定是否正確。";
+        chance = "視期限與證據而定。若處分程序有瑕疵、事實認定錯誤或有明確反證，撤銷或減輕機會較高。";
+        category = "行政救濟、交通罰單、行政罰鍰、稅務與政府申訴。";
+        statutes = "建議參考：行政程序法；行政罰法；訴願法；道路交通管理處罰條例；稅捐稽徵法。";
+      }
+
+      return { advice, illegal, chance, category, statutes };
+    }
+
+    function renderResult() {
+      const text = caseInput.value.trim();
+      if (!text) {
+        appStatus.textContent = "請先輸入目前遇到的情形。";
+        legalResult.classList.add("hidden");
+        legalResult.innerHTML = "";
+        return;
+      }
+      if (credits <= 0) {
+        appStatus.textContent = copy[currentLanguage].noCredits;
+        upgradeAlert.classList.add("show");
+        showPage("upgradePage");
+        return;
+      }
+      credits -= 1;
+      updateCredits();
+      const labels = copy[currentLanguage];
+      const result = analyzeCase(text, caseType.value);
+      lastAnalyzedText = text;
+      legalResult.classList.remove("hidden");
+      legalResult.innerHTML = `
+        <h2>${labels.resultTitle}</h2>
+        <div class="result-block"><strong>${labels.blocks[0]}</strong><p>${result.advice}</p></div>
+        <div class="result-block"><strong>${labels.blocks[1]}</strong><p>${result.illegal}</p></div>
+        <div class="result-block"><strong>${labels.blocks[2]}</strong><p>${result.chance}</p></div>
+        <div class="result-block"><strong>${labels.blocks[3]}</strong><p>${result.category}</p></div>
+        <div class="result-block"><strong>${labels.blocks[4]}</strong><p>${result.statutes}</p></div>
+        <p class="hint">${labels.disclaimer}</p>
+      `;
+      appStatus.textContent = "已產生法律初步分析。";
+    }
+
+    function applyLanguage() {
+      currentLanguage = languageSelect.value;
+      const labels = copy[currentLanguage];
+      appStatus.textContent = labels.statusReady;
+      navButtons.forEach((button, index) => {
+        button.textContent = labels.nav[index];
+      });
+      document.querySelector("#settingsTitle").textContent = labels.settingsTitle;
+      const settingLabels = document.querySelectorAll("#settingsPage .card:first-child label");
+      settingLabels[0].childNodes[0].textContent = labels.background;
+      settingLabels[1].childNodes[0].textContent = labels.fontSize;
+      settingLabels[2].childNodes[0].textContent = labels.language;
+      const supportCard = document.querySelector("#settingsPage .card:nth-of-type(2)");
+      supportCard.querySelector("h2").textContent = labels.supportTitle;
+      const supportBlocks = supportCard.querySelectorAll(".result-block");
+      supportBlocks[0].querySelector("strong").textContent = labels.reportTitle;
+      supportBlocks[0].querySelector("p").textContent = labels.reportText;
+      if (supportBlocks[1]) {
+        supportBlocks[1].querySelector("strong").textContent = labels.partnerTitle;
+        supportBlocks[1].querySelector("p").textContent = labels.partnerText;
+      }
+    }
+
+    navButtons.forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
+    userButton.addEventListener("click", () => {
+      updateCredits();
+      showPage("profilePage");
+    });
+    creditButton.addEventListener("click", openUpgradePage);
+    upgradeAlertButton.addEventListener("click", openUpgradePage);
+    officeButtons.forEach(button => {
+      button.addEventListener("click", event => {
+        if (event.target.closest("a")) return;
+        openLawyerModal(button);
+      });
+    });
+    closeLawyerModal.addEventListener("click", closeLawyerContactModal);
+    sendLawyerContact.addEventListener("click", () => {
+      lawyerContactResult.textContent = `感謝您的留言，後續將有專人與您聯繫。已將諮詢內容寄到 ${selectedOffice.email}，並以簡訊通知 ${selectedOffice.phone}。`;
+    });
+
+    regGenderButtons.forEach(button => button.addEventListener("click", () => setGender(regGenderButtons, button.dataset.gender)));
+    profileGenderButtons.forEach(button => button.addEventListener("click", () => setGender(profileGenderButtons, button.dataset.gender)));
+
+    sendRegCode.addEventListener("click", () => {
+      registerCode = code();
+      regHint.textContent = `${copy[currentLanguage].codeSent(regPhone.value.trim() || "手機")}${registerCode}`;
+    });
+
+    toggleTerms.addEventListener("click", () => {
+      hasOpenedTerms = true;
+      termsText.classList.toggle("show");
+      toggleTerms.textContent = termsText.classList.contains("show")
+        ? "收合使用條款、隱私權政策與免責聲明"
+        : "展開使用條款、隱私權政策與免責聲明";
+    });
+
+    finishRegister.addEventListener("click", () => {
+      registerMessage.textContent = "";
+      const hasProfile = regName.value.trim() && regPhone.value.trim() && regEmail.value.trim() && regAge.value.trim();
+      if (!hasOpenedTerms) {
+        registerMessage.textContent = copy[currentLanguage].needOpenTerms;
+        return;
+      }
+      if (!hasProfile || !agreeTerms.checked || !registerCode) {
+        registerMessage.textContent = copy[currentLanguage].needRegister;
+        return;
+      }
+      if (regCode.value.trim() !== registerCode) {
+        registerMessage.textContent = copy[currentLanguage].wrongCode;
+        return;
+      }
+      registeredPhone = regPhone.value.trim();
+      registeredEmail = regEmail.value.trim();
+      syncProfileFromRegistration();
+      screen.classList.remove("locked");
+      registerMessage.textContent = "";
+      appStatus.textContent = copy[currentLanguage].registered;
+      credits = 3;
+      updateCredits();
+    });
+
+    caseInput.addEventListener("input", () => {
+      counter.textContent = `${caseInput.value.length} / 200`;
+      if (caseInput.value.trim() !== lastAnalyzedText) {
+        legalResult.classList.add("hidden");
+        legalResult.innerHTML = "";
+        appStatus.textContent = "內容已變更，請重新送出分析。";
+      }
+    });
+
+    function resetCaseAnalysis(message) {
+      legalResult.classList.add("hidden");
+      legalResult.innerHTML = "";
+      appStatus.textContent = message;
+    }
+
+    caseGroup.addEventListener("change", () => {
+      populateCaseTypes();
+      resetCaseAnalysis("法律大類已變更，請重新送出分析。");
+    });
+
+    caseType.addEventListener("change", () => {
+      resetCaseAnalysis("問題細項已變更，請重新送出分析。");
+    });
+
+    clearCase.addEventListener("click", () => {
+      caseInput.value = "";
+      counter.textContent = "0 / 200";
+      lastAnalyzedText = "";
+      legalResult.classList.add("hidden");
+      legalResult.innerHTML = "";
+      appStatus.textContent = "已清除內容，請重新輸入情況。";
+      caseInput.focus();
+    });
+    submitCase.addEventListener("click", renderResult);
+
+    sendPhoneCode.addEventListener("click", () => {
+      phoneVerifyCode = code();
+      profileHint.textContent = `${copy[currentLanguage].codeSent(profilePhone.value.trim() || "新電話")}${phoneVerifyCode}`;
+    });
+
+    sendEmailCode.addEventListener("click", () => {
+      emailVerifyCode = code();
+      profileHint.textContent = `${copy[currentLanguage].codeSent(profileEmail.value.trim() || "新 Email")}${emailVerifyCode}`;
+    });
+
+    saveProfile.addEventListener("click", () => {
+      const newPhone = profilePhone.value.trim();
+      const newEmail = profileEmail.value.trim();
+      if (newPhone !== registeredPhone && phoneCode.value.trim() !== phoneVerifyCode) {
+        profileHint.textContent = copy[currentLanguage].phoneNeedCode;
+        return;
+      }
+      if (newEmail !== registeredEmail && emailCode.value.trim() !== emailVerifyCode) {
+        profileHint.textContent = copy[currentLanguage].emailNeedCode;
+        return;
+      }
+      registeredPhone = newPhone;
+      registeredEmail = newEmail;
+      userButton.textContent = profileName.value.trim() || "使用者";
+      profileHint.textContent = copy[currentLanguage].saved;
+      appStatus.textContent = copy[currentLanguage].saved;
+      showPage("casePage");
+    });
+
+    themeSelect.addEventListener("change", () => {
+      screen.classList.remove("theme-ink", "theme-light");
+      if (themeSelect.value !== "default") screen.classList.add(`theme-${themeSelect.value}`);
+    });
+
+    fontSelect.addEventListener("change", () => {
+      screen.classList.remove("font-small", "font-large");
+      if (fontSelect.value !== "normal") screen.classList.add(`font-${fontSelect.value}`);
+    });
+
+    languageSelect.addEventListener("change", applyLanguage);
+
+    planButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        planButtons.forEach(plan => plan.classList.toggle("selected", plan === button));
+        selectedPlan = {
+          name: button.dataset.plan,
+          credits: Number(button.dataset.credits),
+          price: button.dataset.price
+        };
+        paymentSummary.textContent = `${selectedPlan.name} ${selectedPlan.price}，每月可以 ${selectedPlan.credits} 次。`;
+      });
+    });
+
+    payUpgrade.addEventListener("click", () => {
+      paymentSummary.textContent = `${selectedPlan.name} ${selectedPlan.price}，每月可以 ${selectedPlan.credits} 次。`;
+      showPage("paymentPage");
+      appStatus.textContent = "請輸入信用卡資料完成付費。";
+    });
+
+    completePayment.addEventListener("click", () => {
+      currentPlan = `${selectedPlan.name} ${selectedPlan.price}`;
+      credits += selectedPlan.credits;
+      updateCredits();
+      appStatus.textContent = copy[currentLanguage].paid(selectedPlan.name);
+      showPage("casePage");
+    });
+
+    populateCaseTypes();
+    syncProfileFromRegistration();
+    updateCredits();
+    if (new URLSearchParams(window.location.search).get("demo") === "home") {
+      screen.classList.remove("locked");
+      appStatus.textContent = "作品集展示模式：已進入法律助理諮詢頁。";
+      showPage("casePage");
+      if (new URLSearchParams(window.location.search).get("preview") === "1") {
+        document.body.classList.add("portfolio-watermark");
+        userButton.textContent = "Crovantix";
+        creditButton.textContent = "創微科技";
+        document.querySelectorAll("button, input, select, textarea").forEach(element => { element.disabled = true; });
+        document.querySelectorAll("a").forEach(element => { element.style.pointerEvents = "none"; });
+        const blockPreviewEvent = event => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        };
+        ["click", "submit", "change", "input", "keydown"].forEach(type => document.addEventListener(type, blockPreviewEvent, true));
+        appStatus.textContent = "作品集首頁樣板展示，互動功能已關閉。";
+      }
+    }
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

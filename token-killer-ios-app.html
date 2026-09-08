@@ -1,0 +1,1883 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Token大師 iOS App</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071019;
+      --panel: #111c28;
+      --panel-2: #182638;
+      --ink: #f8fbff;
+      --muted: #a9b8c7;
+      --line: rgba(255,255,255,.14);
+      --cyan: #59d8ff;
+      --mint: #61e7bd;
+      --pink: #ff85a2;
+      --amber: #ffd166;
+      --danger: #ff5d6c;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(89,216,255,.24), transparent 30rem),
+        radial-gradient(circle at 84% 80%, rgba(97,231,189,.18), transparent 30rem),
+        linear-gradient(145deg, #060b12, #111827 58%, #071018);
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      animation: splashFade 3.05s ease forwards;
+    }
+
+    .launch-card {
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      animation: markIn 2.75s ease forwards;
+    }
+
+    .launch-card img {
+      width: min(290px, 70vw);
+      max-height: 160px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .launch-card strong {
+      font-size: clamp(18px, 4vw, 30px);
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .launch-card span {
+      color: rgba(248,251,255,.72);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .06em;
+    }
+
+    @keyframes markIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      18%, 78% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes splashFade {
+      0%, 82% { opacity: 1; visibility: visible; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+    .phone {
+      width: min(430px, 100%);
+      height: min(900px, calc(100vh - 28px));
+      min-height: 760px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 36px;
+      background: #05070c;
+      box-shadow: 0 30px 90px rgba(0,0,0,.48);
+    }
+
+    .screen {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(89,216,255,.18), transparent 16rem),
+        linear-gradient(180deg, #111927, #071018);
+    }
+
+    .island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 112px;
+      height: 28px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+      z-index: 4;
+    }
+
+    .status {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 26px 0;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .app {
+      height: calc(100% - 48px);
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 80px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 6px 0 12px;
+    }
+
+    .pill {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 13px;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .pill.primary {
+      color: #061018;
+      border: 0;
+      background: linear-gradient(135deg, #d9f8ff, var(--cyan));
+    }
+
+    #userButton { margin-left: auto; }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 30px;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      min-height: 38px;
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .content {
+      flex: 1;
+      overflow: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+
+    .content::-webkit-scrollbar { display: none; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: rgba(255,255,255,.045);
+      box-shadow: 0 16px 50px rgba(0,0,0,.18);
+    }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .download-card {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 8px;
+      min-width: 0;
+      min-height: 164px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .download-card strong {
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .download-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .download-link {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-width: 0;
+      min-height: 42px;
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #061018;
+      background: linear-gradient(135deg, var(--cyan), var(--mint));
+      border: 0;
+      text-decoration: none;
+      font-size: 13px;
+      line-height: 1.25;
+      font-weight: 950;
+      text-align: center;
+      box-sizing: border-box;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      cursor: pointer;
+    }
+
+    .download-link small {
+      display: block;
+      max-width: 100%;
+      margin-top: 3px;
+      font-size: 10px;
+      line-height: 1.25;
+      font-weight: 850;
+      opacity: .82;
+      overflow-wrap: anywhere;
+      word-break: break-all;
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .label-row strong {
+      color: var(--ink);
+      font-size: 18px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(4,12,20,.78);
+      outline: none;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    select option { color: #061018; background: #fff; }
+    textarea { min-height: 120px; resize: vertical; line-height: 1.45; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .primary-button,
+    .secondary-button {
+      width: 100%;
+      min-height: 46px;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #061018;
+      background: linear-gradient(135deg, var(--cyan), var(--mint));
+      font-size: 14px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .secondary-button {
+      color: var(--ink);
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--line);
+    }
+
+    .secondary-button.inactive-plan {
+      opacity: .58;
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.045);
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 10px 0 12px;
+    }
+
+    .tool-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 50px;
+      margin: 0;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      cursor: pointer;
+    }
+
+    .tool-option input {
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      accent-color: var(--cyan);
+    }
+
+    .auto-flow {
+      display: grid;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .result {
+      display: none;
+      white-space: pre-wrap;
+      border: 1px solid rgba(97,231,189,.38);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(97,231,189,.08);
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 800;
+    }
+
+    .result.show { display: block; }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      color: var(--muted);
+      background: rgba(255,255,255,.05);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .history-item b {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .meter {
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.1);
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: var(--value, 0%);
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--mint), var(--cyan));
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .check-row input { width: 16px; height: 16px; padding: 0; }
+
+    .sms-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 138px;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .sms-row label {
+      margin: 0;
+    }
+
+    .sms-row input,
+    .sms-row .secondary-button {
+      height: 46px;
+      min-height: 46px;
+      padding: 0 12px;
+      line-height: 1;
+    }
+
+    .sms-row .secondary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      align-self: end;
+    }
+
+    @media (max-width: 420px) {
+      .download-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tabbar {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 16px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 4px;
+      min-height: 64px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 8px;
+      background: rgba(5,8,13,.92);
+      backdrop-filter: blur(16px);
+      z-index: 5;
+    }
+
+    .tabbar button {
+      border: 0;
+      border-radius: 18px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      display: grid;
+      gap: 3px;
+      place-items: center;
+    }
+
+    .tabbar button span:first-child { font-size: 16px; }
+    .tabbar button.active { color: var(--cyan); }
+
+    .toast {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 52px;
+      display: none;
+      border: 1px solid rgba(89,216,255,.36);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(12,24,36,.96);
+      font-size: 13px;
+      font-weight: 900;
+      z-index: 10;
+      box-shadow: 0 16px 40px rgba(0,0,0,.32);
+    }
+
+    .toast.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-hidden="true">
+    <div class="launch-card">
+      <img src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <span>© Token大師</span>
+    </div>
+  </div>
+
+  <main class="phone">
+    <section class="screen">
+      <div class="island"></div>
+      <div class="status"><span>9:41</span><span>5G ▪</span></div>
+      <div class="toast" id="toast"></div>
+      <section class="app">
+        <div class="topbar">
+          <button class="pill" id="statusPill" type="button">剩餘點數 20</button>
+          <button class="pill primary" id="dailySummaryButton" type="button">21:00 摘要</button>
+          <button class="pill" id="userButton" type="button">尚未註冊</button>
+        </div>
+        <h1 id="pageTitle">Token大師</h1>
+        <p class="subline" id="appStatus">協助你在使用 ChatGPT、Gemini、Claude 等 AI 工具前，先壓縮 prompt token。</p>
+
+        <div class="content">
+          <section class="page active" id="registerPage">
+            <section class="card">
+              <div class="label-row"><strong>登入 / 註冊</strong><span>首次使用</span></div>
+              <label>姓名<input id="registerName" value="Clay Tseng"></label>
+              <label>電話<input id="registerPhone" value="0912-345-678" inputmode="tel"></label>
+              <label>Email<input id="registerEmail" value="clay@example.com" inputmode="email"></label>
+              <div class="sms-row">
+                <label>簡訊驗證碼<input id="smsCode" maxlength="4" placeholder="輸入 4 位數" inputmode="numeric"></label>
+                <button class="secondary-button" id="sendSms" type="button">發送驗證碼</button>
+              </div>
+              <p class="subline" id="smsHint">按下發送驗證碼後會產生 4 位數驗證碼。</p>
+              <button class="secondary-button" id="toggleTerms" type="button">展開使用條款、隱私權政策與免責聲明</button>
+              <div class="result" id="termsBox">
+本 App 由創微科技有限公司（以下稱「本公司」）提供相關服務。
+
+Token大師 App 使用條款（Terms of Service）
+
+最後更新日期：2026 年 7 月 29 日
+
+一、前言
+
+本 App 由創微科技有限公司（以下稱「本公司」）提供相關服務。
+
+歡迎您使用 Token大師（以下稱「本 App」）。
+
+當您下載、安裝、註冊或使用本 App，即表示您已閱讀、瞭解並同意遵守本使用條款。如您不同意本條款，請停止使用本 App。
+
+二、服務內容
+
+Token大師提供包括但不限於：
+
+AI Prompt 最佳化
+Prompt 壓縮
+Token 使用量分析
+AI 成本估算
+Prompt 重組
+Prompt 範本管理
+Token 使用統計
+AI API 使用輔助工具
+
+本公司得視營運需要新增、修改或終止部分服務，而不另行通知。
+
+三、使用者責任
+
+使用者不得：
+
+違反任何法律
+散播病毒或惡意程式
+破解或攻擊本服務
+侵犯他人智慧財產權
+上傳非法內容
+利用本 App 從事詐騙或犯罪行為
+惡意大量呼叫 API
+
+若違反上述規定，本公司有權立即停止服務。
+
+四、帳號管理
+
+若本 App 提供會員功能：
+
+使用者應妥善保管帳號密碼
+不得借用、出租或轉讓帳號
+因帳號遭盜用造成之損失，本公司不負責任
+
+五、AI 服務
+
+本 App 提供 AI 相關功能，但：
+
+AI 回覆可能存在錯誤
+AI 結果可能不完整
+AI 不保證正確性
+AI 不代表本公司立場
+
+使用者應自行判斷內容是否適合採用。
+
+六、Token 計算
+
+本 App 所提供之：
+
+Token 數量
+Token 節省比例
+Token 成本估算
+
+皆屬估算值。
+
+不同 AI 平台（如 OpenAI、Anthropic、Google Gemini、DeepSeek 等）可能有不同 Token 計算方式，本公司不保證估算值與實際帳單完全一致。
+
+七、智慧財產權
+
+本 App 內所有：
+
+Logo
+UI
+程式碼
+Prompt 模板
+圖片
+文件
+
+均屬本公司所有，受著作權法保護。
+
+未經書面同意，不得重製、散布或商業使用。
+
+八、第三方服務
+
+本 App 可能整合：
+
+OpenAI API
+Anthropic Claude API
+Google Gemini API
+Azure OpenAI
+Firebase
+Google Analytics
+第三方登入
+第三方支付
+
+其服務受各自之使用條款約束。
+
+九、服務中斷
+
+本公司可能因：
+
+系統維護
+網路異常
+第三方服務故障
+天災
+不可抗力
+
+而暫停服務。
+
+本公司不因此負損害賠償責任。
+
+十、終止服務
+
+本公司得於下列情形終止使用資格：
+
+違反本條款
+非法使用
+惡意攻擊系統
+濫用 AI 資源
+
+十一、條款修改
+
+本公司保留修改本條款之權利。
+
+修改後公布於官方網站或 App，即生效。
+
+十二、準據法
+
+本條款依中華民國法律解釋。
+
+如有爭議，以臺灣桃園地方法院為第一審管轄法院。
+
+Token大師隱私權政策（Privacy Policy）
+
+最後更新日期：2026 年 7 月 29 日
+
+一、前言
+
+本 App 由創微科技有限公司（以下稱「本公司」）提供相關服務。
+
+本公司重視您的個人資料保護。
+
+二、蒐集資料
+
+本 App 可能蒐集：
+
+帳號資料
+Email
+Google Login
+Apple Login
+裝置資訊
+Device ID
+OS Version
+App Version
+使用紀錄
+Prompt 使用次數
+Token 使用量
+AI 模型
+功能使用紀錄
+錯誤紀錄
+Crash Log
+Error Log
+
+三、資料用途
+
+蒐集資料主要用於：
+
+提供服務
+改善 App
+Token 統計
+AI 功能
+客服
+防止濫用
+系統安全
+
+四、第三方服務
+
+本 App 可能使用：
+
+Firebase Analytics
+Firebase Crashlytics
+Google Login
+Apple Login
+OpenAI API
+Anthropic API
+Google Gemini API
+
+第三方可能依其隱私政策處理部分資料。
+
+五、Cookie
+
+若使用 Web 功能：
+
+可能使用 Cookie 或 Local Storage 改善使用體驗。
+
+六、資料保存
+
+本公司僅保存提供服務必要期間。
+
+依法令或主管機關要求時，得延長保存。
+
+七、資料保護
+
+本公司採用：
+
+HTTPS 加密
+權限管理
+存取控制
+雲端安全機制
+
+保護您的資料。
+
+八、使用者權利
+
+您可依法要求：
+
+查詢
+更正
+刪除
+停止蒐集
+停止利用
+匯出資料（如適用）
+
+九、未成年保護
+
+未滿十八歲者，建議取得法定代理人同意後使用。
+
+十、政策修改
+
+本公司保留修改本政策之權利。
+
+更新後即生效。
+
+十一、聯絡方式
+
+公司名稱：
+
+創微科技有限公司
+
+Email：
+
+support@crovantix.com
+
+Token大師免責聲明（Disclaimer）
+
+最後更新日期：2026 年 7 月 29 日
+
+一、AI 回覆免責
+
+本 App 所提供之：
+
+Prompt 建議
+Prompt 最佳化
+Token 分析
+AI 回覆
+
+均由 AI 模型產生。
+
+本公司不保證：
+
+正確
+完整
+最新
+無錯誤
+
+二、Token 計算
+
+Token 數量及成本均屬估算。
+
+不同 AI 平台可能產生不同結果。
+
+實際費用請依各 AI 平台官方帳單為準。
+
+三、AI 成本
+
+本 App 提供之：
+
+成本預估
+Token 節省比例
+效率分析
+
+僅供參考，不構成任何保證。
+
+四、Prompt 成果
+
+本公司不保證：
+
+Prompt 一定提升 AI 品質
+一定降低 Token
+一定提升回答速度
+一定符合商業需求
+
+五、第三方服務
+
+若因第三方 AI 平台（例如 OpenAI、Anthropic、Google Gemini 等）故障、停機、限制使用、調整價格或修改 API 導致服務受影響，本公司不負相關責任。
+
+六、商業決策
+
+使用者不得僅依據本 App 所提供資訊作為：
+
+投資
+法律
+醫療
+財務
+商業決策
+
+應自行尋求專業意見。
+
+七、責任限制
+
+在法律允許範圍內，本公司對任何直接、間接、附帶、特殊或衍生性損害均不負賠償責任，包括但不限於資料遺失、營業中斷、利潤損失或其他經濟損失。
+
+八、聯絡資訊
+
+若您對本條款、隱私權政策或免責聲明有任何疑問，請透過本公司公布之客服電子郵件 support@crovantix.com 與我們聯繫。
+              </div>
+              <label class="check-row"><input id="agreeTerms" type="checkbox">我已閱讀並同意使用條款、隱私權政策與免責聲明</label>
+              <button class="primary-button" id="finishRegister" type="button">完成註冊</button>
+              <div class="result" id="registerResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="optimizePage">
+            <section class="card">
+              <div class="label-row"><strong>背景自動優化</strong><span id="optimizeStatus">尚未選擇</span></div>
+              <p class="subline">請點選要由 Token大師常駐優化的 AI tools。啟用後，使用者在已選工具送出 request 時，App 會先自動進行 token 最小化，再送出到原 AI tool。</p>
+              <div class="tool-grid" id="toolGrid">
+                <label class="tool-option"><input class="tool-toggle" type="checkbox" value="ChatGPT">ChatGPT</label>
+                <label class="tool-option"><input class="tool-toggle" type="checkbox" value="Gemini">Gemini</label>
+                <label class="tool-option"><input class="tool-toggle" type="checkbox" value="Claude">Claude</label>
+                <label class="tool-option"><input class="tool-toggle" type="checkbox" value="Perplexity">Perplexity</label>
+                <label class="tool-option"><input class="tool-toggle" type="checkbox" value="Copilot">Copilot</label>
+              </div>
+              <label class="check-row"><input id="localOptimizeConsent" type="checkbox">我同意啟用本機精簡模式，讓已選 AI tools 的 request 在手機本機先精簡 token，再由使用者確認送出。</label>
+              <div class="result show" id="localOptimizeStatus">本機精簡模式會在手機本機處理 prompt，不會上傳到 Crovantix 伺服器。</div>
+              <button class="primary-button" id="optimizeButton" type="button">確認</button>
+              <div class="result" id="optimizeResult"></div>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong>下載PC版本</strong><span>macOS / Windows</span></div>
+              <div class="download-grid">
+                <article class="download-card">
+                  <strong>個人版</strong>
+                  <p>先選擇 Windows 或 Mac 安裝環境，下載後依安裝 UI 同意授權並完成安裝。</p>
+                  <button class="download-link" id="personalInstallButton" type="button">下載個人版</button>
+                </article>
+                <article class="download-card">
+                  <strong>企業版</strong>
+                  <p>企業版提供部署諮詢、API Gateway、SSO、稽核與團隊報表，請先聯繫客服確認需求。</p>
+                  <button class="download-link" id="enterpriseInquiryButton" type="button">下載企業版</button>
+                </article>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="installerChoicePage">
+            <section class="card">
+              <div class="label-row"><strong>選擇安裝環境</strong><span>Windows / Mac</span></div>
+              <p class="subline">請依照電腦作業系統下載安裝檔。Windows 安裝包內含 installation.exe；Mac 安裝包為 .pkg。安裝後依說明啟用 Chrome Extension；IE 需使用 Windows IE Helper 整合。</p>
+              <div class="download-grid">
+                <article class="download-card">
+                  <strong>Windows</strong>
+                  <p>下載後點選 installation.exe進行安裝。</p>
+                  <a class="download-link" href="downloads/token-master-personal-pc-installable.zip" download>下載Windows版</a>
+                </article>
+                <article class="download-card">
+                  <strong>Mac</strong>
+                  <p>下載 .pkg 後執行安裝，完成後需在 Chrome 擴充功能頁載入 TokenMasterPCExtension 才會出現「精簡」。</p>
+                  <a class="download-link" href="downloads/token-master-personal-mac.pkg" download>下載Mac版</a>
+                </article>
+              </div>
+              <button class="secondary-button" id="closeInstallerChoice" type="button">返回</button>
+            </section>
+          </section>
+
+          <section class="page" id="enterpriseInquiryPage">
+            <section class="card">
+              <div class="label-row"><strong>詢問企業版服務</strong><span>客服</span></div>
+              <p class="subline">請填寫企業版服務需求，客服會依照內容以 Email 回覆，協助確認部署方式、API 串接、團隊用量與報價。</p>
+              <label>提出者姓名<input id="enterpriseName" value="Clay Tseng"></label>
+              <label>提出者 Email<input id="enterpriseEmail" value="clay@example.com" inputmode="email"></label>
+              <label>需求內容<textarea id="enterpriseText" maxlength="500" placeholder="請輸入公司名稱、預計使用人數、需要支援的 AI tool、Chrome / IE / macOS / Windows 部署需求。"></textarea></label>
+              <div class="action-row">
+                <button class="secondary-button" id="closeEnterpriseInquiry" type="button">關閉</button>
+                <button class="primary-button" id="submitEnterpriseInquiry" type="button">送出需求</button>
+              </div>
+              <div class="result" id="enterpriseInquiryResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="statsPage">
+            <section class="card">
+              <div class="label-row"><strong>今日統計</strong><span id="todayDate"></span></div>
+              <div class="grid-2">
+                <div class="history-item"><b id="requestCount">0</b>今日 request</div>
+                <div class="history-item"><b id="savedPercent">0%</b>平均節省 token</div>
+                <div class="history-item"><b id="monthlySavedTokens">0</b>本月累積節省 token</div>
+                <div class="history-item"><b id="monthlySavedMoney">NT$0.0000</b>本月累積節省費用</div>
+              </div>
+              <div class="history-item">
+                <b>Token 節省率</b>
+                <div class="meter"><span id="savedMeter"></span></div>
+              </div>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong>AI 工具使用紀錄</strong><span>最新紀錄</span></div>
+              <div class="history-list" id="requestHistory"></div>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong>每日 21:00 摘要</strong><span>背景通知</span></div>
+              <button class="secondary-button" id="simulateSummary" type="button">模擬今晚 21:00 摘要</button>
+              <div class="result" id="summaryResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="upgradePage">
+            <section class="card">
+              <div class="label-row"><strong>後端授權狀態</strong><span id="licenseStatus">等待同步</span></div>
+              <div class="history-list">
+                <div class="history-item"><b id="licensePlan">依點數</b>目前訂閱等級</div>
+                <div class="history-item"><b id="licenseCredits">20</b>伺服器剩餘點數</div>
+                <div class="history-item"><b id="licenseUpgradedAt">尚未升級</b>升級時間點</div>
+                <div class="history-item"><b id="licenseExpiresAt">尚未到期</b>過期時間點</div>
+                <div class="history-item"><b id="licenseServerTime">尚未同步</b>伺服器時間</div>
+              </div>
+              <p class="subline">正式版會連接 Crovantix 帳號/後端授權與伺服器時間，所有帳號、等級、升級時間、過期時間、剩餘點數、個人資料與統計數據都會寫入 MySQL，避免解除安裝或修改電腦時間躲避付費。</p>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong>升級方案</strong><span id="planStatus"></span></div>
+              <div class="history-list">
+                <button class="secondary-button" data-plan="Plus" data-points="500" data-unlimited="false" type="button">Plus NT$99/月：點數 500</button>
+                <button class="secondary-button" data-plan="Pro" data-points="3000" data-unlimited="false" type="button">Pro NT$290/月：點數 3000</button>
+                <button class="secondary-button" data-plan="Master" data-points="10000" data-unlimited="false" type="button">Master NT$590/月：點數 10,000</button>
+                <button class="secondary-button" data-plan="VIP" data-points="0" data-unlimited="true" type="button">VIP NT$999/月：點數無限使用</button>
+              </div>
+              <div class="result" id="upgradeResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="paymentPage">
+            <section class="card">
+              <div class="label-row"><strong>信用卡付費</strong><span id="paymentPlanName">升級方案</span></div>
+              <label>持卡人姓名<input id="cardName" value="Clay Tseng"></label>
+              <label>信用卡號<input id="cardNumber" value="4242 4242 4242 4242" inputmode="numeric"></label>
+              <div class="grid-2">
+                <label>有效期限<input id="cardExpiry" value="12/30" inputmode="numeric"></label>
+                <label>安全碼<input id="cardCvc" value="123" inputmode="numeric"></label>
+              </div>
+              <div class="action-row">
+                <button class="secondary-button" id="cancelPayment" type="button">返回方案</button>
+                <button class="primary-button" id="confirmPayment" type="button">確認付款並升級</button>
+              </div>
+              <div class="result" id="paymentResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="reportPage">
+            <section class="card">
+              <div class="label-row"><strong>問題回報</strong><span>客服</span></div>
+              <label>問題類型<select id="reportType"><option>壓縮效果問題</option><option>背景常駐問題</option><option>統計問題</option><option>帳號問題</option><option>其他</option></select></label>
+              <label>問題內容<textarea id="reportText" maxlength="300" placeholder="請描述遇到的問題。"></textarea></label>
+              <button class="primary-button" id="submitReport" type="button">送出問題回報</button>
+              <div class="result" id="reportResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="settingsPage">
+            <section class="card">
+              <div class="label-row"><strong>設定</strong><span>背景服務</span></div>
+              <label>背景常駐
+                <select id="backgroundSelect">
+                  <option value="on">開啟</option>
+                  <option value="off">關閉</option>
+                </select>
+              </label>
+              <label>每日摘要時間<input id="summaryTime" type="time" value="21:00"></label>
+              <label>語言<select id="languageSelect"><option>繁體中文</option><option>English</option></select></label>
+              <div class="result show" id="backgroundStatus">背景常駐已開啟，會記錄各 AI 工具 request 與 token 節省估算。</div>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong>聯繫客服</strong></div>
+              <p class="subline">Email：support@crovantix.com<br>官網：www.crovantix.com</p>
+            </section>
+          </section>
+
+          <section class="page" id="profilePage">
+            <section class="card">
+              <div class="label-row"><strong>個人資料</strong><span id="profilePlan">免費版</span></div>
+              <label>姓名<input id="profileName"></label>
+              <label>電話<input id="profilePhone" inputmode="tel"></label>
+              <label>Email<input id="profileEmail" inputmode="email"></label>
+              <button class="primary-button" id="saveProfile" type="button">儲存個人資料</button>
+              <div class="result" id="profileResult"></div>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong>訂閱授權</strong><span>MySQL 後台</span></div>
+              <p class="subline">使用者重新安裝後，App 會用 Crovantix 帳號向後端同步授權；若伺服器紀錄點數為 0 或訂閱已過期，會直接顯示升級頁面。</p>
+              <div class="history-list">
+                <div class="history-item"><b id="profileLicensePlan">依點數</b>訂閱等級</div>
+                <div class="history-item"><b id="profileLicenseCredits">20</b>剩餘點數</div>
+                <div class="history-item"><b id="profileLicenseExpiry">尚未到期</b>到期時間</div>
+              </div>
+            </section>
+          </section>
+        </div>
+
+        <nav class="tabbar" aria-label="App navigation">
+          <button class="active" data-page="optimizePage" type="button"><span>✂</span><span>優化</span></button>
+          <button data-page="statsPage" type="button"><span>📊</span><span>統計</span></button>
+          <button data-page="upgradePage" type="button"><span>◇</span><span>升級</span></button>
+          <button data-page="settingsPage" type="button"><span>⚙</span><span>設定</span></button>
+        </nav>
+      </section>
+    </section>
+  </main>
+
+  <script src="app-database.js"></script>
+  <script>
+    const pages = [...document.querySelectorAll(".page")];
+    const navButtons = [...document.querySelectorAll(".tabbar button")];
+    const CONTACT_API_BASE = window.APP_API_BASE
+      || localStorage.getItem("APP_API_BASE")
+      || (location.protocol.startsWith("http") ? location.origin : "http://127.0.0.1:3000");
+    const pageTitle = document.querySelector("#pageTitle");
+    const appStatus = document.querySelector("#appStatus");
+    const userButton = document.querySelector("#userButton");
+    const statusPill = document.querySelector("#statusPill");
+    const dailySummaryButton = document.querySelector("#dailySummaryButton");
+    const toast = document.querySelector("#toast");
+    const registerName = document.querySelector("#registerName");
+    const registerPhone = document.querySelector("#registerPhone");
+    const registerEmail = document.querySelector("#registerEmail");
+    const smsCode = document.querySelector("#smsCode");
+    const sendSms = document.querySelector("#sendSms");
+    const smsHint = document.querySelector("#smsHint");
+    const toggleTerms = document.querySelector("#toggleTerms");
+    const termsBox = document.querySelector("#termsBox");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const finishRegister = document.querySelector("#finishRegister");
+    const registerResult = document.querySelector("#registerResult");
+    const toolToggles = [...document.querySelectorAll(".tool-toggle")];
+    const localOptimizeConsent = document.querySelector("#localOptimizeConsent");
+    const localOptimizeStatus = document.querySelector("#localOptimizeStatus");
+    const optimizeButton = document.querySelector("#optimizeButton");
+    const optimizeStatus = document.querySelector("#optimizeStatus");
+    const optimizeResult = document.querySelector("#optimizeResult");
+    const personalInstallButton = document.querySelector("#personalInstallButton");
+    const closeInstallerChoice = document.querySelector("#closeInstallerChoice");
+    const enterpriseInquiryButton = document.querySelector("#enterpriseInquiryButton");
+    const enterpriseName = document.querySelector("#enterpriseName");
+    const enterpriseEmail = document.querySelector("#enterpriseEmail");
+    const enterpriseText = document.querySelector("#enterpriseText");
+    const closeEnterpriseInquiry = document.querySelector("#closeEnterpriseInquiry");
+    const submitEnterpriseInquiry = document.querySelector("#submitEnterpriseInquiry");
+    const enterpriseInquiryResult = document.querySelector("#enterpriseInquiryResult");
+    const todayDate = document.querySelector("#todayDate");
+    const requestCount = document.querySelector("#requestCount");
+    const savedPercent = document.querySelector("#savedPercent");
+    const savedMoney = document.querySelector("#savedMoney");
+    const monthlySavedTokens = document.querySelector("#monthlySavedTokens");
+    const monthlySavedMoney = document.querySelector("#monthlySavedMoney");
+    const savedMeter = document.querySelector("#savedMeter");
+    const requestHistory = document.querySelector("#requestHistory");
+    const simulateSummary = document.querySelector("#simulateSummary");
+    const summaryResult = document.querySelector("#summaryResult");
+    const planStatus = document.querySelector("#planStatus");
+    const profilePlan = document.querySelector("#profilePlan");
+    const upgradeResult = document.querySelector("#upgradeResult");
+    const paymentPlanName = document.querySelector("#paymentPlanName");
+    const cardName = document.querySelector("#cardName");
+    const cardNumber = document.querySelector("#cardNumber");
+    const cardExpiry = document.querySelector("#cardExpiry");
+    const cardCvc = document.querySelector("#cardCvc");
+    const cancelPayment = document.querySelector("#cancelPayment");
+    const confirmPayment = document.querySelector("#confirmPayment");
+    const paymentResult = document.querySelector("#paymentResult");
+    const reportType = document.querySelector("#reportType");
+    const reportText = document.querySelector("#reportText");
+    const submitReport = document.querySelector("#submitReport");
+    const reportResult = document.querySelector("#reportResult");
+    const backgroundSelect = document.querySelector("#backgroundSelect");
+    const summaryTime = document.querySelector("#summaryTime");
+    const backgroundStatus = document.querySelector("#backgroundStatus");
+    const languageSelect = document.querySelector("#languageSelect");
+    const profileName = document.querySelector("#profileName");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profileEmail = document.querySelector("#profileEmail");
+    const saveProfile = document.querySelector("#saveProfile");
+    const profileResult = document.querySelector("#profileResult");
+    const licenseStatus = document.querySelector("#licenseStatus");
+    const licensePlan = document.querySelector("#licensePlan");
+    const licenseCredits = document.querySelector("#licenseCredits");
+    const licenseUpgradedAt = document.querySelector("#licenseUpgradedAt");
+    const licenseExpiresAt = document.querySelector("#licenseExpiresAt");
+    const licenseServerTime = document.querySelector("#licenseServerTime");
+    const profileLicensePlan = document.querySelector("#profileLicensePlan");
+    const profileLicenseCredits = document.querySelector("#profileLicenseCredits");
+    const profileLicenseExpiry = document.querySelector("#profileLicenseExpiry");
+
+    let registered = false;
+    let generatedCode = "";
+    let plan = "免費版";
+    let credits = 20;
+    let unlimitedCredits = false;
+    let upgradedAt = "";
+    let expiresAt = "";
+    let serverTime = "";
+    let subscriptionStatus = "free";
+    let backgroundRunning = true;
+    let pendingPlan = null;
+    const requests = [];
+    const planRanks = {
+      "免費版": 0,
+      Plus: 1,
+      Pro: 2,
+      Master: 3,
+      VIP: 4
+    };
+    const ntCostPerThousandTokens = {
+      ChatGPT: 0.09,
+      Gemini: 0.06,
+      Claude: 0.12,
+      Perplexity: 0.08,
+      Copilot: 0.07,
+      "其他 AI 工具": 0.08
+    };
+
+    const titleMap = {
+      registerPage: "Token大師",
+      optimizePage: "Token大師",
+      installerChoicePage: "選擇安裝環境",
+      enterpriseInquiryPage: "詢問企業版服務",
+      statsPage: "使用統計",
+      upgradePage: "升級方案",
+      paymentPage: "信用卡付費",
+      reportPage: "問題回報",
+      settingsPage: "設定",
+      profilePage: "個人資料"
+    };
+
+    const statusMap = {
+      registerPage: "先完成註冊，即可開始記錄 AI 工具 request 與 token 節省率。",
+      optimizePage: "點選要常駐優化的 AI tools，並啟用本機精簡；request 會在手機本機先精簡 token。",
+      installerChoicePage: "請選擇 Windows 或 Mac 安裝檔，完成安裝後即可在支援的 AI tool 使用精簡功能。",
+      enterpriseInquiryPage: "填寫企業版服務需求，客服將以 Email 回覆部署與報價資訊。",
+      statsPage: "查看今天送出的 request 與平均 token 節省百分比。",
+      upgradePage: "開啟更多壓縮策略、工具統計與團隊報表。",
+      paymentPage: "請確認信用卡資訊，按下確認付款後才會完成升級。",
+      reportPage: "回報壓縮、背景常駐或統計問題。",
+      settingsPage: "設定背景常駐、每日摘要時間與語言。",
+      profilePage: "修改使用者資料與查看目前方案。"
+    };
+
+    function saveRecord(type, payload) {
+      if (window.AppDatabase) {
+        window.AppDatabase.save("token-killer-ios-app", type, payload);
+      }
+    }
+
+    async function postTokenMasterApi(path, payload) {
+      const response = await fetch(`${CONTACT_API_BASE}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok && response.status !== 402) {
+        throw new Error(result.error || "後端授權同步失敗");
+      }
+      return result;
+    }
+
+    function licensePayload(extra = {}) {
+      return {
+        account: {
+          name: (profileName.value || registerName.value || "").trim(),
+          phone: (profilePhone.value || registerPhone.value || "").trim(),
+          email: (profileEmail.value || registerEmail.value || "").trim()
+        },
+        deviceId: localStorage.getItem("TOKEN_MASTER_DEVICE_ID") || (() => {
+          const id = crypto.randomUUID();
+          localStorage.setItem("TOKEN_MASTER_DEVICE_ID", id);
+          return id;
+        })(),
+        platform: navigator.platform || "browser",
+        browser: navigator.userAgent.includes("Chrome") ? "Chrome" : "Browser",
+        extensionVersion: "prototype",
+        ...extra
+      };
+    }
+
+    function applyServerLicense(license) {
+      if (!license) return;
+      plan = license.plan === "依點數" ? "免費版" : `${license.plan} 方案`;
+      credits = Number(license.creditsRemaining || 0);
+      unlimitedCredits = Boolean(license.unlimitedCredits);
+      upgradedAt = license.upgradedAt || "";
+      expiresAt = license.expiresAt || "";
+      serverTime = license.serverTime || "";
+      subscriptionStatus = license.subscriptionStatus || "free";
+      updateCredits();
+      if (license.requiresUpgrade) {
+        showToast(subscriptionStatus === "expired" ? "訂閱已到期，請進行升級。" : "點數已用完，請進行升級。");
+        showPage("upgradePage");
+      }
+    }
+
+    function renderLicenseStatus(mode = "本機原型") {
+      const planLabel = plan || "免費版";
+      const creditLabel = unlimitedCredits ? "無限制" : String(credits);
+      licenseStatus.textContent = mode;
+      licensePlan.textContent = planLabel;
+      licenseCredits.textContent = creditLabel;
+      licenseUpgradedAt.textContent = upgradedAt ? new Date(upgradedAt).toLocaleString("zh-TW") : "尚未升級";
+      licenseExpiresAt.textContent = expiresAt ? new Date(expiresAt).toLocaleString("zh-TW") : "尚未到期";
+      licenseServerTime.textContent = serverTime ? new Date(serverTime).toLocaleString("zh-TW") : "尚未同步";
+      profileLicensePlan.textContent = planLabel;
+      profileLicenseCredits.textContent = creditLabel;
+      profileLicenseExpiry.textContent = expiresAt ? new Date(expiresAt).toLocaleString("zh-TW") : "尚未到期";
+    }
+
+    async function syncServerLicense() {
+      try {
+        const result = await postTokenMasterApi("/api/token-master/license/sync", licensePayload());
+        applyServerLicense(result.license);
+        renderLicenseStatus(result.mode === "mysql-authoritative" ? "MySQL 後端已同步" : "本機備援");
+      } catch (error) {
+        renderLicenseStatus("等待後端連線");
+      }
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function updateCredits() {
+      statusPill.textContent = unlimitedCredits ? "剩餘點數 無限制" : `剩餘點數 ${credits}`;
+      planStatus.textContent = plan === "免費版" ? "" : plan;
+      profilePlan.textContent = plan;
+      renderLicenseStatus(licenseStatus.textContent || "本機原型");
+      document.querySelectorAll("[data-plan]").forEach(button => {
+        const currentRank = planRanks[plan.replace(" 方案", "")] || 0;
+        const buttonRank = planRanks[button.dataset.plan] || 0;
+        button.classList.toggle("inactive-plan", currentRank >= buttonRank && currentRank > 0);
+        button.textContent = button.dataset.baseLabel + (
+          currentRank > buttonRank && currentRank > 0
+            ? "（目前方案較高）"
+            : currentRank === buttonRank && currentRank > 0
+              ? "（已訂閱）"
+              : ""
+        );
+      });
+    }
+
+    async function spendCreditForRequest(usagePayload = {}) {
+      try {
+        const result = await postTokenMasterApi("/api/token-master/license/consume", licensePayload({
+          requestId: `prototype-request-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          ...usagePayload
+        }));
+        applyServerLicense(result.license);
+        renderLicenseStatus("MySQL 後端已同步");
+        if (!result.consumed) return false;
+        return true;
+      } catch {
+        renderLicenseStatus("本機原型，後端待連線");
+      }
+      if (unlimitedCredits) {
+        updateCredits();
+        return true;
+      }
+      if (credits <= 0) {
+        showToast("點數已用完，請進行升級。");
+        showPage("upgradePage");
+        return false;
+      }
+      credits -= 1;
+      updateCredits();
+      saveRecord("messages", {
+        title: "Token大師點數扣除",
+        action: "送出 request",
+        points: 1,
+        remainingCredits: credits,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+      return true;
+    }
+
+    function planFromButton(button) {
+      return {
+        name: button.dataset.plan,
+        label: button.dataset.baseLabel || button.textContent,
+        points: Number(button.dataset.points || 0),
+        unlimited: button.dataset.unlimited === "true"
+      };
+    }
+
+    async function completeUpgrade(selectedPlan) {
+      plan = `${selectedPlan.name} 方案`;
+      unlimitedCredits = selectedPlan.unlimited;
+      upgradedAt = new Date().toISOString();
+      const expiry = new Date(upgradedAt);
+      expiry.setMonth(expiry.getMonth() + 1);
+      expiresAt = expiry.toISOString();
+      subscriptionStatus = "active";
+      if (!unlimitedCredits) {
+        credits += selectedPlan.points;
+      }
+      try {
+        const result = await postTokenMasterApi("/api/token-master/license/upgrade", licensePayload({
+          plan: selectedPlan.name,
+          paymentId: `prototype-${Date.now()}`
+        }));
+        applyServerLicense(result.license);
+        renderLicenseStatus("MySQL 後端已同步");
+      } catch {
+        renderLicenseStatus("本機原型，後端待連線");
+      }
+      updateCredits();
+      const successMessage = unlimitedCredits
+        ? `付款成功，已升級為 ${plan}，點數無限制使用。`
+        : `付款成功，已升級為 ${plan}，新增 ${selectedPlan.points} 點，目前剩餘 ${credits} 點。`;
+      paymentResult.textContent = successMessage;
+      paymentResult.classList.add("show");
+      upgradeResult.textContent = successMessage;
+      upgradeResult.classList.add("show");
+      saveRecord("users", {
+        title: "Token大師升級",
+        plan,
+        credits,
+        unlimitedCredits,
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    function selectedTools() {
+      return toolToggles.filter(input => input.checked).map(input => input.value);
+    }
+
+    function syncToolSelection() {
+      const tools = selectedTools();
+      optimizeStatus.textContent = tools.length ? `已啟用 ${tools.length} 個` : "尚未選擇";
+      optimizeResult.textContent = tools.length
+        ? `背景自動優化已啟用：${tools.join("、")}。\n啟用本機精簡後，使用者在這些 AI tools 送出 request 時，Token大師會在手機本機先進行 token 最小化。`
+        : "請先點選要優化的 AI tool。";
+      optimizeResult.classList.add("show");
+      localOptimizeStatus.textContent = tools.length && localOptimizeConsent.checked
+        ? `本機精簡已啟用：${tools.join("、")} 的 request 會先在手機本機優化。`
+        : "尚未啟用本機精簡。請先選擇 AI tool 並勾選同意。";
+      localOptimizeStatus.classList.add("show");
+    }
+
+    function optimizeLocally(tool, source) {
+      if (!localOptimizeConsent.checked) {
+        optimizeResult.textContent = "請先勾選同意啟用本機精簡模式。";
+        optimizeResult.classList.add("show");
+        return null;
+      }
+      localOptimizeStatus.textContent = `本機精簡處理中：${tool} request 正在手機本機優化。`;
+      const optimizedPrompt = optimizePrompt(source);
+      const beforeTokens = estimateTokens(source);
+      const afterTokens = estimateTokens(optimizedPrompt);
+      const savedTokens = Math.max(0, beforeTokens - afterTokens);
+      const savedPercent = Math.max(0, Math.round((1 - afterTokens / Math.max(beforeTokens, 1)) * 100));
+      const savedMoney = estimateSavedMoney(tool, savedTokens);
+      localOptimizeStatus.textContent = `本機精簡完成：request 已在手機本機優化，請確認後送出到 ${tool}。`;
+      return { optimizedPrompt, beforeTokens, afterTokens, savedTokens, savedPercent, savedMoney };
+    }
+
+    async function autoOptimizeRequest(tool, source) {
+      if (!backgroundRunning) {
+        optimizeResult.textContent = "背景常駐已關閉，請先到設定頁面開啟背景常駐後再使用自動優化。";
+        optimizeResult.classList.add("show");
+        return;
+      }
+      const localPayload = optimizeLocally(tool, source);
+      if (!localPayload) return;
+      const optimized = localPayload.optimizedPrompt;
+      const beforeTokens = Number(localPayload.beforeTokens);
+      const afterTokens = Number(localPayload.afterTokens);
+      const savedTokens = Math.max(0, Number(localPayload.savedTokens));
+      const saved = Math.max(0, Number(localPayload.savedPercent));
+      const savedMoneyValue = Number(localPayload.savedMoney);
+      if (!(await spendCreditForRequest({
+        tool,
+        beforeTokens,
+        afterTokens,
+        savedTokens,
+        savedPercent: saved,
+        savedMoney: savedMoneyValue
+      }))) return;
+      const item = {
+        tool,
+        beforeTokens,
+        afterTokens,
+        savedTokens,
+        savedPercent: saved,
+        savedMoney: savedMoneyValue,
+        time: new Date().toLocaleString("zh-TW"),
+        createdAt: new Date().toISOString(),
+        source,
+        optimized
+      };
+      requests.unshift(item);
+      optimizeStatus.textContent = "自動優化完成";
+      optimizeResult.textContent = `已偵測 ${tool} request，Token大師已在手機本機先優化。\n原始：約 ${beforeTokens} tokens\n最小化：約 ${afterTokens} tokens\n節省：約 ${saved}% / ${savedTokens} tokens`;
+      optimizeResult.classList.add("show");
+      renderStats();
+      saveRecord("questions", {
+        title: "Token 自動最小化",
+        ...item,
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    function showPage(pageId) {
+      if (!registered && pageId !== "registerPage") {
+        showToast("請先完成註冊");
+        return;
+      }
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      pageTitle.textContent = titleMap[pageId] || "Token大師";
+      appStatus.textContent = statusMap[pageId] || statusMap.optimizePage;
+      renderStats();
+    }
+
+    function syncProfile() {
+      profileName.value = registerName.value.trim();
+      profilePhone.value = registerPhone.value.trim();
+      profileEmail.value = registerEmail.value.trim();
+      enterpriseName.value = registerName.value.trim();
+      enterpriseEmail.value = registerEmail.value.trim();
+      profilePlan.textContent = plan;
+    }
+
+    function estimateTokens(text) {
+      const normalized = text.trim();
+      if (!normalized) return 0;
+      const zh = (normalized.match(/[\u4e00-\u9fff]/g) || []).length;
+      const words = normalized.replace(/[\u4e00-\u9fff]/g, " ").split(/\s+/).filter(Boolean).length;
+      return Math.max(1, Math.ceil(zh * 0.85 + words * 1.35));
+    }
+
+    function optimizePrompt(text) {
+      const cleaned = text
+        .replace(/\s+/g, " ")
+        .replace(/請問一下|我想要請你幫我|麻煩你可以幫我|麻煩你|可以幫我|請幫我|如果可以的話|拜託|謝謝/g, "")
+        .replace(/非常非常|真的真的/g, "非常")
+        .replace(/這是一筆由 Token大師偵測到的 AI tool request[。.]?/g, "")
+        .replace(/完整回答/g, "回答")
+        .replace(/避免冗長內容/g, "精簡")
+        .replace(/不要太長/g, "精簡")
+        .replace(/並依照使用者指定格式輸出/g, "依指定格式輸出")
+        .trim();
+      const compact = cleaned
+        .replace(/，/g, "；")
+        .replace(/；+/g, "；")
+        .replace(/[；。\s]+$/g, "")
+        .trim();
+      const task = compact.length > 110 ? `${compact.slice(0, 106)}...` : compact;
+      const optimized = task;
+      return estimateTokens(optimized) < estimateTokens(text) && task.replace(/[\s，。；、]/g, "").length >= 8
+        ? optimized
+        : text.trim();
+    }
+
+    function estimateSavedMoney(tool, savedTokens) {
+      const rate = ntCostPerThousandTokens[tool] || ntCostPerThousandTokens["其他 AI 工具"];
+      return Number(((savedTokens / 1000) * rate).toFixed(6));
+    }
+
+    function formatNTD(value) {
+      return `NT$${Number(value || 0).toFixed(4)}`;
+    }
+
+    function renderStats() {
+      todayDate.textContent = new Date().toLocaleDateString("zh-TW");
+      const total = requests.length;
+      const saved = total
+        ? Math.round(requests.reduce((sum, item) => sum + item.savedPercent, 0) / total)
+        : 0;
+      const money = requests.reduce((sum, item) => sum + (item.savedMoney || 0), 0);
+      const now = new Date();
+      const monthRequests = requests.filter(item => {
+        const date = item.createdAt ? new Date(item.createdAt) : now;
+        return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+      });
+      const monthTokens = monthRequests.reduce((sum, item) => sum + (item.savedTokens || 0), 0);
+      const monthMoney = monthRequests.reduce((sum, item) => sum + (item.savedMoney || 0), 0);
+      requestCount.textContent = total;
+      savedPercent.textContent = `${saved}%`;
+      if (savedMoney) savedMoney.textContent = formatNTD(money);
+      monthlySavedTokens.textContent = monthTokens.toLocaleString("zh-TW");
+      monthlySavedMoney.textContent = formatNTD(monthMoney);
+      savedMeter.style.setProperty("--value", `${saved}%`);
+      requestHistory.innerHTML = total ? requests.slice(0, 8).map(item => `
+        <article class="history-item">
+          <b>${item.tool} · 節省 ${item.savedPercent}% token</b>
+          ${item.time}<br>
+          原始 ${item.beforeTokens} tokens → 最小化 ${item.afterTokens} tokens，節省 ${item.savedTokens} tokens
+        </article>
+      `).join("") : `<div class="history-item">尚無 request 紀錄。</div>`;
+    }
+
+    function buildDailySummary() {
+      const total = requests.length;
+      const saved = total
+        ? Math.round(requests.reduce((sum, item) => sum + item.savedPercent, 0) / total)
+        : 0;
+      const byTool = requests.reduce((map, item) => {
+        map[item.tool] = (map[item.tool] || 0) + 1;
+        return map;
+      }, {});
+      const money = requests.reduce((sum, item) => sum + (item.savedMoney || 0), 0);
+      const toolText = Object.entries(byTool).map(([tool, count]) => `${tool} ${count} 次`).join("、") || "尚無工具使用紀錄";
+      return `今日 Token大師摘要：已協助送出 ${total} 個 request 給 AI tools，平均節省 ${saved}% token，估算省下 ${formatNTD(money)}。AI 工具使用：${toolText}。下一次摘要時間：${summaryTime.value || "21:00"}。`;
+    }
+
+    sendSms.addEventListener("click", () => {
+      generatedCode = String(Math.floor(1000 + Math.random() * 9000));
+      smsHint.textContent = `已發送 4 位數簡訊驗證碼。原型示範碼：${generatedCode}`;
+    });
+
+    toggleTerms.addEventListener("click", () => {
+      termsBox.classList.toggle("show");
+    });
+
+    finishRegister.addEventListener("click", () => {
+      if (!registerEmail.value.includes("@")) {
+        registerResult.textContent = "Email 格式需包含 @。";
+        registerResult.classList.add("show");
+        return;
+      }
+      if (!generatedCode || smsCode.value !== generatedCode) {
+        registerResult.textContent = "請先完成 4 位數簡訊驗證。";
+        registerResult.classList.add("show");
+        return;
+      }
+      if (!termsBox.classList.contains("show") || !agreeTerms.checked) {
+        registerResult.textContent = "請先展開並同意使用條款、隱私權政策與免責聲明。";
+        registerResult.classList.add("show");
+        return;
+      }
+      registered = true;
+      userButton.textContent = registerName.value.trim() || "使用者";
+      syncProfile();
+      registerResult.textContent = "註冊成功，背景常駐 Token大師已啟動。";
+      registerResult.classList.add("show");
+      saveRecord("users", {
+        name: registerName.value.trim(),
+        phone: registerPhone.value.trim(),
+        email: registerEmail.value.trim(),
+        app: "Token大師",
+        createdAt: new Date().toISOString()
+      });
+      syncServerLicense();
+      showPage("optimizePage");
+    });
+
+    optimizeButton.addEventListener("click", async () => {
+      const tools = selectedTools();
+      if (!tools.length) {
+        optimizeResult.textContent = "請先點選至少一個要自動優化的 AI tool。";
+        optimizeResult.classList.add("show");
+        return;
+      }
+      const tool = tools[requests.length % tools.length];
+      await autoOptimizeRequest(
+        tool,
+        "請幫我根據以下資料產生完整回答，保留重點、避免冗長內容，並依照使用者指定格式輸出。這是一筆由 Token大師偵測到的 AI tool request。"
+      );
+    });
+
+    toolToggles.forEach(input => {
+      input.addEventListener("change", () => {
+        syncToolSelection();
+        saveRecord("users", {
+          title: "Token大師 AI tool 自動優化設定",
+          tools: selectedTools(),
+          localOptimizeConsent: localOptimizeConsent.checked,
+          email: registerEmail.value.trim(),
+          updatedAt: new Date().toISOString()
+        });
+      });
+    });
+
+    localOptimizeConsent.addEventListener("change", () => {
+      syncToolSelection();
+      saveRecord("users", {
+        title: "Token大師本機精簡設定",
+        localOptimizeConsent: localOptimizeConsent.checked,
+        tools: selectedTools(),
+        email: registerEmail.value.trim(),
+        updatedAt: new Date().toISOString()
+      });
+    });
+
+    personalInstallButton.addEventListener("click", () => {
+      showPage("installerChoicePage");
+    });
+
+    closeInstallerChoice.addEventListener("click", () => {
+      showPage("optimizePage");
+    });
+
+    enterpriseInquiryButton.addEventListener("click", () => {
+      enterpriseName.value = profileName.value.trim() || registerName.value.trim();
+      enterpriseEmail.value = profileEmail.value.trim() || registerEmail.value.trim();
+      enterpriseInquiryResult.classList.remove("show");
+      showPage("enterpriseInquiryPage");
+    });
+
+    closeEnterpriseInquiry.addEventListener("click", () => {
+      showPage("optimizePage");
+    });
+
+    submitEnterpriseInquiry.addEventListener("click", async () => {
+      if (!enterpriseEmail.value.includes("@")) {
+        enterpriseInquiryResult.textContent = "Email 格式需包含 @。";
+        enterpriseInquiryResult.classList.add("show");
+        return;
+      }
+      if (!enterpriseText.value.trim()) {
+        enterpriseInquiryResult.textContent = "請先輸入企業版服務需求內容。";
+        enterpriseInquiryResult.classList.add("show");
+        return;
+      }
+      enterpriseInquiryResult.textContent = "正在送出企業版服務需求到 support@crovantix.com...";
+      enterpriseInquiryResult.classList.add("show");
+      const payload = {
+        app: "token-killer-ios-app",
+        source: "enterpriseInquiry",
+        name: enterpriseName.value.trim(),
+        email: enterpriseEmail.value.trim(),
+        type: "Token大師企業版服務詢問",
+        budget: "企業版服務",
+        message: enterpriseText.value.trim(),
+        sentAt: new Date().toISOString()
+      };
+      try {
+        const response = await fetch(`${CONTACT_API_BASE}/api/contact`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.ok) throw new Error(result.error || "送出失敗");
+        enterpriseInquiryResult.textContent = result.delivery?.sent
+          ? "已送出需求給客服, 後續客服會email回覆您, 謝謝！"
+          : "需求已記錄，但 Email 尚未寄出，請確認後端 RESEND_API_KEY 已設定。";
+      } catch (error) {
+        enterpriseInquiryResult.textContent = `Email 送出失敗：${error.message}。請確認後端 /api/contact 正在執行。`;
+      }
+      enterpriseInquiryResult.classList.add("show");
+      saveRecord("messages", {
+        title: "Token大師企業版服務詢問",
+        requester: payload.name,
+        email: payload.email,
+        content: payload.message,
+        targetEmail: "support@crovantix.com",
+        createdAt: payload.sentAt
+      });
+    });
+
+    simulateSummary.addEventListener("click", () => {
+      summaryResult.textContent = buildDailySummary();
+      summaryResult.classList.add("show");
+      showToast("已顯示每日摘要通知");
+      saveRecord("messages", {
+        title: "每日 Token 摘要",
+        content: summaryResult.textContent,
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    dailySummaryButton.addEventListener("click", () => {
+      showPage("statsPage");
+      summaryResult.textContent = buildDailySummary();
+      summaryResult.classList.add("show");
+    });
+
+    document.querySelectorAll("[data-plan]").forEach(button => {
+      button.dataset.baseLabel = button.textContent;
+      button.addEventListener("click", () => {
+        const currentRank = planRanks[plan.replace(" 方案", "")] || 0;
+        const targetRank = planRanks[button.dataset.plan] || 0;
+        if (currentRank > targetRank) {
+          upgradeResult.textContent = `目前已是 ${plan}，無法再訂閱較低等級的 ${button.dataset.plan} 方案。`;
+          upgradeResult.classList.add("show");
+          return;
+        }
+        if (currentRank === targetRank && currentRank > 0) {
+          upgradeResult.textContent = `目前已訂閱 ${plan}，不需要重複訂閱。`;
+          upgradeResult.classList.add("show");
+          return;
+        }
+        pendingPlan = planFromButton(button);
+        paymentPlanName.textContent = pendingPlan.label;
+        paymentResult.classList.remove("show");
+        paymentResult.textContent = "";
+        cardName.value = registerName.value.trim() || profileName.value.trim() || "Clay Tseng";
+        showPage("paymentPage");
+      });
+    });
+
+    cancelPayment.addEventListener("click", () => {
+      paymentResult.classList.remove("show");
+      showPage("upgradePage");
+    });
+
+    confirmPayment.addEventListener("click", async () => {
+      if (!pendingPlan) {
+        paymentResult.textContent = "請先回到升級頁面選擇方案。";
+        paymentResult.classList.add("show");
+        return;
+      }
+      if (!cardName.value.trim() || cardNumber.value.replace(/\s/g, "").length < 12 || !cardExpiry.value.trim() || cardCvc.value.trim().length < 3) {
+        paymentResult.textContent = "請完整輸入信用卡付款資料。";
+        paymentResult.classList.add("show");
+        return;
+      }
+      await completeUpgrade(pendingPlan);
+      pendingPlan = null;
+    });
+
+    submitReport.addEventListener("click", () => {
+      if (!reportText.value.trim()) {
+        reportResult.textContent = "請先輸入問題內容。";
+        reportResult.classList.add("show");
+        return;
+      }
+      reportResult.textContent = "感謝您的回報，已將問題提送至客服 support@crovantix.com。\nCrovantix 創微科技\n官網：www.crovantix.com";
+      reportResult.classList.add("show");
+      saveRecord("messages", {
+        title: "Token大師問題回報",
+        type: reportType.value,
+        content: reportText.value.trim(),
+        requester: registerName.value.trim(),
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    backgroundSelect.addEventListener("change", () => {
+      backgroundRunning = backgroundSelect.value === "on";
+      backgroundStatus.textContent = backgroundRunning
+        ? "背景常駐已開啟，會記錄各 AI 工具 request 與 token 節省估算。"
+        : "背景常駐已關閉，暫停自動統計與每日摘要提醒。";
+      updateCredits();
+    });
+
+    summaryTime.addEventListener("change", () => {
+      backgroundStatus.textContent = `每日摘要時間已更新為 ${summaryTime.value}。`;
+    });
+
+    saveProfile.addEventListener("click", async () => {
+      if (!profileEmail.value.includes("@")) {
+        profileResult.textContent = "Email 格式需包含 @。";
+        profileResult.classList.add("show");
+        return;
+      }
+      registerName.value = profileName.value.trim();
+      registerPhone.value = profilePhone.value.trim();
+      registerEmail.value = profileEmail.value.trim();
+      userButton.textContent = registerName.value.trim() || "使用者";
+      enterpriseName.value = registerName.value.trim();
+      enterpriseEmail.value = registerEmail.value.trim();
+      profileResult.textContent = "個人資料已更新。";
+      profileResult.classList.add("show");
+      saveRecord("users", {
+        title: "修改個人資料",
+        name: registerName.value.trim(),
+        phone: registerPhone.value.trim(),
+        email: registerEmail.value.trim(),
+        updatedAt: new Date().toISOString()
+      });
+      await syncServerLicense();
+    });
+
+    userButton.addEventListener("click", () => showPage("profilePage"));
+    navButtons.forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
+
+    todayDate.textContent = new Date().toLocaleDateString("zh-TW");
+    updateCredits();
+    renderLicenseStatus("本機原型");
+    syncToolSelection();
+    showPage("registerPage");
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

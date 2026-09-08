@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>交易平台 | 會員上架、搜尋、信用卡交易與聊天</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f8fb;
+      --ink: #0b1f35;
+      --muted: #667789;
+      --line: rgba(10, 45, 82, .14);
+      --panel: #ffffff;
+      --blue: #1078dc;
+      --cyan: #34c8f4;
+      --green: #29c49a;
+      --orange: #ffb35c;
+      --shadow: 0 18px 50px rgba(8, 35, 70, .12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Segoe UI", Arial, sans-serif;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; }
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244,248,251,.92);
+      backdrop-filter: blur(18px);
+    }
+    .nav-inner {
+      width: min(1180px, calc(100% - 32px));
+      min-height: 72px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand strong {
+      display: block;
+      font-size: 20px;
+      color: #073763;
+    }
+    .brand span {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .links a {
+      min-height: 36px;
+      display: grid;
+      place-items: center;
+      padding: 0 12px;
+      border-radius: 8px;
+      color: #173c63;
+      font-size: 14px;
+      font-weight: 900;
+    }
+    .links a:hover, .links a.primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+    }
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .hero {
+      padding: 72px 0 36px;
+      background:
+        radial-gradient(circle at 82% 22%, rgba(52,200,244,.28), transparent 30%),
+        linear-gradient(135deg, #ffffff, #eaf6ff);
+      border-bottom: 1px solid var(--line);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
+      gap: 34px;
+      align-items: stretch;
+    }
+    h1 {
+      margin: 12px 0 16px;
+      font-size: clamp(42px, 7vw, 82px);
+      line-height: .96;
+      letter-spacing: 0;
+      color: #073763;
+    }
+    .eyebrow {
+      display: inline-grid;
+      place-items: center;
+      min-height: 32px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: rgba(16,120,220,.1);
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 950;
+    }
+    .lead {
+      max-width: 760px;
+      color: #41576f;
+      font-size: clamp(18px, 2.2vw, 23px);
+      line-height: 1.7;
+      font-weight: 760;
+    }
+    .marquee-card {
+      min-height: 100%;
+      display: grid;
+      align-content: center;
+      gap: 14px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .marquee-card h2 {
+      margin: 0;
+      font-size: 24px;
+      color: #073763;
+    }
+    .marquee-track {
+      display: flex;
+      gap: 12px;
+      width: max-content;
+      animation: ticker 20s linear infinite;
+    }
+    .marquee-item {
+      min-width: 240px;
+      padding: 14px;
+      border-radius: 8px;
+      background: #eef8ff;
+      border: 1px solid rgba(16,120,220,.16);
+      font-weight: 900;
+    }
+    .marquee-item span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .section {
+      padding: 70px 0;
+    }
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .section-title h2 {
+      margin: 0;
+      color: #073763;
+      font-size: clamp(30px, 4vw, 50px);
+      letter-spacing: 0;
+    }
+    .section-title p {
+      max-width: 680px;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 760;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .card, .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    .card {
+      padding: 18px;
+    }
+    .card h3, .panel h3 {
+      margin: 0 0 10px;
+      color: #073763;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+    .card p, .panel p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-weight: 720;
+    }
+    .panel {
+      padding: 22px;
+    }
+    .app-grid {
+      display: grid;
+      grid-template-columns: minmax(300px, .8fr) minmax(0, 1.2fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    label {
+      display: grid;
+      gap: 7px;
+      color: #36516c;
+      font-size: 14px;
+      font-weight: 900;
+    }
+    label.full { grid-column: 1 / -1; }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f9fcff;
+      color: var(--ink);
+      padding: 13px 14px;
+      outline: none;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    details {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f9fcff;
+      padding: 12px 14px;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: 950;
+      color: #073763;
+    }
+    .terms {
+      max-height: 260px;
+      overflow: auto;
+      margin-top: 10px;
+      color: #52667d;
+      line-height: 1.75;
+      font-weight: 720;
+    }
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #36516c;
+      font-weight: 900;
+    }
+    .check-row input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--blue);
+    }
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .button {
+      min-height: 48px;
+      display: inline-grid;
+      place-items: center;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 950;
+      cursor: pointer;
+    }
+    .button.secondary {
+      background: #eef3f8;
+      color: #073763;
+      border: 1px solid var(--line);
+    }
+    .button.green {
+      background: var(--green);
+    }
+    .result {
+      min-height: 26px;
+      margin-top: 12px;
+      color: var(--blue);
+      font-weight: 900;
+      line-height: 1.6;
+    }
+    .hidden { display: none !important; }
+    .market-toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .product-list, .chat-list, .friend-list {
+      display: grid;
+      gap: 12px;
+    }
+    .product {
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr);
+      gap: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .product img {
+      width: 110px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #e6eef8;
+    }
+    .product h3 {
+      margin: 0 0 6px;
+      color: #073763;
+      font-size: 20px;
+    }
+    .tag {
+      display: inline-grid;
+      place-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #eaf7ff;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 950;
+    }
+    .price {
+      color: #073763;
+      font-size: 20px;
+      font-weight: 950;
+    }
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      background: #eef8ff;
+      color: #22425f;
+      font-weight: 760;
+      line-height: 1.55;
+    }
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .stat {
+      min-height: 88px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    .stat b {
+      color: #073763;
+      font-size: 22px;
+    }
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .friend-sidebar {
+      position: fixed;
+      top: 92px;
+      right: 16px;
+      z-index: 8;
+      width: min(280px, calc(100vw - 32px));
+      max-height: calc(100vh - 116px);
+      overflow: auto;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.96);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+    .friend-sidebar h3 {
+      margin: 0 0 8px;
+      color: #073763;
+      font-size: 20px;
+    }
+    .friend-sidebar p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-weight: 760;
+    }
+    .sidebar-list {
+      display: grid;
+      gap: 10px;
+    }
+    .sidebar-friend {
+      display: grid;
+      gap: 6px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f8fcff;
+    }
+    .sidebar-friend strong {
+      color: #073763;
+    }
+    .notice {
+      display: inline-grid;
+      width: fit-content;
+      min-height: 24px;
+      place-items: center;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: #ff3b30;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 950;
+    }
+    footer {
+      padding: 30px 0;
+      border-top: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    @media (max-width: 880px) {
+      .nav-inner { align-items: flex-start; flex-direction: column; padding: 12px 0; }
+      .hero-grid, .app-grid, .grid {
+        grid-template-columns: 1fr;
+      }
+      .status-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+      .friend-sidebar {
+        position: static;
+        width: min(1180px, calc(100% - 32px));
+        max-height: none;
+        margin: 18px auto 0;
+      }
+    }
+    @media (max-width: 560px) {
+      .form-grid, .market-toolbar, .status-strip {
+        grid-template-columns: 1fr;
+      }
+      .product {
+        grid-template-columns: 1fr;
+      }
+      .product img {
+        width: 100%;
+        height: 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="#home">
+        <strong>交易平台</strong>
+        <span>會員上架、搜尋、信用卡交易與聊天</span>
+      </a>
+      <div class="links">
+        <a href="#membership">加入會員</a>
+        <a href="#vip">VIP</a>
+        <a href="#sell">上架商品</a>
+        <a href="#market">搜尋商品</a>
+        <a href="#social">聊天好友</a>
+        <a class="primary" href="#database">管理後台</a>
+      </div>
+    </div>
+  </nav>
+
+  <aside class="friend-sidebar hidden" id="friendSidebar" aria-label="好友列表">
+    <h3>好友列表</h3>
+    <p id="friendSidebarSummary">會員登入後會顯示好友、未讀留言與好友邀請。</p>
+    <div class="sidebar-list" id="friendSidebarList"></div>
+  </aside>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="wrap hero-grid">
+        <div>
+          <span class="eyebrow">MEMBER COMMERCE PLATFORM</span>
+          <h1>任何會員都能上架販售商品</h1>
+          <p class="lead">加入會員後可上傳商品照片與描述、刊登販售、讓買家搜尋商品並使用信用卡付款。交易成功後平台會向賣家收取成交價 4% 服務費，會員也能聊天、互加好友與刪除好友。</p>
+          <div class="button-row">
+            <a class="button" href="#membership">立即加入會員</a>
+            <a class="button secondary" href="#market">查看商品</a>
+          </div>
+          <div class="status-strip">
+            <div class="stat"><b id="memberCount">0</b><span>會員數</span></div>
+            <div class="stat"><b id="productCount">0</b><span>上架商品</span></div>
+            <div class="stat"><b id="transactionCount">0</b><span>交易紀錄</span></div>
+            <div class="stat"><b>4%</b><span>賣家成交服務費</span></div>
+          </div>
+        </div>
+        <aside class="marquee-card">
+          <h2>VIP 首頁商品跑馬燈</h2>
+          <p>升級 VIP 會員後，上架商品會出現在首頁動態跑馬燈，提高曝光。</p>
+          <div style="overflow:hidden">
+            <div class="marquee-track" id="vipMarquee"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="wrap">
+        <div class="section-title">
+          <h2>平台功能</h2>
+          <p>交易、會員、訊息與好友關係都會寫入後台資料庫，方便未來做管理後台、金流對帳、客服查詢與風控。</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <h3>會員上架</h3>
+            <p>賣家可上傳照片、商品名稱、價格、分類與描述，送出後立即上架。</p>
+          </article>
+          <article class="card">
+            <h3>買家搜尋</h3>
+            <p>買家可用關鍵字搜尋想買的商品，依名稱、描述、分類與賣家篩選。</p>
+          </article>
+          <article class="card">
+            <h3>信用卡交易</h3>
+            <p>買家輸入信用卡完成交易後，系統記錄訂單並計算向賣家收取 4% 服務費。</p>
+          </article>
+          <article class="card">
+            <h3>會員聊天</h3>
+            <p>會員可以針對商品或一般需求互相留言聊天，訊息保存至後台資料庫。</p>
+          </article>
+          <article class="card">
+            <h3>好友管理</h3>
+            <p>會員可以互加好友，也能從好友清單移除好友，好友關係會留下紀錄。</p>
+          </article>
+          <article class="card">
+            <h3>VIP 曝光</h3>
+            <p>每月 NTD$499 信用卡付費升級 VIP 後，上架商品進入首頁跑馬燈曝光。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="membership">
+      <div class="wrap app-grid">
+        <section class="panel">
+          <h3>加入會員</h3>
+          <p>請先展開並閱讀免責聲明，勾選同意後才可以加入會員並使用平台功能。</p>
+          <form id="memberForm" style="display:grid;gap:14px;margin-top:16px">
+            <div class="form-grid">
+              <label>會員姓名
+                <input id="memberName" value="Clay Tseng" required>
+              </label>
+              <label>Email
+                <input id="memberEmail" type="email" value="clay@example.com" required>
+              </label>
+              <label>電話
+                <input id="memberPhone" value="0912-345-678" required>
+              </label>
+              <label>會員類型
+                <select id="memberRole">
+                  <option>買家與賣家</option>
+                  <option>主要買家</option>
+                  <option>主要賣家</option>
+                </select>
+              </label>
+            </div>
+            <details id="termsBox">
+              <summary>展開交易平台免責聲明與使用條款</summary>
+              <div class="terms">
+                <p>本平台提供會員刊登商品、搜尋商品、信用卡交易、會員聊天與好友管理等資訊服務。平台不保證商品真實性、品質、適用性、合法性、交付時間、交易結果或會員身分完全正確。</p>
+                <p>會員應自行確認商品內容、交易條件、付款資訊與交付方式，並確保刊登內容不得違反法令、侵害他人權利、涉及詐欺、違禁品、仿冒品、色情、暴力、仇恨或其他不當內容。</p>
+                <p>交易成功後，平台會向賣家收取成交價 4% 服務費。信用卡付款、退款、爭議款與金流規則，依實際金流服務商規範處理。</p>
+                <p>會員聊天、好友關係、商品資料、交易資料與操作紀錄會保存於後台資料庫，用於交易管理、客服支援、風險控管、系統維護與服務改善。</p>
+              </div>
+            </details>
+            <label class="check-row">
+              <input id="agreeTerms" type="checkbox">
+              我已閱讀並同意免責聲明與使用條款
+            </label>
+            <button class="button" type="submit">加入會員</button>
+            <div class="result" id="memberResult"></div>
+          </form>
+        </section>
+
+        <section class="panel" id="vip">
+          <h3>VIP 會員升級</h3>
+          <p>加入會員後可升級 VIP，費用為每月 NTD$499。升級成功後，上架商品會顯示在首頁動態跑馬燈。</p>
+          <form id="vipForm" class="form-grid" style="margin-top:16px">
+            <label>持卡人姓名
+              <input id="vipCardName" value="Clay Tseng">
+            </label>
+            <label>信用卡號
+              <input id="vipCardNumber" value="4242 4242 4242 4242">
+            </label>
+            <label>有效期限
+              <input id="vipExpiry" value="12/30">
+            </label>
+            <label>安全碼
+              <input id="vipCvc" value="123">
+            </label>
+            <label class="full">VIP 方案
+              <input value="VIP 會員 NTD$499/月，商品首頁跑馬燈曝光" readonly>
+            </label>
+            <button class="button green" type="submit">信用卡付費升級 VIP</button>
+          </form>
+          <div class="result" id="vipResult"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="section" id="sell">
+      <div class="wrap app-grid">
+        <section class="panel">
+          <h3>上架商品</h3>
+          <p>會員可以上傳要賣的東西照片與描述，送出後商品會出現在搜尋列表。</p>
+          <form id="productForm" style="display:grid;gap:12px;margin-top:16px">
+            <div class="form-grid">
+              <label>商品名稱
+                <input id="productName" value="二手筆電">
+              </label>
+              <label>販售價格 NTD
+                <input id="productPrice" type="number" min="1" value="18000">
+              </label>
+              <label>商品分類
+                <select id="productCategory">
+                  <option>3C 電子</option>
+                  <option>生活用品</option>
+                  <option>服飾配件</option>
+                  <option>家具家電</option>
+                  <option>票券收藏</option>
+                  <option>其他商品</option>
+                </select>
+              </label>
+              <label>商品照片
+                <input id="productPhoto" type="file" accept="image/*">
+              </label>
+              <label class="full">商品描述
+                <textarea id="productDescription">功能正常，外觀有正常使用痕跡，適合辦公與上課。</textarea>
+              </label>
+            </div>
+            <button class="button" type="submit">上架商品</button>
+            <div class="result" id="productResult"></div>
+          </form>
+        </section>
+        <section class="panel">
+          <h3>賣家費用說明</h3>
+          <p>每筆信用卡交易成功後，平台會向賣家收取賣價 4% 作為服務費。例如商品成交 NTD$10,000，服務費為 NTD$400，賣家可收 NTD$9,600。</p>
+          <div class="result" id="feePreview">目前商品成交服務費會在買家付款時自動計算。</div>
+        </section>
+      </div>
+    </section>
+
+    <section class="section" id="market">
+      <div class="wrap">
+        <div class="section-title">
+          <h2>搜尋商品</h2>
+          <p>買家可以搜尋想要買的東西，點選信用卡購買後會產生交易紀錄並計算 4% 賣家服務費。</p>
+        </div>
+        <div class="market-toolbar">
+          <input id="searchInput" placeholder="搜尋商品名稱、描述、分類或賣家">
+          <button class="button" id="searchButton" type="button">搜尋</button>
+        </div>
+        <div class="product-list" id="productList"></div>
+      </div>
+    </section>
+
+    <section class="section" id="social">
+      <div class="wrap app-grid">
+        <section class="panel">
+          <h3>會員聊天</h3>
+          <p>會員可以跟會員聊天，聊天訊息會記錄到後台資料庫。</p>
+          <form id="chatForm" style="display:grid;gap:12px;margin-top:16px">
+            <label>聊天對象
+              <select id="chatTarget"></select>
+            </label>
+            <label>訊息內容
+              <textarea id="chatMessage">您好，我想詢問商品是否還可以購買？</textarea>
+            </label>
+            <button class="button" type="submit">送出訊息</button>
+          </form>
+          <div class="chat-list" id="chatList" style="margin-top:14px"></div>
+        </section>
+        <section class="panel">
+          <h3>好友管理</h3>
+          <p>可以互加好友或移除好友，好友關係同樣會保存至後台資料庫。</p>
+          <div class="form-grid" style="margin-top:16px">
+            <label>會員
+              <select id="friendTarget"></select>
+            </label>
+            <label>動作
+              <select id="friendAction">
+                <option>加入好友</option>
+                <option>刪除好友</option>
+              </select>
+            </label>
+          </div>
+          <button class="button" id="friendButton" type="button" style="margin-top:12px">執行好友動作</button>
+          <div class="friend-list" id="friendList" style="margin-top:14px"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="section" id="database">
+      <div class="wrap panel">
+        <h3>管理後台登入</h3>
+        <p>後台資料庫內容只開放平台管理員登入後查看。會員只能使用前台交易、聊天、好友與商品功能，無法直接查看後台紀錄。</p>
+        <form id="adminLoginForm" class="form-grid" style="margin-top:16px">
+          <label>管理員 Email
+            <input id="adminEmail" type="email" value="clay@example.com">
+          </label>
+          <label>管理員驗證碼
+            <input id="adminCode" type="password" placeholder="請輸入管理員驗證碼">
+          </label>
+          <button class="button" type="submit">登入管理後台</button>
+        </form>
+        <div class="result" id="adminLoginResult"></div>
+        <div id="databasePanel" class="hidden" style="margin-top:18px">
+          <h3>後台資料庫紀錄</h3>
+          <p>會員資料、商品上架、信用卡交易摘要、4% 賣家服務費、聊天訊息、好友關係與 VIP 訂閱都會送到後台資料庫。使用 localhost server 開啟本頁時，資料會送到 <b>/api/records</b>，再由後端寫入 Supabase / PostgreSQL 或目前設定的資料庫。</p>
+          <div class="result" id="dbResult">尚未產生新資料。</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">Copyright © 2026 Trading Platform. Powered by Crovantix / Nexora prototype.</div>
+  </footer>
+
+  <script>
+    window.DISABLE_CROVANTIX_SHARE_REWARD = true;
+  </script>
+  <script src="app-database.js"></script>
+  <script>
+    const fallbackImage = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='240' viewBox='0 0 320 240'%3E%3Crect width='320' height='240' rx='18' fill='%23e8f4ff'/%3E%3Cpath d='M70 152l46-48 35 36 25-28 74 76H70z' fill='%231078dc' opacity='.74'/%3E%3Ccircle cx='230' cy='72' r='24' fill='%2334c8f4'/%3E%3Ctext x='160' y='214' text-anchor='middle' font-family='Arial' font-size='20' fill='%23073763' font-weight='700'%3EProduct%3C/text%3E%3C/svg%3E";
+    const state = {
+      currentMember: null,
+      isVip: false,
+      members: [
+        { id: "m-demo-1", name: "Nexora Store", email: "store@nexora.ai", phone: "03-000-0000", role: "主要賣家", vip: true },
+        { id: "m-demo-2", name: "Crovantix Market", email: "market@crovantix.com", phone: "03-123-4567", role: "買家與賣家", vip: true }
+      ],
+      products: [
+        { id: "p-demo-1", name: "AI AOI 相機模組", price: 68000, category: "3C 電子", seller: "Nexora Store", description: "可用於產線視覺檢測的示範商品。", image: fallbackImage, vip: true },
+        { id: "p-demo-2", name: "企業資料庫伺服器", price: 160000, category: "3C 電子", seller: "Crovantix Market", description: "適合內部資料儲存、備份與權限控管。", image: fallbackImage, vip: true }
+      ],
+      transactions: [],
+      messages: [],
+      friends: [],
+      unreadMessages: [],
+      friendInvites: []
+    };
+
+    const $ = id => document.getElementById(id);
+    const currency = value => new Intl.NumberFormat("zh-TW", {
+      style: "currency",
+      currency: "TWD",
+      maximumFractionDigits: 0
+    }).format(value);
+
+    function saveRecord(type, payload) {
+      const enriched = { category: type, app: "trading-platform", ...payload, savedAt: new Date().toISOString() };
+      if (type === "member" && window.AppDatabase?.saveUser) {
+        window.AppDatabase.saveUser(enriched);
+      } else if (window.AppDatabase?.saveMessage) {
+        window.AppDatabase.saveMessage(enriched);
+      }
+      if (!$("databasePanel").classList.contains("hidden")) {
+        $("dbResult").textContent = `已寫入後台資料庫類型：${type}`;
+      }
+    }
+
+    function requireMember() {
+      if (state.currentMember) return true;
+      alert("請先加入會員後再使用此功能。");
+      location.hash = "#membership";
+      return false;
+    }
+
+    function productImageFromFile(file) {
+      return new Promise(resolve => {
+        if (!file) {
+          resolve(fallbackImage);
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = event => resolve(event.target.result);
+        reader.onerror = () => resolve(fallbackImage);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderStats() {
+      $("memberCount").textContent = state.members.length;
+      $("productCount").textContent = state.products.length;
+      $("transactionCount").textContent = state.transactions.length;
+    }
+
+    function renderMarquee() {
+      const vipProducts = state.products.filter(product => product.vip || state.members.find(member => member.name === product.seller)?.vip);
+      const items = vipProducts.length ? vipProducts : state.products;
+      $("vipMarquee").innerHTML = [...items, ...items].map(product => `
+        <div class="marquee-item">${product.name}<span>${currency(product.price)} | ${product.seller}</span></div>
+      `).join("");
+    }
+
+    function renderProducts(keyword = "") {
+      const text = keyword.trim().toLowerCase();
+      const products = state.products.filter(product => {
+        const haystack = `${product.name} ${product.description} ${product.category} ${product.seller}`.toLowerCase();
+        return !text || haystack.includes(text);
+      });
+      $("productList").innerHTML = products.map(product => `
+        <article class="product">
+          <img src="${product.image}" alt="${product.name}">
+          <div>
+            <h3>${product.name}</h3>
+            <div class="price">${currency(product.price)}</div>
+            <p>${product.description}</p>
+            <p><span class="tag">${product.category}</span> <span class="tag">賣家：${product.seller}</span></p>
+            <div class="button-row">
+              <button class="button green" type="button" data-buy="${product.id}">信用卡購買</button>
+              <button class="button secondary" type="button" data-chat="${product.seller}">聯絡賣家</button>
+            </div>
+          </div>
+        </article>
+      `).join("") || `<div class="panel"><p>找不到符合條件的商品。</p></div>`;
+    }
+
+    function renderMembers() {
+      const options = state.members
+        .filter(member => member.id !== state.currentMember?.id)
+        .map(member => `<option value="${member.id}">${member.name}</option>`)
+        .join("");
+      $("chatTarget").innerHTML = options;
+      $("friendTarget").innerHTML = options;
+    }
+
+    function renderSocial() {
+      $("chatList").innerHTML = state.messages.slice().reverse().map(message => `
+        <div class="message"><b>${message.from}</b> 給 <b>${message.to}</b><br>${message.text}</div>
+      `).join("") || `<div class="message">尚無聊天訊息。</div>`;
+      $("friendList").innerHTML = state.friends.map(friend => `
+        <div class="message"><b>${friend.member}</b> ${friend.action}：${friend.friend}</div>
+      `).join("") || `<div class="message">尚無好友異動紀錄。</div>`;
+    }
+
+    function renderFriendSidebar() {
+      const sidebar = $("friendSidebar");
+      if (!state.currentMember) {
+        sidebar.classList.add("hidden");
+        return;
+      }
+      sidebar.classList.remove("hidden");
+      const friendNames = state.friends
+        .filter(friend => friend.action === "加入好友" && friend.member === state.currentMember.name)
+        .map(friend => friend.friend);
+      const mergedNames = [...new Set([
+        ...friendNames,
+        ...state.members.filter(member => member.id !== state.currentMember.id).slice(0, 3).map(member => member.name)
+      ])];
+      const unreadCount = state.unreadMessages.length;
+      const inviteCount = state.friendInvites.length;
+      $("friendSidebarSummary").innerHTML = `已登入：<b>${state.currentMember.name}</b>${unreadCount ? ` <span class="notice">${unreadCount} 則未讀留言</span>` : ""}${inviteCount ? ` <span class="notice">${inviteCount} 個好友邀請</span>` : ""}`;
+      $("friendSidebarList").innerHTML = mergedNames.map(name => {
+        const unread = state.unreadMessages.filter(message => message.from === name).length;
+        const invited = state.friendInvites.some(invite => invite.from === name);
+        return `
+          <div class="sidebar-friend">
+            <strong>${name}</strong>
+            <span>${unread ? `<span class="notice">有留言未讀</span>` : "無未讀留言"}</span>
+            <span>${invited ? `<span class="notice">有人加好友</span>` : "好友狀態正常"}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderAll() {
+      renderStats();
+      renderMarquee();
+      renderProducts($("searchInput")?.value || "");
+      renderMembers();
+      renderSocial();
+      renderFriendSidebar();
+    }
+
+    $("memberForm").addEventListener("submit", event => {
+      event.preventDefault();
+      if (!$("termsBox").open) {
+        $("memberResult").textContent = "請先展開免責聲明與使用條款。";
+        return;
+      }
+      if (!$("agreeTerms").checked) {
+        $("memberResult").textContent = "請勾選同意免責聲明與使用條款後才可以加入會員。";
+        return;
+      }
+      const member = {
+        id: crypto.randomUUID(),
+        name: $("memberName").value.trim(),
+        email: $("memberEmail").value.trim(),
+        phone: $("memberPhone").value.trim(),
+        role: $("memberRole").value,
+        vip: false
+      };
+      state.currentMember = member;
+      state.members.push(member);
+      state.unreadMessages = [
+        { from: "Nexora Store", text: "您好，歡迎來看我的商品。" }
+      ];
+      state.friendInvites = [
+        { from: "Crovantix Market", status: "pending" }
+      ];
+      saveRecord("member", member);
+      $("memberResult").textContent = `會員 ${member.name} 已加入成功，可以開始上架、搜尋、交易與聊天。`;
+      renderAll();
+    });
+
+    $("adminLoginForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const email = $("adminEmail").value.trim().toLowerCase();
+      const code = $("adminCode").value.trim();
+      const allowedEmail = "clay@example.com";
+      const allowedCode = "3790";
+      if (email !== allowedEmail || code !== allowedCode) {
+        $("adminLoginResult").textContent = "登入失敗，只有平台管理員可以查看後台資料庫。";
+        $("databasePanel").classList.add("hidden");
+        return;
+      }
+      $("adminLoginResult").textContent = "管理員登入成功，已開啟後台資料庫檢視。";
+      $("databasePanel").classList.remove("hidden");
+    });
+
+    $("vipForm").addEventListener("submit", event => {
+      event.preventDefault();
+      if (!requireMember()) return;
+      state.currentMember.vip = true;
+      state.isVip = true;
+      const existing = state.members.find(member => member.id === state.currentMember.id);
+      if (existing) existing.vip = true;
+      const subscription = {
+        memberId: state.currentMember.id,
+        memberName: state.currentMember.name,
+        plan: "VIP",
+        price: 499,
+        currency: "NTD",
+        billingCycle: "monthly",
+        cardLast4: $("vipCardNumber").value.replace(/\D/g, "").slice(-4),
+        status: "paid"
+      };
+      saveRecord("vip_subscription", subscription);
+      $("vipResult").textContent = "付款成功，已升級 VIP 會員。你的上架商品會顯示在首頁跑馬燈。";
+      renderAll();
+    });
+
+    $("productForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      if (!requireMember()) return;
+      const product = {
+        id: crypto.randomUUID(),
+        name: $("productName").value.trim(),
+        price: Number($("productPrice").value || 0),
+        category: $("productCategory").value,
+        seller: state.currentMember.name,
+        sellerId: state.currentMember.id,
+        description: $("productDescription").value.trim(),
+        image: await productImageFromFile($("productPhoto").files[0]),
+        vip: state.currentMember.vip
+      };
+      state.products.unshift(product);
+      saveRecord("product_listing", { ...product, image: product.image.startsWith("data:") ? "uploaded-image-data-url" : product.image });
+      $("productResult").textContent = `商品「${product.name}」已上架。`;
+      $("feePreview").textContent = `若此商品成交，賣家服務費為 ${currency(product.price * 0.04)}，賣家實收約 ${currency(product.price * 0.96)}。`;
+      renderAll();
+    });
+
+    $("searchButton").addEventListener("click", () => renderProducts($("searchInput").value));
+    $("searchInput").addEventListener("input", () => renderProducts($("searchInput").value));
+
+    $("productList").addEventListener("click", event => {
+      const buyId = event.target.dataset.buy;
+      const chatSeller = event.target.dataset.chat;
+      if (buyId) {
+        if (!requireMember()) return;
+        const product = state.products.find(item => item.id === buyId);
+        const card = prompt("請輸入信用卡號完成交易", "4242 4242 4242 4242");
+        if (!card) return;
+        const fee = Math.round(product.price * 0.04);
+        const transaction = {
+          id: crypto.randomUUID(),
+          buyer: state.currentMember.name,
+          seller: product.seller,
+          product: product.name,
+          price: product.price,
+          sellerFeeRate: "4%",
+          sellerFee: fee,
+          sellerReceives: product.price - fee,
+          cardLast4: card.replace(/\D/g, "").slice(-4),
+          status: "paid"
+        };
+        state.transactions.unshift(transaction);
+        saveRecord("credit_card_transaction", transaction);
+        alert(`交易成功。平台將向賣家收取 4% 服務費：${currency(fee)}。`);
+        renderAll();
+      }
+      if (chatSeller) {
+        if (!requireMember()) return;
+        const target = state.members.find(member => member.name === chatSeller);
+        if (target) $("chatTarget").value = target.id;
+        location.hash = "#social";
+      }
+    });
+
+    $("chatForm").addEventListener("submit", event => {
+      event.preventDefault();
+      if (!requireMember()) return;
+      const target = state.members.find(member => member.id === $("chatTarget").value);
+      if (!target) return;
+      const message = {
+        id: crypto.randomUUID(),
+        from: state.currentMember.name,
+        to: target.name,
+        text: $("chatMessage").value.trim()
+      };
+      state.messages.push(message);
+      state.unreadMessages.push({ from: target.name, text: "對方已回覆你的訊息，請查看聊天。" });
+      saveRecord("member_chat_message", message);
+      renderAll();
+    });
+
+    $("friendButton").addEventListener("click", () => {
+      if (!requireMember()) return;
+      const target = state.members.find(member => member.id === $("friendTarget").value);
+      if (!target) return;
+      const action = $("friendAction").value;
+      const record = {
+        id: crypto.randomUUID(),
+        member: state.currentMember.name,
+        friend: target.name,
+        action
+      };
+      state.friends.push(record);
+      if (action === "加入好友") {
+        state.friendInvites.push({ from: target.name, status: "pending" });
+      }
+      saveRecord("friendship", record);
+      renderAll();
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>

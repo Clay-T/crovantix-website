@@ -1,0 +1,2736 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>創微科技 Crovantix Technologies</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070b12;
+      --ink: #f7fbff;
+      --muted: #a9b7c7;
+      --line: rgba(255,255,255,.13);
+      --panel: #101722;
+      --panel-2: #151f2d;
+      --cyan: #55d7ff;
+      --mint: #73f0bc;
+      --violet: #a78bfa;
+      --amber: #ffd166;
+      --danger: #ff718b;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", Arial, sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7,11,18,.82);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      width: min(1180px, calc(100% - 32px));
+      min-height: 64px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-width: 168px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(85,215,255,.18);
+    }
+
+    .brand-text {
+      display: grid;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .brand strong {
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      min-height: 34px;
+      display: grid;
+      place-items: center;
+      padding: 0 11px;
+      border-radius: 8px;
+      color: #d8e8f5;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.primary-link {
+      color: #06111b;
+      background: var(--cyan);
+    }
+
+    .language-switch {
+      position: relative;
+    }
+
+    .language-button {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #d8e8f5;
+      background: rgba(255,255,255,.07);
+      font-size: 16px;
+      font-weight: 850;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .language-button:hover,
+    .language-button:focus {
+      border-color: rgba(85,215,255,.72);
+      box-shadow: 0 0 0 3px rgba(85,215,255,.16);
+    }
+
+    .language-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 108px;
+      display: none;
+      gap: 4px;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(16,23,34,.96);
+      box-shadow: 0 18px 44px rgba(0,0,0,.36);
+    }
+
+    .language-switch.open .language-menu {
+      display: grid;
+    }
+
+    .language-option {
+      min-height: 34px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 10px;
+      color: #d8e8f5;
+      background: transparent;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .language-option:hover,
+    .language-option.active {
+      color: #06111b;
+      background: var(--cyan);
+    }
+
+    .hero {
+      position: relative;
+      min-height: 92vh;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+    }
+
+    #heroCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #07101a;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(7,11,18,.08), rgba(7,11,18,.8) 72%, var(--bg));
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 112px 0 54px;
+    }
+
+    .hero-logo {
+      width: min(420px, 86vw);
+      display: block;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 28px 80px rgba(0,0,0,.34), 0 0 0 1px rgba(255,255,255,.18);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid rgba(85,215,255,.34);
+      border-radius: 8px;
+      color: #c7f2ff;
+      background: rgba(8,23,35,.58);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    h1 {
+      max-width: 900px;
+      margin: 20px 0 14px;
+      font-size: clamp(42px, 8vw, 92px);
+      line-height: .95;
+      letter-spacing: 0;
+    }
+
+    .hero-text {
+      max-width: 680px;
+      margin: 0 0 28px;
+      color: #d4e2ef;
+      font-size: clamp(17px, 2vw, 22px);
+      line-height: 1.55;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      min-height: 48px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 18px;
+      color: var(--ink);
+      background: rgba(255,255,255,.07);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .button.primary {
+      color: #06111b;
+      border-color: transparent;
+      background: var(--cyan);
+    }
+
+    .section {
+      padding: 72px 0;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .section.alt {
+      background: #0a1018;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 26px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .section-head p,
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      min-height: 176px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .card b {
+      display: block;
+      margin-bottom: 10px;
+      color: #ffffff;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .metric {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0f1723;
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--mint);
+      font-size: 28px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .portfolio {
+      display: grid;
+      gap: 14px;
+      min-height: 212px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #121d2a, #0d141e);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portfolio::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 3px;
+      background: var(--accent, var(--cyan));
+    }
+
+    .app-mark {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #06111b;
+      background: var(--accent, var(--cyan));
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .portfolio h3 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .portfolio p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .portfolio a {
+      align-self: end;
+      color: var(--accent, var(--cyan));
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .builder-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .builder-form,
+    .site-preview {
+      min-height: 100%;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .builder-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .builder-photo-preview {
+      min-height: 170px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px dashed rgba(85,215,255,.35);
+      border-radius: 8px;
+      color: var(--muted);
+      background: #0b1420;
+      text-align: center;
+    }
+
+    .builder-photo-preview img {
+      width: 100%;
+      height: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .builder-photo-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+      gap: 8px;
+      padding: 8px;
+    }
+
+    .builder-photo-grid img {
+      aspect-ratio: 1;
+      max-height: none;
+      border-radius: 8px;
+    }
+
+    .site-preview {
+      display: grid;
+      gap: 16px;
+      padding: 14px;
+      background:
+        linear-gradient(180deg, #f8fafc 0%, #eef4fb 100%);
+      color: #101827;
+      overflow: hidden;
+    }
+
+    .site-preview.empty {
+      min-height: 420px;
+      place-items: center;
+      color: #536173;
+      text-align: center;
+    }
+
+    .preview-hero {
+      min-height: 430px;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      border: 1px solid rgba(15,23,42,.08);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(85,215,255,.22), transparent 34%),
+        radial-gradient(circle at 84% 4%, rgba(12,40,70,.26), transparent 34%),
+        linear-gradient(135deg, #0b1522, #1b3148);
+      position: relative;
+      box-shadow: 0 28px 70px rgba(15,23,42,.18);
+    }
+
+    .preview-hero img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preview-hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(4,10,18,.08), rgba(4,10,18,.78)),
+        linear-gradient(90deg, rgba(4,10,18,.84), rgba(4,10,18,.18));
+    }
+
+    .preview-hero-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 14px;
+      max-width: 700px;
+      padding: 34px;
+      color: #fff;
+    }
+
+    .preview-mini-nav {
+      position: absolute;
+      z-index: 2;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px;
+      background: rgba(7,16,26,.68);
+      backdrop-filter: blur(14px);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .preview-mini-nav span:last-child {
+      color: #bdeeff;
+    }
+
+    .preview-eyebrow {
+      width: fit-content;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      color: #dff7ff;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .preview-hero-content h3 {
+      margin: 0 0 8px;
+      font-size: clamp(36px, 5vw, 68px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .preview-hero-content p {
+      margin: 0;
+      max-width: 560px;
+      color: rgba(255,255,255,.88);
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    .preview-hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .preview-hero-actions span {
+      padding: 10px 13px;
+      border-radius: 999px;
+      color: #06111b;
+      background: linear-gradient(135deg, #fff, #dff8ff);
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .preview-hero-actions span:last-child {
+      color: #eaf8ff;
+      background: rgba(255,255,255,.16);
+      border: 1px solid rgba(255,255,255,.25);
+    }
+
+    .preview-info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .preview-section {
+      padding: 22px;
+      border: 1px solid rgba(15,23,42,.08);
+      border-radius: 18px;
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 18px 48px rgba(15,23,42,.08);
+    }
+
+    .preview-section-header {
+      display: grid;
+      gap: 8px;
+      max-width: 720px;
+      margin-bottom: 16px;
+    }
+
+    .preview-section-header span {
+      color: #0ea5e9;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .preview-section-header h4 {
+      margin: 0;
+      color: #0f172a;
+      font-size: clamp(24px, 3vw, 38px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .preview-section-header p {
+      margin: 0;
+      color: #64748b;
+      line-height: 1.7;
+    }
+
+    .preview-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .preview-block-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 4px;
+    }
+
+    .preview-block-title h4 {
+      margin: 0;
+      color: #0f172a;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .preview-block-title span {
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .preview-gallery img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 8px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-info-card {
+      min-height: 132px;
+      padding: 18px;
+      border: 1px solid #d8e1ec;
+      border-radius: 14px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.98), rgba(246,250,255,.98));
+      box-shadow: 0 14px 32px rgba(15,23,42,.08);
+    }
+
+    .preview-info-card b {
+      display: block;
+      margin-bottom: 8px;
+      color: #0f172a;
+    }
+
+    .preview-info-card span {
+      color: #475569;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .preview-cta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px;
+      border-radius: 18px;
+      color: #eaf8ff;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(85,215,255,.25), transparent 35%),
+        linear-gradient(135deg, #0f172a, #10263a);
+      box-shadow: 0 18px 40px rgba(5,15,28,.18);
+    }
+
+    .preview-service-tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 2px;
+    }
+
+    .preview-service-tags span {
+      padding: 8px 10px;
+      border: 1px solid #d8e1ec;
+      border-radius: 999px;
+      color: #0f172a;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .preview-feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .preview-feature {
+      display: grid;
+      gap: 10px;
+      min-height: 150px;
+      padding: 18px;
+      border-radius: 16px;
+      background: #0f172a;
+      color: #eaf8ff;
+    }
+
+    .preview-feature strong {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .preview-feature b {
+      font-size: 17px;
+    }
+
+    .preview-feature p {
+      margin: 0;
+      color: #bdd0e3;
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .preview-contact-strip {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .portfolio-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 104px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .section-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .small-button,
+    .page-button {
+      min-height: 42px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid rgba(85,215,255,.4);
+      border-radius: 8px;
+      padding: 0 16px;
+      color: #06111b;
+      background: var(--cyan);
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .page-button.secondary {
+      color: #d8e8f5;
+      background: rgba(255,255,255,.08);
+      border-color: var(--line);
+    }
+
+    .portfolio-page-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .qr-download {
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 8px;
+      background: rgba(255,255,255,.06);
+    }
+
+    .qr-download img {
+      width: 88px;
+      height: 88px;
+      display: block;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .qr-download span {
+      color: #cfe9f5;
+      font-size: 11px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    .process {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      counter-reset: step;
+    }
+
+    .step {
+      min-height: 168px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
+      counter-increment: step;
+    }
+
+    .step::before {
+      content: "0" counter(step);
+      display: block;
+      margin-bottom: 16px;
+      color: var(--amber);
+      font-weight: 950;
+    }
+
+    .step b {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .step span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .price-card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .price-card.featured {
+      border-color: rgba(85,215,255,.7);
+      background: #112131;
+    }
+
+    .price-card h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    .price-card .price {
+      margin: 0 0 14px;
+      color: var(--cyan);
+      font-size: 28px;
+      font-weight: 950;
+    }
+
+    .price-card ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      color: #cad8e8;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .member-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(300px, .98fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .member-panel {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .verification-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .verify-button {
+      min-height: 46px;
+      border: 1px solid rgba(85,215,255,.42);
+      border-radius: 8px;
+      padding: 0 14px;
+      color: #06111b;
+      background: var(--cyan);
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .field-note {
+      min-height: 18px;
+      margin: 0;
+      color: var(--amber);
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1.45;
+    }
+
+    .consent-label {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0b121b;
+      color: #d8e8f5;
+      line-height: 1.5;
+    }
+
+    .gender-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      display: grid;
+      gap: 8px;
+    }
+
+    .choice-button {
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #d8e8f5;
+      background: #0b121b;
+      font-weight: 900;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .choice-button.active {
+      color: #06111b;
+      border-color: transparent;
+      background: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(85,215,255,.16);
+    }
+
+    .membership-plans {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .member-plan {
+      display: grid;
+      gap: 8px;
+      min-height: 190px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0f1723;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .member-plan.free {
+      border-color: rgba(115,240,188,.45);
+    }
+
+    .member-plan.active {
+      border-color: rgba(85,215,255,.75);
+      background: #112131;
+    }
+
+    .member-plan b {
+      color: #fff;
+      font-size: 20px;
+    }
+
+    .member-plan strong {
+      color: var(--cyan);
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .member-plan span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .payment-panel {
+      display: none;
+      margin-top: 16px;
+      padding: 18px;
+      border: 1px solid rgba(85,215,255,.42);
+      border-radius: 8px;
+      background: #0f1723;
+    }
+
+    .payment-panel.open {
+      display: grid;
+      gap: 12px;
+    }
+
+    .payment-title {
+      margin: 0;
+      color: var(--cyan);
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    .contact-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .contact-panel {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .contact-logo {
+      width: 100%;
+      display: block;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .contact-logo-en {
+      display: none;
+    }
+
+    html[lang="en"] .contact-logo-zh {
+      display: none;
+    }
+
+    html[lang="en"] .contact-logo-en {
+      display: block;
+    }
+
+    .contact-panel p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .contact-list div {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #0c141f;
+    }
+
+    .about-company-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(260px, .85fr);
+      gap: 18px;
+      align-items: center;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 84% 8%, rgba(85,215,255,.16), transparent 36%),
+        linear-gradient(135deg, #0d1824, #101f30);
+    }
+
+    .about-company-card h2 {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 4vw, 56px);
+      letter-spacing: 0;
+      line-height: 1.06;
+    }
+
+    .about-company-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .about-company-points {
+      display: grid;
+      gap: 10px;
+    }
+
+    .about-company-points div {
+      padding: 14px;
+      border: 1px solid rgba(85,215,255,.24);
+      border-radius: 8px;
+      background: rgba(7,16,26,.6);
+    }
+
+    .about-company-points b {
+      display: block;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+
+    #about-company,
+    #quote-request {
+      scroll-margin-top: 96px;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #c9d7e8;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      outline: 0;
+      padding: 12px;
+      color: var(--ink);
+      background: #0b121b;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--cyan);
+    }
+
+    textarea {
+      min-height: 132px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .form-status {
+      min-height: 22px;
+      margin: 0;
+      color: var(--mint);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    details + details { margin-top: 10px; }
+
+    summary {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    details p {
+      margin: 0;
+      padding: 0 16px 16px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    footer {
+      padding: 28px 0;
+      color: var(--muted);
+      background: #05080d;
+    }
+
+    .footer-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .nav-inner { align-items: start; padding: 12px 0; }
+      .nav-links { gap: 4px; }
+      .nav-links a { padding: 0 8px; font-size: 12px; }
+      .section-head,
+      .member-layout,
+      .contact-layout,
+      .about-company-card {
+        grid-template-columns: 1fr;
+      }
+      .service-grid,
+      .portfolio-grid,
+      .membership-plans,
+      .pricing-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .process,
+      .metric-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .hero { min-height: 88vh; }
+      .hero-content { padding-top: 120px; }
+      .hero-logo { width: min(320px, 82vw); }
+      .service-grid,
+      .portfolio-grid,
+      .pricing-grid,
+      .membership-plans,
+      .process,
+      .metric-row,
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .verification-row {
+        grid-template-columns: 1fr;
+      }
+      .portfolio-actions {
+        grid-template-columns: 1fr;
+      }
+      .builder-layout,
+      .preview-info-grid,
+      .preview-feature-grid,
+      .preview-contact-strip {
+        grid-template-columns: 1fr;
+      }
+      .preview-hero { min-height: 520px; }
+      .preview-mini-nav { border-radius: 18px; }
+      .preview-hero-content { padding: 24px; }
+      .nav-inner { width: min(100% - 20px, 1180px); }
+      .wrap,
+      .hero-content,
+      .footer-inner { width: min(100% - 24px, 1180px); }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="主要導覽">
+    <div class="nav-inner">
+      <a class="brand" href="#home">
+        <img class="brand-logo" src="crovantix-logo-main.png" alt="Crovantix Technologies logo">
+        <span class="brand-text">
+          <strong>創微科技</strong>
+          <span>Crovantix Technologies</span>
+        </span>
+      </a>
+      <div class="nav-links">
+        <a href="#services">服務</a>
+        <a href="#work">作品</a>
+        <a href="#process">合作流程</a>
+        <a href="#pricing">方案</a>
+        <a href="#free-builder">免費網頁建構</a>
+        <a href="#membership">加入會員</a>
+        <a href="#about-company">關於我們</a>
+        <a href="#quote-request" class="primary-link">聯絡我們</a>
+        <div class="language-switch" id="languageSwitch">
+          <button class="language-button" id="languageButton" type="button" aria-haspopup="true" aria-expanded="false" aria-label="語言切換">🌐</button>
+          <div class="language-menu" id="languageMenu" role="menu" aria-label="語言選單">
+            <button class="language-option active" type="button" data-language="zh" role="menuitem">中文</button>
+            <button class="language-option" type="button" data-language="en" role="menuitem">英文</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero" id="home">
+    <canvas id="heroCanvas" aria-hidden="true"></canvas>
+    <div class="hero-content">
+      <img class="hero-logo" id="heroLogo" src="crovantix-logo-main.png" alt="創微科技 Crovantix Technologies 公司 Logo">
+      <span class="eyebrow">App Design · Website Design · AI App · Backend API · Cloud Database · Ads</span>
+      <h1>創微科技 Crovantix Technologies</h1>
+      <p class="hero-text">我們為中小企業、公司行號、補習班、法律事務所、電商與個人創業者，提供AI應用解決方案，提供消費者行為分析，建立後台資料庫，打造能持續擴建的AI生態系應用於公司或產品上; 打造能上線、能維護、能持續擴充的 App、網頁與雲端系統，並連接後端服務與廣告投放。</p>
+      <div class="hero-actions">
+        <a class="button primary" href="#quote-request">提出需求</a>
+        <a class="button" href="#work">查看作品集</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="section" id="about-company">
+    <div class="wrap">
+      <div class="about-company-card">
+        <div>
+          <h2>創微公司介紹</h2>
+          <p>創微科技有限公司 Crovantix Technologies 位於台灣桃園，專注於 App 設計與開發、AI 應用解決方案、網頁設計、後端 API、雲端資料庫、會員與訂閱系統、數據分析與廣告投放串接。我們協助中小企業、公司行號、補習班、法律事務所、電商與個人創業者，把想法做成可以上線、可以維護、可以持續擴充的數位產品。</p>
+        </div>
+        <div class="about-company-points">
+          <div>
+            <b>AI 應用與自動化</b>
+            <span>導入 AI 助理、內容生成、資料整理、流程優化與客戶行為分析。</span>
+          </div>
+          <div>
+            <b>App / Web / Cloud 一站式開發</b>
+            <span>從介面設計、前端互動、後端 API 到 MySQL / 雲端資料庫整合。</span>
+          </div>
+          <div>
+            <b>可商業化產品規劃</b>
+            <span>支援會員、付費方案、點數、金流、通知、後台與上架維護。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="services">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>從產品設計到上架維護，一次完成。</h2>
+        <p>服務聚焦在 App 設計與開發、網頁設計、AI 應用、後端 API、雲端資料庫、LINE 官方帳號、數據分析、數位轉型、商業模式分析、廣告投放串接與正式上架流程，讓客戶不用分別找設計、工程、雲端、行銷與維護團隊。</p>
+      </div>
+      <div class="service-grid">
+        <article class="card">
+          <b>iOS / Android App</b>
+          <p>規劃使用流程、介面設計、前端互動與雙平台產品原型，適合新創產品、會員服務與內部作業工具。</p>
+        </article>
+        <article class="card">
+          <b>AI App 與智慧助理</b>
+          <p>整合 AI 問答、語音互動、內容摘要、分析回覆、分享與點數方案，讓 App 具備可商業化的 AI 功能。</p>
+        </article>
+        <article class="card">
+          <b>後端 API</b>
+          <p>建立登入驗證、會員資料、訂閱方案、使用紀錄、留言、通知與第三方服務串接。</p>
+        </article>
+        <article class="card">
+          <b>雲端資料庫</b>
+          <p>設計資料表、權限、查詢邏輯與最新紀錄保存策略，支援使用者資料與歷史紀錄管理。</p>
+        </article>
+        <article class="card">
+          <b>網站與公司形象頁</b>
+          <p>製作品牌官網、Landing Page、公司形象頁、服務介紹、作品集、報價表單與常見問題，建立客戶信任與詢價入口。</p>
+        </article>
+        <article class="card">
+          <b>上架與維護代管</b>
+          <p>協助 App Store / Google Play 上架準備、版本更新、資料備份、錯誤修正與功能擴充。</p>
+        </article>
+        <article class="card">
+          <b>UI / UX 與前端開發</b>
+          <p>規劃資訊架構、響應式版面、互動動線、表單流程、前端動畫與可維護的網站元件。</p>
+        </article>
+        <article class="card">
+          <b>SEO / 數據分析 / 廣告投放</b>
+          <p>串接 Google Analytics、Meta Pixel、搜尋曝光基礎設定、廣告活動入口與轉換追蹤。</p>
+        </article>
+        <article class="card">
+          <b>網頁後台與內容管理</b>
+          <p>建立文章、作品、詢價、會員與表單資料管理流程，讓網站能持續更新與接收商機。</p>
+        </article>
+        <article class="card">
+          <b>LINE 官方帳號與後台維護</b>
+          <p>協助企業 LINE 官方帳號建立、圖文選單、導流頁、表單串接、自動回覆、活動公告與後台內容維護。</p>
+        </article>
+        <article class="card">
+          <b>AI 優化公司內部流程</b>
+          <p>協助整理行政、客服、銷售、排程、文件、報表與通知流程，導入 AI 助理與自動化工具提升效率。</p>
+        </article>
+        <article class="card">
+          <b>客戶數據分析 Data Analytics</b>
+          <p>整合網站、App、表單、廣告與會員資料，建立可追蹤的客戶行為、轉換來源、留存與成效報表。</p>
+        </article>
+        <article class="card">
+          <b>數位轉型 Digital Transformation</b>
+          <p>協助企業把紙本、人工、分散系統與重複流程轉為線上化、自動化與可擴充的雲端作業流程。</p>
+        </article>
+        <article class="card">
+          <b>商業模式分析 Business Model Analytics</b>
+          <p>分析產品定位、收費方案、客戶旅程、營運指標與成長機會，協助規劃更適合上線與長期經營的服務模式。</p>
+        </article>
+      </div>
+      <div class="metric-row">
+        <div class="metric"><strong>12+</strong><span>App 原型與產品情境</span></div>
+        <div class="metric"><strong>AI</strong><span>問答、語音、分析、分享</span></div>
+        <div class="metric"><strong>API</strong><span>登入、會員、點數、紀錄</span></div>
+        <div class="metric"><strong>Cloud</strong><span>資料庫與後端服務</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="work">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>作品集</h2>
+          <p>以下展示多種可商業化 App 場景，包含 AI 回覆、會員註冊、點數方案、聯絡表單、資料庫與雲端後端需求。</p>
+        </div>
+        <div class="section-actions">
+          <a class="small-button" href="crovantix-portfolio.html">more&gt;&gt;</a>
+        </div>
+      </div>
+      <div class="portfolio-grid">
+        <article class="portfolio" style="--accent:#55d7ff">
+          <div class="app-mark">法</div>
+          <h3>法律助理 App</h3>
+          <p>法律問題分類、AI 初步分析、專業律師聯繫、升級方案與免責條款。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E6%B3%95%E5%BE%8B%E5%8A%A9%E7%90%86%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Flawyer" alt="法律助理 App 下載 QR code">
+              <span>掃描下載 APP</span>
+            </div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#73f0bc">
+          <div class="app-mark">股</div>
+          <h3>公司股票分析 App</h3>
+          <p>台股公司查詢、K 線圖、營收、EPS、收藏與投資資訊免責流程。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E5%85%AC%E5%8F%B8%E8%82%A1%E7%A5%A8%E5%88%86%E6%9E%90%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fcompany-analysis" alt="公司股票分析 App 下載 QR code">
+              <span>掃描下載 APP</span>
+            </div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#ffd166">
+          <div class="app-mark">題</div>
+          <h3>題庫 App 系列</h3>
+          <p>數學、英文、國文、生物題庫，支援作答計分、詳解與補習班媒合。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E6%95%B8%E5%AD%B8%E9%A1%8C%E5%BA%AB%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fquestion-bank" alt="題庫 App 下載 QR code">
+              <span>掃描下載 APP</span>
+            </div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#a78bfa">
+          <div class="app-mark">語</div>
+          <h3>附近語音通話 App</h3>
+          <p>附近搜尋、好友、群組、留言、封鎖、檢舉、註冊驗證與條款流程。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E9%99%84%E8%BF%91%E8%AA%9E%E9%9F%B3%E9%80%9A%E8%A9%B1%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fvoice-call" alt="附近語音通話 App 下載 QR code">
+              <span>掃描下載 APP</span>
+            </div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#ff718b">
+          <div class="app-mark">秘</div>
+          <h3>個人秘書 App</h3>
+          <p>語音聆聽、AI 對話、點數方案、新需求流程與註冊條款。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E5%80%8B%E4%BA%BA%E7%A7%98%E6%9B%B8%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fsecretary" alt="個人秘書 App 下載 QR code">
+              <span>掃描下載 APP</span>
+            </div>
+          </div>
+        </article>
+        <article class="portfolio" style="--accent:#7dd3fc">
+          <div class="app-mark">商</div>
+          <h3>線上交易 App</h3>
+          <p>會員驗證、商品刊登、留言、付款頁、個人頁與交易免責聲明。</p>
+          <div class="portfolio-actions">
+            <a href="https://apps.apple.com/tw/search?term=Crovantix%20%E7%B7%9A%E4%B8%8A%E4%BA%A4%E6%98%93%20App" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fonline-market" alt="線上交易 App 下載 QR code">
+              <span>掃描下載 APP</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="free-builder">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>免費網頁建構</h2>
+        <p>先輸入店家資料，立即產生初版網站預覽，方便確認品牌首頁、服務資訊與聯絡方式。</p>
+      </div>
+      <div class="builder-layout">
+        <form class="builder-form" id="websiteBuilderForm">
+          <label>公司名稱
+            <input id="builderCompanyName" required placeholder="例：桃園幸福花店">
+          </label>
+          <label>營業項目或服務項目
+            <textarea id="builderServices" required placeholder="例：花束設計、開幕花禮、婚禮佈置、企業送禮"></textarea>
+          </label>
+          <label>照片上傳（最多 5 張）
+            <input id="builderPhotoInput" type="file" accept="image/*" multiple>
+          </label>
+          <div class="builder-photo-preview" id="builderPhotoPreview">尚未上傳照片</div>
+          <label>地址
+            <input id="builderAddress" required placeholder="例：桃園市中壢區中正路 100 號">
+          </label>
+          <label>電話
+            <input id="builderPhone" required placeholder="例：03-123-4567">
+          </label>
+          <button class="button primary" type="submit">網站預覽</button>
+          <p class="form-status" id="builderStatus"></p>
+        </form>
+        <div class="site-preview empty" id="sitePreview">
+          <div>
+            <b>初版網站預覽</b>
+            <p>填寫店家資料並點選網站預覽後，這裡會產生第一版網站樣式。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="process">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>合作流程</h2>
+        <p>用產品開發流程降低溝通成本，從需求到上架每一步都有明確產出。</p>
+      </div>
+      <div class="process">
+        <div class="step"><b>需求訪談</b><span>確認目標客戶、核心功能、商業模式、會員資料與法規條款。</span></div>
+        <div class="step"><b>產品規劃</b><span>整理頁面架構、使用者流程、資料結構與開發優先順序。</span></div>
+        <div class="step"><b>合作簽署</b><span>確認報價、交付範圍、開發時程、付款方式與後續維護責任。</span></div>
+        <div class="step"><b>設計原型</b><span>建立可點擊介面，確認視覺風格、功能位置與操作體驗。</span></div>
+        <div class="step"><b>開發串接</b><span>實作前端、後端 API、雲端資料庫、AI 服務與金流或通知。</span></div>
+        <div class="step"><b>上架維護</b><span>協助測試、上架、版本更新、資料備份、錯誤修正與功能擴充。</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="pricing">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>服務方案價格</h2>
+        <p>以下為針對網頁設計、App設計等軟體開發初步估價區間，實際報價會依頁面數、AI 功能、後端、雲端、金流與上架需求調整。</p>
+      </div>
+      <div class="pricing-grid">
+        <article class="price-card">
+          <h3>Prototype</h3>
+          <p class="price">NT$ 30,000 起</p>
+          <ul>
+            <li>App 流程規劃</li>
+            <li>可點擊介面原型</li>
+            <li>品牌視覺方向</li>
+            <li>適合提案、募資、內部確認</li>
+          </ul>
+        </article>
+        <article class="price-card featured">
+          <h3>Launch</h3>
+          <p class="price">NT$ 120,000 起</p>
+          <ul>
+            <li>App 前端開發</li>
+            <li>會員註冊與設定頁</li>
+            <li>AI / API 初步串接</li>
+            <li>上架準備與測試協助</li>
+          </ul>
+        </article>
+        <article class="price-card">
+          <h3>Cloud Scale</h3>
+          <p class="price">專案報價</p>
+          <ul>
+            <li>後端 API 與雲端資料庫</li>
+            <li>金流、訂閱、點數系統</li>
+            <li>管理後台與資料保存</li>
+            <li>長期維護與版本迭代</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="membership">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>加入會員</h2>
+        <p>填寫會員資料並完成電話與 Email 驗證後，點選下方會員卡片即可加入。免費會員會直接完成註冊，付費會員會先進入信用卡付費頁面。</p>
+      </div>
+      <div class="member-layout">
+        <form class="member-panel" id="memberForm">
+          <div class="form-row">
+            <label>會員名稱
+              <input id="memberName" required placeholder="請輸入會員名稱">
+            </label>
+            <label>生日
+              <input id="memberBirthday" type="date" required>
+            </label>
+          </div>
+          <div>
+            <div class="verification-row">
+              <label>電話
+                <input id="memberPhone" type="tel" required placeholder="請輸入電話">
+              </label>
+              <button class="verify-button" id="sendPhoneCode" type="button">發送驗證碼</button>
+            </div>
+            <label>電話驗證碼
+              <input id="memberPhoneCode" inputmode="numeric" maxlength="4" placeholder="輸入 4 位數">
+            </label>
+            <p class="field-note" id="phoneCodeStatus"></p>
+          </div>
+          <div>
+            <div class="verification-row">
+              <label>Email
+                <input id="memberEmail" type="email" required placeholder="name@example.com">
+              </label>
+              <button class="verify-button" id="sendEmailCode" type="button">發送驗證碼</button>
+            </div>
+            <label>Email 驗證碼
+              <input id="memberEmailCode" inputmode="numeric" maxlength="4" placeholder="輸入 4 位數">
+            </label>
+            <p class="field-note" id="emailCodeStatus"></p>
+          </div>
+          <label>性別</label>
+          <div class="gender-row" role="group" aria-label="性別">
+            <button class="choice-button active" type="button" data-gender="男">男</button>
+            <button class="choice-button" type="button" data-gender="女">女</button>
+          </div>
+          <label class="consent-label">
+            <input id="memberMarketingConsent" type="checkbox" required>
+            <span>我同意接收 Crovantix Technologies（創微科技）最新 App、產品更新、功能發布及相關通知。</span>
+          </label>
+          <p class="form-status" id="memberStatus"></p>
+          <div class="payment-panel" id="paymentPanel">
+            <p class="payment-title" id="paymentTitle">信用卡付費頁面</p>
+            <div class="form-row">
+              <label>信用卡號
+                <input id="cardNumber" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456">
+              </label>
+              <label>持卡人姓名
+                <input id="cardName" placeholder="請輸入持卡人姓名">
+              </label>
+            </div>
+            <div class="form-row">
+              <label>有效期限
+                <input id="cardExpiry" placeholder="MM/YY">
+              </label>
+              <label>安全碼
+                <input id="cardCvc" inputmode="numeric" maxlength="4" placeholder="CVC">
+              </label>
+            </div>
+            <button class="button primary" id="completePayment" type="button">確認付費並加入會員</button>
+          </div>
+        </form>
+        <div class="membership-plans" aria-label="會員方案卡片">
+          <button class="member-plan free" type="button" data-plan="一般會員" data-price="0" data-paid="false">
+            <b>一般會員</b>
+            <strong>免費</strong>
+          </button>
+          <button class="member-plan" type="button" data-plan="Basic付費會員" data-price="39" data-paid="true">
+            <b>Basic</b>
+            <strong>NT$39/月</strong>
+            <span>可使用本公司開發之所有 App Basic 方案。</span>
+          </button>
+          <button class="member-plan" type="button" data-plan="Plus付費會員" data-price="79" data-paid="true">
+            <b>Plus</b>
+            <strong>NT$79/月</strong>
+            <span>可使用本公司所開發之所有 App Plus 方案。</span>
+          </button>
+          <button class="member-plan" type="button" data-plan="Pro付費會員" data-price="149" data-paid="true">
+            <b>Pro</b>
+            <strong>NT$149/月</strong>
+            <span>可使用本公司所開發之所有 App Pro 方案。</span>
+          </button>
+          <button class="member-plan" type="button" data-plan="VIP付費會員" data-price="399" data-paid="true">
+            <b>VIP</b>
+            <strong>NT$399/月</strong>
+            <span>可使用本公司所開發之所有 App 之最高權限功能。</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>聯絡與報價需求</h2>
+        <p>留下專案背景、預算與期望上線時間，我們會依需求回覆開發方向與初步估價。</p>
+      </div>
+      <div class="contact-layout">
+        <aside class="contact-panel">
+          <img class="contact-logo contact-logo-zh" src="crovantix-logo-main.png" alt="創微科技 Crovantix Technologies 公司 Logo">
+          <img class="contact-logo contact-logo-en" src="crovantix-logo-en.png" alt="Crovantix Technologies logo">
+          <p>創微科技有限公司<br>Crovantix Technologies</p>
+          <div class="contact-list">
+            <div><b>Email</b><br><a href="mailto:support@crovantix.com">support@crovantix.com</a></div>
+            <div><b>地址</b><br>台灣桃園</div>
+            <div><b>服務對象</b><br>中小企業、公司行號、補習班、法律事務所、電商、個人創業者</div>
+          </div>
+        </aside>
+        <div id="quote-request">
+          <form id="quoteForm">
+            <div class="form-row">
+              <label>姓名 / 公司
+                <input id="quoteName" required placeholder="例：王先生 / XX 補習班">
+              </label>
+              <label>Email
+                <input id="quoteEmail" type="email" required placeholder="name@example.com">
+              </label>
+            </div>
+            <div class="form-row">
+              <label>專案類型
+                <select id="quoteType">
+                  <option>iOS / Android App</option>
+                  <option>AI App</option>
+                  <option>後端 API / 雲端資料庫</option>
+                  <option>網站 / 公司形象頁</option>
+                  <option>LINE 官方帳號 / 後台維護</option>
+                  <option>AI 優化公司內部流程</option>
+                  <option>維護代管 / 上架協助</option>
+                </select>
+              </label>
+              <label>預算區間
+                <select id="quoteBudget">
+                  <option>NT$ 10,000 - 30,000</option>
+                  <option>NT$ 30,000 - 100,000</option>
+                  <option>NT$ 100,000 - 300,000</option>
+                  <option>NT$ 300,000 以上</option>
+                  <option>需要協助評估</option>
+                </select>
+              </label>
+            </div>
+            <label>需求說明
+              <textarea id="quoteMessage" required placeholder="請描述想做的 App、目標客戶、主要功能、是否需要 AI / 後端 / 上架。"></textarea>
+            </label>
+            <button class="button primary" type="submit">送出需求</button>
+            <p class="form-status" id="formStatus"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>常見問題</h2>
+        <p>如果需求還不明確，也可以先從原型開始，等功能驗證後再進入正式開發。</p>
+      </div>
+      <details>
+        <summary>只有想法，還沒有完整規格，可以開始嗎？</summary>
+        <p>可以。會先整理使用者流程、功能範圍與資料需求，再做可點擊原型確認方向。</p>
+      </details>
+      <details>
+        <summary>可以協助 AI App、後端 API 與雲端資料庫嗎？</summary>
+        <p>可以。可規劃會員資料、問答紀錄、留言紀錄、Email 紀錄、點數方案與雲端資料保存策略。</p>
+      </details>
+      <details>
+        <summary>是否協助 App Store / Google Play 上架？</summary>
+        <p>可以協助準備上架素材、隱私權政策、測試流程與版本更新，但仍需依平台審核規範調整。</p>
+      </details>
+      <details>
+        <summary>報價多久可以提供？</summary>
+        <p>收到需求後，通常會先整理功能範圍與開發階段，再提供初步估價與時程建議。</p>
+      </details>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <span>© 2026 創微科技有限公司 Crovantix Technologies</span>
+      <span>App Design · AI App · Cloud Systems · Taoyuan</span>
+    </div>
+  </footer>
+
+  <script>
+    const languageSwitch = document.querySelector("#languageSwitch");
+    const languageButton = document.querySelector("#languageButton");
+    const languageOptions = document.querySelectorAll(".language-option");
+    const heroLogo = document.querySelector("#heroLogo");
+    const contactLogoZh = document.querySelector(".contact-logo-zh");
+    const contactLogoEn = document.querySelector(".contact-logo-en");
+    const CONTACT_API_BASE = window.APP_API_BASE
+      || localStorage.getItem("APP_API_BASE")
+      || (location.protocol.startsWith("http") ? location.origin : "http://127.0.0.1:3000");
+    const translations = {
+      en: {
+        "創微科技": "Crovantix",
+        "Crovantix Technologies": "Crovantix Technologies",
+        "服務": "Services",
+        "作品": "Work",
+        "合作流程": "Process",
+        "方案": "Plans",
+        "關於我們": "About Us",
+        "免費網頁建構": "Free Website Builder",
+        "加入會員": "Join",
+        "聯絡我們": "Contact Us",
+        "App Design · Website Design · AI App · Backend API · Cloud Database · Ads": "App Design · Website Design · AI App · Backend API · Cloud Database · Ads",
+        "創微科技 Crovantix Technologies": "Crovantix Technologies",
+        "我們為中小企業、公司行號、補習班、法律事務所、電商與個人創業者，提供AI應用解決方案，提供消費者行為分析，建立後台資料庫，打造能持續擴建的AI生態系應用於公司或產品上; 打造能上線、能維護、能持續擴充的 App、網頁與雲端系統，並連接後端服務與廣告投放。": "We provide AI application solutions for SMEs, companies, tutoring centers, law firms, e-commerce teams, and individual founders, including consumer behavior analytics, backend database creation, and scalable AI ecosystems applied to companies or products; building launch-ready, maintainable, and expandable apps, websites, and cloud systems with backend services and ad integrations.",
+        "提出需求": "Submit Request",
+        "查看作品集": "View Portfolio",
+        "創微公司介紹": "About Crovantix",
+        "創微科技有限公司 Crovantix Technologies 位於台灣桃園，專注於 App 設計與開發、AI 應用解決方案、網頁設計、後端 API、雲端資料庫、會員與訂閱系統、數據分析與廣告投放串接。我們協助中小企業、公司行號、補習班、法律事務所、電商與個人創業者，把想法做成可以上線、可以維護、可以持續擴充的數位產品。": "Crovantix Technologies Co., Ltd. is based in Taoyuan, Taiwan, focusing on app design and development, AI application solutions, web design, backend APIs, cloud databases, membership and subscription systems, data analytics, and ad integrations. We help SMEs, companies, tutoring centers, law firms, e-commerce teams, and individual founders turn ideas into digital products that can launch, operate, and scale.",
+        "AI 應用與自動化": "AI Applications And Automation",
+        "導入 AI 助理、內容生成、資料整理、流程優化與客戶行為分析。": "Implement AI assistants, content generation, data organization, workflow optimization, and customer behavior analytics.",
+        "App / Web / Cloud 一站式開發": "App / Web / Cloud Development",
+        "從介面設計、前端互動、後端 API 到 MySQL / 雲端資料庫整合。": "From interface design and frontend interactions to backend APIs and MySQL / cloud database integration.",
+        "可商業化產品規劃": "Commercial Product Planning",
+        "支援會員、付費方案、點數、金流、通知、後台與上架維護。": "Support membership, paid plans, credits, payments, notifications, admin panels, launch, and maintenance.",
+        "從產品設計到上架維護，一次完成。": "From Product Design To Launch And Maintenance.",
+        "服務聚焦在 App 設計與開發、網頁設計、AI 應用、後端 API、雲端資料庫、LINE 官方帳號、數據分析、數位轉型、商業模式分析、廣告投放串接與正式上架流程，讓客戶不用分別找設計、工程、雲端、行銷與維護團隊。": "Our services cover app design and development, web design, AI applications, backend APIs, cloud databases, LINE Official Accounts, data analytics, digital transformation, business model analytics, ad integrations, and launch support, so clients do not need separate design, engineering, cloud, marketing, and maintenance teams.",
+        "iOS / Android App": "iOS / Android App",
+        "規劃使用流程、介面設計、前端互動與雙平台產品原型，適合新創產品、會員服務與內部作業工具。": "User flows, interface design, frontend interactions, and dual-platform prototypes for startup products, membership services, and internal tools.",
+        "AI App 與智慧助理": "AI Apps And Smart Assistants",
+        "整合 AI 問答、語音互動、內容摘要、分析回覆、分享與點數方案，讓 App 具備可商業化的 AI 功能。": "AI Q&A, voice interaction, summaries, analytical responses, sharing, and credit plans that make AI features ready for business use.",
+        "後端 API": "Backend APIs",
+        "建立登入驗證、會員資料、訂閱方案、使用紀錄、留言、通知與第三方服務串接。": "Login verification, member profiles, subscription plans, usage records, messages, notifications, and third-party integrations.",
+        "雲端資料庫": "Cloud Databases",
+        "設計資料表、權限、查詢邏輯與最新紀錄保存策略，支援使用者資料與歷史紀錄管理。": "Database tables, permissions, query logic, and retention strategies for user data and history management.",
+        "網站與公司形象頁": "Websites And Corporate Pages",
+        "製作品牌官網、Landing Page、公司形象頁、服務介紹、作品集、報價表單與常見問題，建立客戶信任與詢價入口。": "Brand websites, landing pages, corporate pages, service pages, portfolios, quote forms, and FAQs that build trust and generate inquiries.",
+        "上架與維護代管": "Launch And Maintenance",
+        "協助 App Store / Google Play 上架準備、版本更新、資料備份、錯誤修正與功能擴充。": "App Store / Google Play launch preparation, version updates, data backups, bug fixes, and feature expansion.",
+        "UI / UX 與前端開發": "UI / UX And Frontend Development",
+        "規劃資訊架構、響應式版面、互動動線、表單流程、前端動畫與可維護的網站元件。": "Information architecture, responsive layouts, interaction flows, forms, frontend motion, and maintainable web components.",
+        "SEO / 數據分析 / 廣告投放": "SEO / Analytics / Ads",
+        "串接 Google Analytics、Meta Pixel、搜尋曝光基礎設定、廣告活動入口與轉換追蹤。": "Google Analytics, Meta Pixel, search visibility basics, campaign entry points, and conversion tracking.",
+        "網頁後台與內容管理": "Admin Panels And Content Management",
+        "建立文章、作品、詢價、會員與表單資料管理流程，讓網站能持續更新與接收商機。": "Admin workflows for articles, projects, inquiries, members, and form data so websites can keep growing and capturing leads.",
+        "LINE 官方帳號與後台維護": "LINE Official Account And Admin Maintenance",
+        "協助企業 LINE 官方帳號建立、圖文選單、導流頁、表單串接、自動回覆、活動公告與後台內容維護。": "LINE Official Account setup, rich menus, landing pages, form integrations, auto-replies, announcements, and backend content maintenance.",
+        "AI 優化公司內部流程": "AI Workflow Optimization",
+        "協助整理行政、客服、銷售、排程、文件、報表與通知流程，導入 AI 助理與自動化工具提升效率。": "Organize admin, support, sales, scheduling, documents, reports, and notifications, then improve efficiency with AI assistants and automation.",
+        "客戶數據分析 Data Analytics": "Customer Data Analytics",
+        "整合網站、App、表單、廣告與會員資料，建立可追蹤的客戶行為、轉換來源、留存與成效報表。": "Integrate website, app, form, ad, and member data to track customer behavior, conversion sources, retention, and performance.",
+        "數位轉型 Digital Transformation": "Digital Transformation",
+        "協助企業把紙本、人工、分散系統與重複流程轉為線上化、自動化與可擴充的雲端作業流程。": "Turn paper-based, manual, fragmented, and repetitive work into online, automated, scalable cloud workflows.",
+        "商業模式分析 Business Model Analytics": "Business Model Analytics",
+        "分析產品定位、收費方案、客戶旅程、營運指標與成長機會，協助規劃更適合上線與長期經營的服務模式。": "Analyze product positioning, pricing plans, customer journeys, operating metrics, and growth opportunities to shape a stronger business model.",
+        "App 原型與產品情境": "App Prototypes And Product Scenarios",
+        "問答、語音、分析、分享": "Q&A, Voice, Analysis, Sharing",
+        "登入、會員、點數、紀錄": "Login, Members, Credits, Records",
+        "資料庫與後端服務": "Databases And Backend Services",
+        "作品集": "Portfolio",
+        "以下展示多種可商業化 App 場景，包含 AI 回覆、會員註冊、點數方案、聯絡表單、資料庫與雲端後端需求。": "These portfolio examples show commercial app scenarios, including AI responses, member registration, credit plans, contact forms, databases, and cloud backend needs.",
+        "more": "more",
+        "所有作品": "All Work",
+        "完整展示 Crovantix Technologies 已建立的 App 原型與商業化產品情境。": "A complete showcase of app prototypes and commercial product scenarios built by Crovantix Technologies.",
+        "法": "Law",
+        "法律助理 App": "Legal Assistant App",
+        "法律問題分類、AI 初步分析、專業律師聯繫、升級方案與免責條款。": "Legal issue categories, AI first-pass analysis, lawyer contact flow, upgrade plans, and disclaimers.",
+        "開啟作品": "Open Demo",
+        "掃描下載 APP": "Scan To Download App",
+        "先輸入店家資料，立即產生初版網站預覽，方便確認品牌首頁、服務資訊與聯絡方式。": "Enter store information to instantly generate a first website preview for the homepage, services, and contact details.",
+        "公司名稱": "Company Name",
+        "營業項目或服務項目": "Business Or Services",
+        "照片上傳（最多 5 張）": "Photo Upload (Up To 5)",
+        "尚未上傳照片": "No photo uploaded",
+        "網站預覽": "Website Preview",
+        "免費網站建構需先加入會員，請先完成會員註冊後再使用。": "Free website building requires membership. Please complete member registration first.",
+        "初版網站預覽": "First Website Preview",
+        "填寫店家資料並點選網站預覽後，這裡會產生第一版網站樣式。": "After entering store details and clicking Website Preview, the first website layout will appear here.",
+        "服務項目": "Services",
+        "這是依據店家資料產生的初版網站，可再加入品牌色、SEO、表單、地圖與後台。": "This first website preview is generated from store information. Brand colors, SEO, forms, maps, and admin tools can be added next.",
+        "聯繫客服了解更多": "Contact Support To Learn More",
+        "股": "Stock",
+        "公司股票分析 App": "Company Stock Analysis App",
+        "台股公司查詢、K 線圖、營收、EPS、收藏與投資資訊免責流程。": "Taiwan stock lookup, candlestick charts, revenue, EPS, favorites, and investment information disclaimers.",
+        "題": "Quiz",
+        "題庫 App 系列": "Question Bank App Series",
+        "數學、英文、國文、生物題庫，支援作答計分、詳解與補習班媒合。": "Math, English, Chinese, and Biology question banks with scoring, explanations, and tutoring center matching.",
+        "數": "Math",
+        "數學題庫 App": "Math Question Bank App",
+        "數學選擇題、難易度、詳解算式、補習班媒合與點數升級。": "Math multiple-choice questions, difficulty levels, detailed formulas, tutoring matches, and credit upgrades.",
+        "英": "EN",
+        "英文題庫 App": "English Question Bank App",
+        "英文選擇題測驗、分數評估、詳解與補習班推薦功能。": "English multiple-choice tests, score evaluation, explanations, and tutoring recommendations.",
+        "文": "CN",
+        "國文題庫 App": "Chinese Question Bank App",
+        "國文選擇題、題目與選項配對、分數與詳解學習流程。": "Chinese multiple-choice questions, matched options, scoring, and explanation workflows.",
+        "生": "Bio",
+        "生物題庫 App": "Biology Question Bank App",
+        "生物選擇題測驗、非重複題庫、正確選項配對與詳解。": "Biology multiple-choice tests, non-repeating question sets, correct option matching, and explanations.",
+        "語": "Voice",
+        "附近語音通話 App": "Nearby Voice Call App",
+        "附近搜尋、好友、群組、留言、封鎖、檢舉、註冊驗證與條款流程。": "Nearby search, friends, groups, messages, blocking, reports, registration verification, and terms flow.",
+        "Agent": "Agent",
+        "語音 Agent App": "Voice Agent App",
+        "AI 語音助理、新需求流程、使用者資料與設定頁管理。": "AI voice assistant, feature request flow, user profile, and settings management.",
+        "秘": "AI",
+        "個人秘書 App": "Personal Secretary App",
+        "語音聆聽、AI 對話、點數方案、新需求流程與註冊條款。": "Voice listening, AI chat, credit plans, feature request flow, and registration terms.",
+        "我的": "Mine",
+        "我的秘書 App": "My Secretary App",
+        "背景學習使用習慣、秘書工作清單、提醒建議與訂閱升級。": "Background learning, secretary worklists, proactive suggestions, and subscription upgrades.",
+        "商": "Trade",
+        "線上交易 App": "Online Marketplace App",
+        "會員驗證、商品刊登、留言、付款頁、個人頁與交易免責聲明。": "Member verification, product listings, messages, payment pages, profiles, and transaction disclaimers.",
+        "媒": "Media",
+        "社群媒體助手 App": "Social Media Assistant App",
+        "照片美化、AI 文案、平台帳密驗證、發文預覽與升級功能。": "Photo beautification, AI captions, platform account validation, post previews, and upgrades.",
+        "愛": "Love",
+        "愛情大師 App": "Love Master App",
+        "感情分析、愛情教練、點數扣除、升級方案與註冊條款。": "Relationship analysis, love coaching, credit usage, upgrade plans, and registration terms.",
+        "命": "Fate",
+        "命理 App": "Fortune App",
+        "命理分析、點數方案、個人資料設定與多語言設定。": "Fortune analysis, credit plans, profile settings, and language settings.",
+        "需": "Need",
+        "需求媒合 App": "Service Match App",
+        "提需求、接案、工作室、留言、點數扣除與 MySQL 紀錄。": "Requests, case taking, studios, messages, credit usage, and MySQL records.",
+        "股票 App": "Stock App",
+        "股票追蹤、資訊整理、設定頁與投資輔助展示流程。": "Stock tracking, information organization, settings, and investment assistant demo flows.",
+        "回到上一頁": "Back",
+        "回首頁": "Home",
+        "用產品開發流程降低溝通成本，從需求到上架每一步都有明確產出。": "Reduce communication cost with a product development process, with clear deliverables from discovery to launch.",
+        "需求訪談": "Discovery",
+        "確認目標客戶、核心功能、商業模式、會員資料與法規條款。": "Confirm target customers, core features, business model, member data, and required terms.",
+        "產品規劃": "Product Planning",
+        "整理頁面架構、使用者流程、資料結構與開發優先順序。": "Plan page structure, user flows, data structure, and development priorities.",
+        "合作簽署": "Agreement",
+        "確認報價、交付範圍、開發時程、付款方式與後續維護責任。": "Confirm pricing, scope, timeline, payment terms, and maintenance responsibilities.",
+        "設計原型": "Design Prototype",
+        "建立可點擊介面，確認視覺風格、功能位置與操作體驗。": "Build clickable interfaces to confirm visual direction, feature placement, and usability.",
+        "開發串接": "Development And Integration",
+        "實作前端、後端 API、雲端資料庫、AI 服務與金流或通知。": "Implement frontend, backend APIs, cloud databases, AI services, payments, and notifications.",
+        "上架維護": "Launch And Support",
+        "協助測試、上架、版本更新、資料備份、錯誤修正與功能擴充。": "Support testing, launch, version updates, backups, bug fixes, and feature expansion.",
+        "服務方案價格": "Service Plans",
+        "以下為針對網頁設計、App設計等軟體開發初步估價區間，實際報價會依頁面數、AI 功能、後端、雲端、金流與上架需求調整。": "These are initial estimate ranges for website design, app design, and software development. Final pricing depends on page count, AI features, backend, cloud, payments, and launch requirements.",
+        "NT$ 30,000 起": "From NT$30,000",
+        "App 流程規劃": "App flow planning",
+        "可點擊介面原型": "Clickable UI prototype",
+        "品牌視覺方向": "Brand visual direction",
+        "適合提案、募資、內部確認": "For proposals, fundraising, and internal alignment",
+        "NT$ 120,000 起": "From NT$120,000",
+        "App 前端開發": "App frontend development",
+        "會員註冊與設定頁": "Member registration and settings",
+        "AI / API 初步串接": "Initial AI / API integration",
+        "上架準備與測試協助": "Launch preparation and testing support",
+        "專案報價": "Custom Quote",
+        "後端 API 與雲端資料庫": "Backend APIs and cloud databases",
+        "金流、訂閱、點數系統": "Payments, subscriptions, and credits",
+        "管理後台與資料保存": "Admin panels and data retention",
+        "長期維護與版本迭代": "Long-term maintenance and iteration",
+        "填寫會員資料並完成電話與 Email 驗證後，點選下方會員卡片即可加入。免費會員會直接完成註冊，付費會員會先進入信用卡付費頁面。": "Fill in member information and complete phone and email verification, then select a membership card below. Free membership completes registration directly, while paid memberships open the credit card payment page first.",
+        "會員名稱": "Member Name",
+        "生日": "Birthday",
+        "電話": "Phone",
+        "發送驗證碼": "Send Code",
+        "電話驗證碼": "Phone Verification Code",
+        "Email 驗證碼": "Email Verification Code",
+        "性別": "Gender",
+        "男": "Male",
+        "女": "Female",
+        "我同意接收 Crovantix Technologies（創微科技）最新 App、產品更新、功能發布及相關通知。": "I agree to receive the latest app, product update, feature release, and related notifications from Crovantix Technologies.",
+        "信用卡付費頁面": "Credit Card Payment Page",
+        "信用卡號": "Card Number",
+        "持卡人姓名": "Cardholder Name",
+        "有效期限": "Expiry Date",
+        "安全碼": "Security Code",
+        "確認付費並加入會員": "Confirm Payment And Join",
+        "會員方案卡片": "Membership Plan Cards",
+        "一般會員": "General Member",
+        "免費": "Free",
+        "Plus付費會員": "Plus Paid Member",
+        "Basic付費會員": "Basic Paid Member",
+        "Pro付費會員": "Pro Paid Member",
+        "VIP付費會員": "VIP Paid Member",
+        "付費會員方案": "Paid Membership Plans",
+        "NT$39/月": "NT$39/month",
+        "可使用本公司開發之所有 App Basic 方案。": "Use the Basic plan of all apps developed by our company.",
+        "NT$79/月": "NT$79/month",
+        "可使用本公司所開發之所有 App Plus 方案。": "Use the Plus plan of all apps developed by our company.",
+        "NT$149/月": "NT$149/month",
+        "可使用本公司所開發之所有 App Pro 方案。": "Use the Pro plan of all apps developed by our company.",
+        "NT$399/月": "NT$399/month",
+        "可使用本公司所開發之所有 App 之最高權限功能。": "Use the highest-level features of all apps developed by our company.",
+        "聯絡與報價需求": "Contact And Quote Request",
+        "留下專案背景、預算與期望上線時間，我們會依需求回覆開發方向與初步估價。": "Share your project background, budget, and preferred launch timing. We will reply with development direction and an initial estimate.",
+        "創微科技有限公司": "Crovantix Technologies Co., Ltd.",
+        "地址": "Address",
+        "台灣桃園": "Taoyuan, Taiwan",
+        "服務對象": "Clients",
+        "中小企業、公司行號、補習班、法律事務所、電商、個人創業者": "SMEs, companies, tutoring centers, law firms, e-commerce teams, and individual founders",
+        "姓名 / 公司": "Name / Company",
+        "專案類型": "Project Type",
+        "AI App": "AI App",
+        "後端 API / 雲端資料庫": "Backend API / Cloud Database",
+        "網站 / 公司形象頁": "Website / Corporate Page",
+        "LINE 官方帳號 / 後台維護": "LINE Official Account / Admin Maintenance",
+        "維護代管 / 上架協助": "Maintenance / Launch Support",
+        "預算區間": "Budget Range",
+        "NT$ 10,000 - 30,000": "NT$10,000 - 30,000",
+        "NT$ 30,000 - 100,000": "NT$30,000 - 100,000",
+        "NT$ 100,000 - 300,000": "NT$100,000 - 300,000",
+        "NT$ 300,000 以上": "Over NT$300,000",
+        "需要協助評估": "Need help estimating",
+        "需求說明": "Project Description",
+        "送出需求": "Send Request",
+        "常見問題": "FAQ",
+        "如果需求還不明確，也可以先從原型開始，等功能驗證後再進入正式開發。": "If the requirements are not clear yet, we can start with a prototype and move into full development after validation.",
+        "只有想法，還沒有完整規格，可以開始嗎？": "Can we start if I only have an idea and no full specification?",
+        "可以。會先整理使用者流程、功能範圍與資料需求，再做可點擊原型確認方向。": "Yes. We first organize user flows, feature scope, and data needs, then build a clickable prototype to confirm direction.",
+        "可以協助 AI App、後端 API 與雲端資料庫嗎？": "Can you help with AI apps, backend APIs, and cloud databases?",
+        "可以。可規劃會員資料、問答紀錄、留言紀錄、Email 紀錄、點數方案與雲端資料保存策略。": "Yes. We can plan member data, Q&A records, message history, email records, credit plans, and cloud data retention.",
+        "是否協助 App Store / Google Play 上架？": "Do you help with App Store / Google Play launch?",
+        "可以協助準備上架素材、隱私權政策、測試流程與版本更新，但仍需依平台審核規範調整。": "Yes. We can prepare launch assets, privacy policies, testing workflows, and version updates, while adjusting to platform review requirements.",
+        "報價多久可以提供？": "How long does a quote take?",
+        "收到需求後，通常會先整理功能範圍與開發階段，再提供初步估價與時程建議。": "After receiving your request, we usually clarify feature scope and development phases before providing an initial estimate and timeline.",
+        "© 2026 創微科技有限公司 Crovantix Technologies": "© 2026 Crovantix Technologies Co., Ltd.",
+        "App Design · AI App · Cloud Systems · Taoyuan": "App Design · AI App · Cloud Systems · Taoyuan"
+      }
+    };
+
+    const placeholderTranslations = {
+      en: {
+        "請輸入會員名稱": "Enter member name",
+        "請輸入電話": "Enter phone number",
+        "輸入 4 位數": "Enter 4 digits",
+        "請輸入持卡人姓名": "Enter cardholder name",
+        "例：桃園幸福花店": "Example: Taoyuan Happy Florist",
+        "例：花束設計、開幕花禮、婚禮佈置、企業送禮": "Example: bouquets, opening flower gifts, wedding decor, corporate gifting",
+        "例：桃園市中壢區中正路 100 號": "Example: 100 Zhongzheng Rd., Zhongli District, Taoyuan",
+        "例：03-123-4567": "Example: 03-123-4567",
+        "例：王先生 / XX 補習班": "Example: Mr. Wang / XX Tutoring Center",
+        "請描述想做的 App、目標客戶、主要功能、是否需要 AI / 後端 / 上架。": "Describe the app you want to build, target customers, key features, and whether AI / backend / launch support is needed."
+      }
+    };
+
+    const uiMessages = {
+      zh: {
+        sending: "正在送出需求到 support@crovantix.com...",
+        sent: "需求已直接寄送到 support@crovantix.com。",
+        saved: "需求已送出並保存；正式寄信需在後端設定 RESEND_API_KEY。",
+        failedPrefix: "目前無法直接寄送：",
+        failedSuffix: "。請確認網站是從本機伺服器開啟，或設定 Email API。",
+        phoneCode: "已發送 4 位數電話驗證碼。原型示範碼：",
+        emailCode: "已發送 4 位數 Email 驗證碼。原型示範碼：",
+        needPhoneCode: "請先發送並輸入正確電話驗證碼。",
+        needEmailCode: "請先發送並輸入正確 Email 驗證碼。",
+        needCardInfo: "請完整輸入信用卡資訊。",
+        memberSaved: "會員註冊成功，會員資料與訂閱資訊已寫入資料庫。",
+        paidMemberSaved: "付費成功並成功加入會員，會員資料與訂閱資訊已寫入資料庫。",
+        memberFailed: "會員資料暫時無法送出，請稍後再試。"
+      },
+      en: {
+        sending: "Sending your request to support@crovantix.com...",
+        sent: "Your request has been emailed to support@crovantix.com.",
+        saved: "Your request was submitted and saved. Email delivery requires RESEND_API_KEY on the backend.",
+        failedPrefix: "Unable to send directly right now: ",
+        failedSuffix: ". Please open the site from the local server or configure the Email API.",
+        phoneCode: "A 4-digit phone verification code was sent. Prototype code: ",
+        emailCode: "A 4-digit email verification code was sent. Prototype code: ",
+        needPhoneCode: "Please send and enter the correct phone verification code.",
+        needEmailCode: "Please send and enter the correct email verification code.",
+        needCardInfo: "Please complete the credit card information.",
+        memberSaved: "Membership registration successful. Member data and subscription information have been saved to the database.",
+        paidMemberSaved: "Payment successful and membership activated. Member data and subscription information have been saved to the database.",
+        memberFailed: "Membership information cannot be submitted right now. Please try again later."
+      }
+    };
+
+    const translatedTextNodes = [];
+    const translatedPlaceholders = [];
+    let currentLanguage = "zh";
+
+    function collectTextNodes(root) {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          const parentTag = node.parentElement?.tagName;
+          if (["SCRIPT", "STYLE", "CANVAS"].includes(parentTag)) return NodeFilter.FILTER_REJECT;
+          return node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+        }
+      });
+      let node = walker.nextNode();
+      while (node) {
+        translatedTextNodes.push({ node, zh: node.textContent });
+        node = walker.nextNode();
+      }
+      document.querySelectorAll("[placeholder]").forEach(element => {
+        translatedPlaceholders.push({ element, zh: element.getAttribute("placeholder") });
+      });
+    }
+
+    function translateText(original, language) {
+      if (language === "zh") return original;
+      const trimmed = original.trim();
+      const translated = translations[language]?.[trimmed];
+      if (!translated) return original;
+      const prefix = original.match(/^\s*/)?.[0] || "";
+      const suffix = original.match(/\s*$/)?.[0] || "";
+      return `${prefix}${translated}${suffix}`;
+    }
+
+    function applySiteLanguage(language) {
+      currentLanguage = language;
+      const isEnglish = language === "en";
+      document.documentElement.lang = language === "en" ? "en" : "zh-Hant";
+      heroLogo.src = isEnglish ? "crovantix-logo-en.png" : "crovantix-logo-main.png";
+      heroLogo.alt = isEnglish ? "Crovantix Technologies logo" : "創微科技 Crovantix Technologies 公司 Logo";
+      contactLogoZh.hidden = isEnglish;
+      contactLogoEn.hidden = !isEnglish;
+      contactLogoZh.style.display = isEnglish ? "none" : "block";
+      contactLogoEn.style.display = isEnglish ? "block" : "none";
+      languageOptions.forEach(option => {
+        option.classList.toggle("active", option.dataset.language === language);
+      });
+      translatedTextNodes.forEach(item => {
+        item.node.textContent = translateText(item.zh, language);
+      });
+      translatedPlaceholders.forEach(item => {
+        const translated = placeholderTranslations[language]?.[item.zh] || item.zh;
+        item.element.setAttribute("placeholder", translated);
+      });
+    }
+
+    collectTextNodes(document.body);
+    languageButton.addEventListener("click", () => {
+      const isOpen = languageSwitch.classList.toggle("open");
+      languageButton.setAttribute("aria-expanded", String(isOpen));
+    });
+    languageOptions.forEach(option => {
+      option.addEventListener("click", () => {
+        applySiteLanguage(option.dataset.language);
+        languageSwitch.classList.remove("open");
+        languageButton.setAttribute("aria-expanded", "false");
+      });
+    });
+    document.addEventListener("click", event => {
+      if (!languageSwitch.contains(event.target)) {
+        languageSwitch.classList.remove("open");
+        languageButton.setAttribute("aria-expanded", "false");
+      }
+    });
+    applySiteLanguage(currentLanguage);
+
+    const canvas = document.querySelector("#heroCanvas");
+    const ctx = canvas.getContext("2d");
+    const nodes = [];
+    let width = 0;
+    let height = 0;
+    let pointer = { x: -9999, y: -9999 };
+
+    function resizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      canvas.width = Math.floor(width * ratio);
+      canvas.height = Math.floor(height * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      nodes.length = 0;
+      const count = Math.max(46, Math.floor(width * height / 18000));
+      for (let index = 0; index < count; index += 1) {
+        nodes.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - .5) * .38,
+          vy: (Math.random() - .5) * .38,
+          r: 1.4 + Math.random() * 2.2,
+          hue: Math.random() > .5 ? "85,215,255" : "115,240,188"
+        });
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#07101a";
+      ctx.fillRect(0, 0, width, height);
+      for (const node of nodes) {
+        node.x += node.vx;
+        node.y += node.vy;
+        if (node.x < -20) node.x = width + 20;
+        if (node.x > width + 20) node.x = -20;
+        if (node.y < -20) node.y = height + 20;
+        if (node.y > height + 20) node.y = -20;
+      }
+      for (let i = 0; i < nodes.length; i += 1) {
+        for (let j = i + 1; j < nodes.length; j += 1) {
+          const a = nodes[i];
+          const b = nodes[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const distance = Math.hypot(dx, dy);
+          if (distance < 145) {
+            ctx.strokeStyle = `rgba(85,215,255,${(1 - distance / 145) * .22})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+        const node = nodes[i];
+        const pDistance = Math.hypot(node.x - pointer.x, node.y - pointer.y);
+        if (pDistance < 170) {
+          ctx.strokeStyle = `rgba(255,209,102,${(1 - pDistance / 170) * .35})`;
+          ctx.beginPath();
+          ctx.moveTo(node.x, node.y);
+          ctx.lineTo(pointer.x, pointer.y);
+          ctx.stroke();
+        }
+        ctx.fillStyle = `rgba(${node.hue},.92)`;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("pointermove", event => {
+      pointer = { x: event.clientX, y: event.clientY };
+    });
+    window.addEventListener("pointerleave", () => {
+      pointer = { x: -9999, y: -9999 };
+    });
+    resizeCanvas();
+    draw();
+
+    const memberState = {
+      gender: "男",
+      type: "",
+      selectedPlan: "",
+      price: 0,
+      phoneCode: "",
+      emailCode: "",
+      pendingPaidPlan: null,
+      membershipActive: false
+    };
+
+    function generateMemberCode() {
+      return String(Math.floor(1000 + Math.random() * 9000));
+    }
+
+    function setActiveChoice(selector, target) {
+      document.querySelectorAll(selector).forEach(button => {
+        button.classList.toggle("active", button === target);
+      });
+    }
+
+    function memberPlanLabel(plan) {
+      if (currentLanguage !== "en") return plan;
+      const labels = {
+        "一般會員": "General Member",
+        "Basic付費會員": "Basic Paid Member",
+        "Plus付費會員": "Plus Paid Member",
+        "Pro付費會員": "Pro Paid Member",
+        "VIP付費會員": "VIP Paid Member"
+      };
+      return labels[plan] || plan;
+    }
+
+    document.querySelectorAll("[data-gender]").forEach(button => {
+      button.addEventListener("click", () => {
+        memberState.gender = button.dataset.gender;
+        setActiveChoice("[data-gender]", button);
+      });
+    });
+
+    document.querySelectorAll("[data-plan]").forEach(button => {
+      button.addEventListener("click", () => {
+        memberState.type = button.dataset.plan;
+        memberState.selectedPlan = button.dataset.plan;
+        memberState.price = Number(button.dataset.price || 0);
+        setActiveChoice(".member-plan", button);
+        const paymentPanel = document.querySelector("#paymentPanel");
+        const status = document.querySelector("#memberStatus");
+        if (!validateMembershipFields()) return;
+        if (button.dataset.paid === "true") {
+          memberState.pendingPaidPlan = {
+            type: memberState.type,
+            price: memberState.price
+          };
+          document.querySelector("#paymentTitle").textContent = currentLanguage === "en"
+            ? `${memberPlanLabel(memberState.type)} NT$${memberState.price}/month Credit Card Payment Page`
+            : `${memberState.type} NT$${memberState.price}/月 信用卡付費頁面`;
+          paymentPanel.classList.add("open");
+          status.textContent = "";
+          paymentPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        paymentPanel.classList.remove("open");
+        saveMembership({
+          paymentStatus: "free",
+          paidAt: "",
+          cardLast4: ""
+        });
+      });
+    });
+
+    document.querySelector("#sendPhoneCode").addEventListener("click", () => {
+      memberState.phoneCode = generateMemberCode();
+      document.querySelector("#phoneCodeStatus").textContent = `${uiMessages[currentLanguage].phoneCode}${memberState.phoneCode}`;
+    });
+
+    document.querySelector("#sendEmailCode").addEventListener("click", () => {
+      memberState.emailCode = generateMemberCode();
+      document.querySelector("#emailCodeStatus").textContent = `${uiMessages[currentLanguage].emailCode}${memberState.emailCode}`;
+    });
+
+    function validateMembershipFields() {
+      const status = document.querySelector("#memberStatus");
+      const phoneStatus = document.querySelector("#phoneCodeStatus");
+      const emailStatus = document.querySelector("#emailCodeStatus");
+      if (!document.querySelector("#memberForm").reportValidity()) {
+        status.textContent = "";
+        return false;
+      }
+      const phoneCode = document.querySelector("#memberPhoneCode").value.trim();
+      const emailCode = document.querySelector("#memberEmailCode").value.trim();
+      if (!memberState.phoneCode || phoneCode !== memberState.phoneCode) {
+        phoneStatus.textContent = uiMessages[currentLanguage].needPhoneCode;
+        status.textContent = "";
+        return false;
+      }
+      if (!memberState.emailCode || emailCode !== memberState.emailCode) {
+        emailStatus.textContent = uiMessages[currentLanguage].needEmailCode;
+        status.textContent = "";
+        return false;
+      }
+      return true;
+    }
+
+    function saveMembership(extra) {
+      const status = document.querySelector("#memberStatus");
+      const phoneStatus = document.querySelector("#phoneCodeStatus");
+      const emailStatus = document.querySelector("#emailCodeStatus");
+      const payload = {
+        app: "crovantix-technologies",
+        type: "users",
+        payload: {
+          source: "membershipForm",
+          name: document.querySelector("#memberName").value.trim(),
+          phone: document.querySelector("#memberPhone").value.trim(),
+          email: document.querySelector("#memberEmail").value.trim(),
+          birthday: document.querySelector("#memberBirthday").value,
+          gender: memberState.gender,
+          marketingConsent: document.querySelector("#memberMarketingConsent").checked,
+          memberType: memberState.type,
+          selectedPlan: memberState.selectedPlan,
+          subscription: {
+            plan: memberState.selectedPlan,
+            monthlyPrice: memberState.price,
+            currency: "NTD",
+            status: extra.paymentStatus === "paid" ? "active" : "free",
+            paymentStatus: extra.paymentStatus,
+            paidAt: extra.paidAt,
+            cardLast4: extra.cardLast4
+          },
+          submittedAt: new Date().toISOString()
+        }
+      };
+      fetch(`${CONTACT_API_BASE}/api/records`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(async response => {
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok || !result.ok) throw new Error(result.error || "送出失敗");
+          status.textContent = extra.paymentStatus === "paid"
+            ? uiMessages[currentLanguage].paidMemberSaved
+            : uiMessages[currentLanguage].memberSaved;
+          memberState.membershipActive = true;
+          localStorage.setItem("crovantixMembershipActive", "true");
+          document.querySelector("#memberForm").reset();
+          document.querySelector("#paymentPanel").classList.remove("open");
+          memberState.phoneCode = "";
+          memberState.emailCode = "";
+          memberState.type = "";
+          memberState.selectedPlan = "";
+          memberState.price = 0;
+          memberState.pendingPaidPlan = null;
+          phoneStatus.textContent = "";
+          emailStatus.textContent = "";
+          document.querySelectorAll(".member-plan").forEach(plan => plan.classList.remove("active"));
+          document.querySelectorAll("[data-gender]").forEach((button, index) => button.classList.toggle("active", index === 0));
+          memberState.gender = "男";
+        })
+        .catch(() => {
+          status.textContent = uiMessages[currentLanguage].memberFailed;
+        });
+    }
+
+    document.querySelector("#memberForm").addEventListener("submit", event => {
+      event.preventDefault();
+    });
+
+    document.querySelector("#completePayment").addEventListener("click", () => {
+      const status = document.querySelector("#memberStatus");
+      if (!memberState.pendingPaidPlan || !validateMembershipFields()) return;
+      const cardNumber = document.querySelector("#cardNumber").value.replace(/\D/g, "");
+      const cardName = document.querySelector("#cardName").value.trim();
+      const cardExpiry = document.querySelector("#cardExpiry").value.trim();
+      const cardCvc = document.querySelector("#cardCvc").value.trim();
+      if (cardNumber.length < 12 || !cardName || !cardExpiry || cardCvc.length < 3) {
+        status.textContent = uiMessages[currentLanguage].needCardInfo;
+        return;
+      }
+      saveMembership({
+        paymentStatus: "paid",
+        paidAt: new Date().toISOString(),
+        cardLast4: cardNumber.slice(-4)
+      });
+    });
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[character]));
+    }
+
+    const builderState = {
+      photos: []
+    };
+    const builderCopy = {
+      zh: {
+        noPhoto: "尚未上傳照片",
+        needMembership: "免費網站建構需先加入會員，請先完成會員註冊後再使用。",
+        needAllFields: "請完整填寫店家資料。",
+        photoLimit: "最多可上傳 5 張照片，已保留前 5 張。",
+        generated: "已產生初版網站預覽。",
+        services: "服務項目",
+        address: "地址",
+        phone: "電話",
+        ctaText: "這是依據店家資料產生的初版網站，可再加入品牌色、SEO、表單、地圖與後台。",
+        ctaButton: "聯繫客服了解更多",
+        altSuffix: "店家照片",
+        saved: "已產生初版網站預覽，資料也已送出給客服參考。"
+      },
+      en: {
+        noPhoto: "No photo uploaded",
+        needMembership: "Free website building requires membership. Please complete member registration first.",
+        needAllFields: "Please complete all store information.",
+        photoLimit: "You can upload up to 5 photos. The first 5 were kept.",
+        generated: "First website preview generated.",
+        services: "Services",
+        address: "Address",
+        phone: "Phone",
+        ctaText: "This first website preview is generated from store information. Brand colors, SEO, forms, maps, and admin tools can be added next.",
+        ctaButton: "Contact Support To Learn More",
+        altSuffix: "store photo",
+        saved: "First website preview generated, and the information was sent for support review."
+      }
+    };
+    const builderPhotoInput = document.querySelector("#builderPhotoInput");
+    const builderPhotoPreview = document.querySelector("#builderPhotoPreview");
+    const websiteBuilderForm = document.querySelector("#websiteBuilderForm");
+    const sitePreview = document.querySelector("#sitePreview");
+    const builderStatus = document.querySelector("#builderStatus");
+
+    function readBuilderPhoto(file) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({
+            fileName: file.name,
+            mimeType: file.type,
+            sizeBytes: file.size,
+            dataUrl: String(reader.result || "")
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    builderPhotoInput?.addEventListener("change", async () => {
+      const files = Array.from(builderPhotoInput.files || []);
+      if (!files.length) {
+        builderState.photos = [];
+        builderPhotoPreview.textContent = builderCopy[currentLanguage].noPhoto;
+        return;
+      }
+      const selectedFiles = files.slice(0, 5);
+      builderState.photos = await Promise.all(selectedFiles.map(readBuilderPhoto));
+      builderPhotoPreview.innerHTML = `
+        <div class="builder-photo-grid">
+          ${builderState.photos.map((photo, index) => `<img src="${photo.dataUrl}" alt="店家上傳照片預覽 ${index + 1}">`).join("")}
+        </div>`;
+      builderStatus.textContent = files.length > 5 ? builderCopy[currentLanguage].photoLimit : "";
+    });
+
+    websiteBuilderForm?.addEventListener("submit", event => {
+      event.preventDefault();
+      const copy = builderCopy[currentLanguage];
+      memberState.membershipActive = memberState.membershipActive || localStorage.getItem("crovantixMembershipActive") === "true";
+      if (!memberState.membershipActive) {
+        builderStatus.textContent = copy.needMembership;
+        document.querySelector("#membership")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      const companyName = document.querySelector("#builderCompanyName").value.trim();
+      const services = document.querySelector("#builderServices").value.trim();
+      const address = document.querySelector("#builderAddress").value.trim();
+      const phone = document.querySelector("#builderPhone").value.trim();
+      if (!companyName || !services || !address || !phone) {
+        builderStatus.textContent = copy.needAllFields;
+        return;
+      }
+      const heroImage = builderState.photos[0]?.dataUrl
+        ? `<img src="${builderState.photos[0].dataUrl}" alt="${escapeHtml(companyName)} ${copy.altSuffix}">`
+        : "";
+      const serviceTags = services
+        .split(/[、,，\n]/)
+        .map(item => item.trim())
+        .filter(Boolean)
+        .slice(0, 6)
+        .map(item => `<span>${escapeHtml(item)}</span>`)
+        .join("");
+      const galleryImages = builderState.photos.slice(1).map((photo, index) => (
+        `<img src="${photo.dataUrl}" alt="${escapeHtml(companyName)} ${copy.altSuffix} ${index + 2}">`
+      )).join("");
+      sitePreview.classList.remove("empty");
+      sitePreview.innerHTML = `
+        <div class="preview-hero">
+          ${heroImage}
+          <div class="preview-mini-nav">
+            <span>${escapeHtml(companyName)}</span>
+            <span>品牌介紹 · 服務項目 · 聯絡我們</span>
+          </div>
+          <div class="preview-hero-content">
+            <span class="preview-eyebrow">Professional Business Website</span>
+            <h3>${escapeHtml(companyName)}</h3>
+            <p>${escapeHtml(services)}</p>
+            <div class="preview-hero-actions">
+              <span>立即聯繫</span>
+              <span>查看服務</span>
+            </div>
+          </div>
+        </div>
+        <div class="preview-section">
+          <div class="preview-section-header">
+            <span>About</span>
+            <h4>以專業形象呈現服務價值，讓客戶第一眼就知道為什麼選擇您。</h4>
+            <p>${escapeHtml(companyName)} 專注提供 ${escapeHtml(services)}，透過清楚的服務資訊、照片展示與聯絡入口，協助訪客快速理解服務內容並完成詢問。</p>
+          </div>
+          ${serviceTags ? `<div class="preview-service-tags">${serviceTags}</div>` : ""}
+        </div>
+        <div class="preview-feature-grid">
+          <div class="preview-feature">
+            <strong>01</strong>
+            <b>清楚服務定位</b>
+            <p>把營業項目整理成可閱讀、可理解、可詢問的網站內容。</p>
+          </div>
+          <div class="preview-feature">
+            <strong>02</strong>
+            <b>建立客戶信任</b>
+            <p>用照片、地址、電話與品牌敘事，降低訪客詢問前的不確定感。</p>
+          </div>
+          <div class="preview-feature">
+            <strong>03</strong>
+            <b>方便後續擴充</b>
+            <p>未來可加入地圖、表單、LINE、SEO、廣告追蹤與後台管理。</p>
+          </div>
+        </div>
+        <div class="preview-section">
+          <div class="preview-section-header">
+            <span>Information</span>
+            <h4>營業資訊</h4>
+          </div>
+          <div class="preview-info-grid">
+            <div class="preview-info-card"><b>精選服務</b><span>${escapeHtml(services)}</span></div>
+            <div class="preview-info-card"><b>${copy.address}</b><span>${escapeHtml(address)}</span></div>
+            <div class="preview-info-card"><b>${copy.phone}</b><span>${escapeHtml(phone)}</span></div>
+          </div>
+        </div>
+        ${galleryImages ? `
+          <div class="preview-section">
+            <div class="preview-block-title">
+              <div>
+                <h4>照片展示</h4>
+                <span>Store Gallery</span>
+              </div>
+              <span>品牌視覺素材</span>
+            </div>
+            <div class="preview-gallery">${galleryImages}</div>
+          </div>
+        ` : ""}
+        <div class="preview-cta">
+          <span>${copy.ctaText}</span>
+          <a class="button primary" href="#quote-request">${copy.ctaButton}</a>
+        </div>`;
+      builderStatus.textContent = copy.generated;
+      fetch(`${CONTACT_API_BASE}/api/records`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          app: "crovantix-technologies",
+          type: "website_builder_requests",
+          payload: {
+            source: "freeWebsiteBuilder",
+            companyName,
+            services,
+            address,
+            phone,
+            membershipRequired: true,
+            membershipActive: memberState.membershipActive,
+            language: currentLanguage,
+            pageUrl: location.href,
+            previewGenerated: true,
+            photos: builderState.photos,
+            photoCount: builderState.photos.length,
+            submittedAt: new Date().toISOString()
+          }
+        })
+      })
+        .then(async response => {
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok || !result.ok) throw new Error(result.error || "紀錄失敗");
+          builderStatus.textContent = copy.saved;
+        })
+        .catch(() => {
+          builderStatus.textContent = copy.generated;
+        });
+    });
+
+    document.querySelector("#quoteForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const name = document.querySelector("#quoteName").value.trim();
+      const email = document.querySelector("#quoteEmail").value.trim();
+      const type = document.querySelector("#quoteType").value;
+      const budget = document.querySelector("#quoteBudget").value;
+      const message = document.querySelector("#quoteMessage").value.trim();
+      const status = document.querySelector("#formStatus");
+      status.textContent = uiMessages[currentLanguage].sending;
+      fetch(`${CONTACT_API_BASE}/api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          app: "crovantix-technologies",
+          source: "quoteForm",
+          name,
+          email,
+          type,
+          budget,
+          message,
+          sentAt: new Date().toISOString()
+        })
+      })
+        .then(async response => {
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok || !result.ok) throw new Error(result.error || "送出失敗");
+          status.textContent = result.delivery?.sent
+            ? uiMessages[currentLanguage].sent
+            : uiMessages[currentLanguage].saved;
+          event.target.reset();
+        })
+        .catch(error => {
+          status.textContent = `${uiMessages[currentLanguage].failedPrefix}${error.message}${uiMessages[currentLanguage].failedSuffix}`;
+        });
+    });
+  </script>
+</body>
+</html>

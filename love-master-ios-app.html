@@ -1,0 +1,1510 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Love Master iOS App Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08070b;
+      --ink: #fff7f8;
+      --muted: #b9a6ad;
+      --line: rgba(255,255,255,.12);
+      --panel: #151019;
+      --panel-2: #211823;
+      --panel-3: #302232;
+      --pink: #ff6b9a;
+      --rose: #ff375f;
+      --peach: #ffb199;
+      --gold: #ffd166;
+      --green: #30d158;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      background:
+        radial-gradient(circle at 14% 8%, rgba(255,107,154,.24), transparent 26rem),
+        radial-gradient(circle at 86% 86%, rgba(255,209,102,.13), transparent 24rem),
+        #0b080d;
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100vw, 1120px);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 420px minmax(320px, 1fr);
+      gap: 50px;
+      align-items: start;
+      padding: 32px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #3c313a, #09070a 34%, #463845);
+      box-shadow: 0 30px 80px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.16);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255,107,154,.16), transparent 14rem),
+        linear-gradient(180deg, rgba(255,177,153,.12), transparent 34%),
+        var(--bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .island {
+      position: absolute;
+      z-index: 10;
+      top: 11px;
+      left: 50%;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+
+    .status {
+      height: 58px;
+      padding: 12px 26px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .signal {
+      display: flex;
+      gap: 2px;
+      height: 12px;
+      align-items: end;
+    }
+
+    .signal i {
+      display: block;
+      width: 3px;
+      border-radius: 2px;
+      background: #fff;
+    }
+
+    .signal i:nth-child(1) { height: 4px; }
+    .signal i:nth-child(2) { height: 7px; }
+    .signal i:nth-child(3) { height: 9px; }
+    .signal i:nth-child(4) { height: 12px; }
+
+    .battery {
+      width: 24px;
+      height: 12px;
+      border: 1.6px solid #fff;
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .battery::before {
+      content: "";
+      position: absolute;
+      right: -4px;
+      top: 3px;
+      width: 2px;
+      height: 5px;
+      background: #fff;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .battery::after {
+      content: "";
+      position: absolute;
+      inset: 2px 5px 2px 2px;
+      background: #fff;
+      border-radius: 2px;
+    }
+
+    .app {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 84px;
+      overflow: hidden;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 3px;
+    }
+
+    .user-pill,
+    .credit-pill {
+      display: inline-grid;
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 6px;
+      min-height: 34px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .user-pill {
+      max-width: 170px;
+      color: #21080f;
+      background: linear-gradient(135deg, #fff1f4, #ffb199 46%, #ff6b9a);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .credit-pill {
+      color: #21080f;
+      background: var(--gold);
+      cursor: pointer;
+    }
+
+    h1 {
+      margin: 18px 0 6px;
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .content {
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-right: 2px;
+    }
+
+    .content::-webkit-scrollbar { width: 0; }
+
+    .screen.theme-light {
+      --bg: #fff7f9;
+      --ink: #2b121a;
+      --muted: #7d5d68;
+      --panel: #ffffff;
+      --panel-2: #fdeaf0;
+      --panel-3: #f9d7e2;
+    }
+
+    .screen.theme-deep {
+      --bg: #110711;
+      --panel: #1e0d1c;
+      --panel-2: #2a1528;
+      --pink: #ff4f8c;
+    }
+
+    .screen.font-small { font-size: 12px; }
+    .screen.font-large { font-size: 16px; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .input-card,
+    .answer-card,
+    .history-card {
+      margin-top: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background:
+        linear-gradient(145deg, rgba(255,107,154,.13), transparent 48%),
+        var(--panel);
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .label-row strong {
+      font-size: 15px;
+    }
+
+    .label-row span {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 132px;
+      resize: none;
+      border: 0;
+      border-radius: 20px;
+      padding: 14px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      line-height: 1.45;
+      outline: none;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 10px 0 2px;
+    }
+
+    .chips::-webkit-scrollbar { width: 0; height: 0; }
+
+    .topic {
+      flex: 0 0 auto;
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .topic.active {
+      color: #21080f;
+      background: var(--peach);
+      border-color: transparent;
+    }
+
+    .primary {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 18px;
+      color: #21080f;
+      background: var(--pink);
+      font-size: 15px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .primary:disabled {
+      opacity: .62;
+      cursor: default;
+    }
+
+    .sms-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .sms-button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-3);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 950;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .answer-card {
+      display: none;
+      margin-bottom: 14px;
+    }
+
+    .answer-card.show {
+      display: block;
+    }
+
+    .answer-card.loading {
+      border-color: rgba(255,107,154,.52);
+    }
+
+    .answer-card.loading h2::after {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-left: 8px;
+      border-radius: 50%;
+      background: var(--pink);
+      animation: blink 1s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: .2; }
+    }
+
+    .answer-card h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      line-height: 1.18;
+      letter-spacing: 0;
+    }
+
+    .answer-card p {
+      margin: 0;
+      color: #eadde1;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .answer-card b {
+      color: var(--ink);
+    }
+
+    .safe-note {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 16px;
+      color: #ffe8ee;
+      background: rgba(255,55,95,.16);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .page-controls {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 0 16px 10px;
+    }
+
+    .page-controls.show {
+      display: grid;
+    }
+
+    .page-controls button {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      background: rgba(255,255,255,.07);
+      color: var(--ink);
+      min-height: 38px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .page-controls button:disabled {
+      color: var(--muted);
+      cursor: default;
+      opacity: .45;
+    }
+
+    .history-card {
+      margin-top: 12px;
+      background: rgba(255,255,255,.045);
+    }
+
+    .history-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      padding: 9px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .heart {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      color: #21080f;
+      background: var(--peach);
+      font-weight: 950;
+    }
+
+    .history-item span:last-child {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .plan-card {
+      width: 100%;
+      border: 1px solid rgba(255, 107, 154, .25);
+      border-radius: 18px;
+      background: rgba(255,255,255,.055);
+      color: var(--ink);
+      display: grid;
+      gap: 5px;
+      margin-top: 10px;
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .plan-card strong {
+      color: var(--pink);
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .plan-card span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .setting-field {
+      display: grid;
+      gap: 6px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .setting-field select,
+    .setting-field input {
+      min-height: 42px;
+      border: 0;
+      border-radius: 16px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    .register-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .gender-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .gender-choice {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .gender-choice.active {
+      color: #21080f;
+      background: var(--peach);
+      border-color: transparent;
+    }
+
+    .terms-box {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.045);
+    }
+
+    .terms-toggle {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: var(--panel-3);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .terms-panel {
+      display: none;
+      max-height: 220px;
+      overflow-y: auto;
+      white-space: pre-line;
+      color: #eadde1;
+      font-size: 12px;
+      line-height: 1.55;
+      scrollbar-width: thin;
+    }
+
+    .terms-panel.show {
+      display: block;
+    }
+
+    .terms-consent {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .terms-consent input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--pink);
+    }
+
+    .register-hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .sms-hint {
+      grid-column: 1 / -1;
+      min-height: 16px;
+    }
+
+    .nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 6;
+      height: 74px;
+      padding-bottom: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line);
+      background: rgba(17,12,18,.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 780;
+      cursor: pointer;
+    }
+
+    .nav button.active { color: var(--pink); }
+
+    .nav-symbol {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .brief {
+      max-width: 530px;
+    }
+
+    .brief h2 {
+      margin: 0 0 16px;
+      font-size: clamp(30px, 4vw, 54px);
+      line-height: 1.02;
+      letter-spacing: 0;
+    }
+
+    .brief p {
+      margin: 0 0 22px;
+      color: #d1bdc5;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .specs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .spec {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(255,255,255,.05);
+    }
+
+    .spec b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .spec span {
+      color: #c4b2ba;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 860px) {
+      .stage {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 24px;
+        padding: 18px 14px 28px;
+      }
+
+      .phone {
+        width: min(390px, calc(100vw - 28px));
+        height: min(844px, calc(100vh - 28px));
+        min-height: 720px;
+      }
+
+      .brief {
+        width: min(390px, calc(100vw - 28px));
+      }
+
+      .specs { grid-template-columns: 1fr; }
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="iPhone love master app prototype">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status">
+          <span>9:41</span>
+          <span class="status-icons" aria-hidden="true">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span>5G</span>
+            <span class="battery"></span>
+          </span>
+        </div>
+
+        <div class="app">
+          <div class="toolbar">
+            <button class="user-pill" id="userProfileButton" title="使用者名稱">Clay Tseng</button>
+            <button class="credit-pill" id="creditPill" type="button">剩餘次數 3</button>
+          </div>
+
+          <h1>愛情大師</h1>
+          <p class="subline" id="appStatus">輸入你遇到的愛情問題，送出後取得感情解法</p>
+          <div class="page-controls" id="pageControls">
+            <button id="prevPageButton" type="button">&lt;上一頁</button>
+            <button id="nextPageButton" type="button">下一頁&gt;</button>
+          </div>
+
+          <section class="content">
+            <div class="page active" id="registerPage">
+              <section class="history-card">
+                <strong>首次註冊</strong>
+                <div class="register-grid">
+                  <label class="setting-field">姓名<input id="registerName" value="Clay Tseng" placeholder="請輸入姓名"></label>
+                  <label class="setting-field">電話<input id="registerPhone" value="0912-345-678" inputmode="tel" placeholder="請輸入電話"></label>
+                  <div class="sms-row">
+                    <label class="setting-field">簡訊驗證碼<input id="registerSmsCode" maxlength="4" inputmode="numeric" placeholder="請輸入 4 碼"></label>
+                    <button class="sms-button" id="sendRegisterSms" type="button">發送驗證碼</button>
+                    <p class="register-hint sms-hint" id="smsHint"></p>
+                  </div>
+                  <label class="setting-field">Email<input id="registerEmail" value="clay.tseng@example.com" inputmode="email" placeholder="請輸入 Email"></label>
+                  <label class="setting-field">生日<input id="registerBirthday" value="1992-08-16" placeholder="YYYY-MM-DD"></label>
+                  <label class="setting-field">性別
+                    <div class="gender-row">
+                      <button class="gender-choice active" type="button" data-gender="男">男</button>
+                      <button class="gender-choice" type="button" data-gender="女">女</button>
+                    </div>
+                  </label>
+                  <div class="terms-box">
+                    <button class="terms-toggle" id="toggleTermsButton" type="button">展開使用條款、隱私權政策與免責聲明</button>
+                    <div class="terms-panel" id="termsPanel">愛情大師 App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「愛情大師 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供感情分析、戀愛建議、AI 愛情助理、配對分析、聊天建議、命理參考、語音互動及相關情感與娛樂輔助服務，所有內容僅供娛樂、參考與一般互動用途。
+
+二、AI 與感情內容聲明
+
+本 App 部分內容可能由 AI 系統自動生成，包括感情分析、戀愛建議、聊天建議、配對結果、語音回覆或其他互動內容。
+
+本公司不保證相關內容之正確性、完整性、即時性、適法性或適用於特定情況。
+
+所有感情分析、戀愛建議、配對內容、命理分析與 AI 回覆僅供娛樂與參考用途，不構成任何心理諮詢、醫療建議、婚姻保證、交友保證或其他專業建議。
+
+三、使用風險與免責聲明
+
+使用者應自行判斷並承擔使用本 App 所產生之一切風險與責任。
+
+本 App 僅提供情感與 AI 輔助服務，本公司不保證任何感情結果、交友結果、配對成功率、婚姻結果或 AI 建議之準確性或實現結果。
+
+使用者因依據本 App 提供之內容、戀愛建議、聊天建議、AI 回覆、感情分析、配對結果或其他資訊所作之任何決定、交友行為、感情互動、金錢往來或其他私人行為而產生之損失、損害或爭議，均由使用者自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+本 App 之語音、AI、網路及第三方服務功能，可能受網路環境、裝置效能、第三方服務或系統狀況影響，本公司不保證服務之穩定性、即時性或完全無錯誤。
+
+四、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+* 使用者帳號資訊
+* Email
+* 裝置資訊
+* 使用紀錄
+* IP 位址
+* 感情偏好與互動資料
+* 語音內容
+* AI 互動紀錄
+* 崩潰紀錄與分析資料
+
+五、資料用途
+
+蒐集資料主要用於：
+
+* 提供感情與 AI 助理服務
+* AI 感情分析與內容生成
+* 提供個人化互動功能
+* 語音互動與 AI 回覆
+* 改善使用體驗
+* 系統安全維護
+* 客服支援
+* 防止詐騙、濫用或違法行為
+* 提升 AI 與系統服務品質
+
+六、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+* OpenAI
+* Firebase
+* Google Analytics
+* 語音辨識服務
+* 雲端儲存服務
+* AI 模型服務
+
+部分資料可能因服務需求而傳輸至第三方服務供應商。
+
+七、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、語音通訊或儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及個人資訊，避免向他人提供敏感資料或進行高風險金錢交易。
+
+八、使用者責任
+
+使用者不得利用本 App 從事任何違法、騷擾、詐騙、散布不當內容、侵犯他人權益或其他不法行為。
+
+若因使用者違法或不當行為導致任何損害或法律責任，應由使用者自行負責。
+
+九、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、資料、AI 系統及相關內容，均屬本公司或合法授權人所有。
+
+未經授權不得重製、修改、散布、反向工程、破解或用於商業用途。
+
+十、使用者權利
+
+使用者得依法請求查詢、更正或刪除其個人資料。
+
+十一、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利，修改後內容將公布於本 App，使用者繼續使用即視為同意修改內容。</div>
+                    <label class="terms-consent">
+                      <input id="agreeTerms" type="checkbox">
+                      我已閱讀並同意使用條款、隱私權政策與免責聲明
+                    </label>
+                  </div>
+                  <button class="primary" id="finishRegisterButton" type="button">完成註冊</button>
+                  <p class="register-hint" id="registerHint">請填寫資料、發送簡訊驗證碼並展開條文閱讀。</p>
+                </div>
+              </section>
+            </div>
+
+            <div class="page" id="consultPage">
+              <section class="input-card">
+                <div class="label-row">
+                  <strong>你的愛情問題</strong>
+                  <span id="charCount">0 / 240</span>
+                </div>
+                <textarea id="question" maxlength="240" placeholder="例如：我喜歡的人忽冷忽熱，我該主動問清楚，還是先保持距離？">我和曖昧對象最近聊天變少，但見面時又很自然。我不知道該不該主動問他對我的想法。</textarea>
+                <div class="chips" aria-label="love topics">
+                  <button class="topic active" data-topic="曖昧">曖昧</button>
+                  <button class="topic" data-topic="復合">復合</button>
+                  <button class="topic" data-topic="溝通">溝通</button>
+                  <button class="topic" data-topic="遠距">遠距</button>
+                  <button class="topic" data-topic="告白">告白</button>
+                </div>
+                <button class="primary" id="askButton">詢問</button>
+              </section>
+
+              <section class="answer-card" id="answerCard">
+                <h2 id="answerTitle">感情解決方法</h2>
+                <p id="answerText"></p>
+                <div class="safe-note">提醒：建議可以幫你整理方向，但如果關係中有威脅、控制、暴力或安全疑慮，請優先找可信任的人或專業資源協助。</div>
+              </section>
+            </div>
+
+            <div class="page" id="historyPage">
+              <section class="history-card">
+                <strong>最近諮詢</strong>
+                <div class="history-item">
+                  <span class="heart">心</span>
+                  <span>曖昧中該不該主動？先確認互動頻率，再提出低壓邀約。</span>
+                </div>
+                <div class="history-item">
+                  <span class="heart">答</span>
+                  <span>吵架後先不急著辯解，用一句具體理解開始修復。</span>
+                </div>
+              </section>
+            </div>
+
+            <div class="page" id="profilePage">
+              <section class="history-card">
+                <strong>使用者資料</strong>
+                <label class="setting-field">姓名<input id="profileName" value="Clay Tseng" placeholder="請輸入姓名"></label>
+                <label class="setting-field">Email<input id="profileEmail" value="clay.tseng@example.com" inputmode="email" placeholder="請輸入 Email"></label>
+                <label class="setting-field">電話<input id="profilePhone" value="0912-345-678" inputmode="tel" placeholder="請輸入電話"></label>
+                <div class="history-item"><span class="heart">方</span><span>目前方案：<b id="profilePlan">免費方案</b></span></div>
+                <div class="history-item"><span class="heart">點</span><span>剩餘點數：<b id="profileCredits">3</b></span></div>
+                <button class="primary" id="saveProfileButton" type="button">儲存資料</button>
+              </section>
+            </div>
+
+            <div class="page" id="upgradePage">
+              <section class="history-card">
+                <strong>升級方案</strong>
+                <button class="plan-card" type="button" data-plan="Basic" data-price="NTD$99" data-credits="30">
+                  <strong>Basic NTD$99</strong>
+                  <span>每月可以詢問 30 次</span>
+                </button>
+                <button class="plan-card" type="button" data-plan="Plus" data-price="NTD$299" data-credits="100">
+                  <strong>Plus NTD$299</strong>
+                  <span>每月可以詢問 100 次</span>
+                </button>
+                <button class="plan-card" type="button" data-plan="Pro" data-price="NTD$599" data-credits="500">
+                  <strong>Pro NTD$599</strong>
+                  <span>每月可以詢問 500 次</span>
+                </button>
+                <button class="plan-card" type="button" data-plan="VIP" data-price="NTD$999" data-credits="1000">
+                  <strong>VIP NTD$999</strong>
+                  <span>每月可以詢問 1000 次</span>
+                </button>
+              </section>
+            </div>
+
+            <div class="page" id="paymentPage">
+              <section class="history-card">
+                <strong>信用卡付費</strong>
+                <div class="history-item"><span class="heart">卡</span><span id="selectedPlanText">請先選擇升級方案。</span></div>
+                <label class="setting-field">持卡人姓名<input id="cardName" value="Clay Tseng" placeholder="請輸入持卡人姓名"></label>
+                <label class="setting-field">信用卡號<input id="cardNumber" value="4242 4242 4242 4242" inputmode="numeric" placeholder="0000 0000 0000 0000"></label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <label class="setting-field">有效期限<input id="cardExp" value="12/30" placeholder="MM/YY"></label>
+                  <label class="setting-field">CVV<input id="cardCvv" value="123" inputmode="numeric" placeholder="CVV"></label>
+                </div>
+                <button class="primary" id="payUpgradeButton" type="button">升級付費</button>
+              </section>
+            </div>
+
+            <div class="page" id="settingsPage">
+              <section class="history-card">
+                <strong>設定</strong>
+                <label class="setting-field">App 背景
+                  <select id="themeSelect">
+                    <option value="default">玫瑰深色</option>
+                    <option value="deep">深紫夜色</option>
+                    <option value="light">明亮粉色</option>
+                  </select>
+                </label>
+                <label class="setting-field">字體大小
+                  <select id="fontSizeSelect">
+                    <option value="normal">標準</option>
+                    <option value="small">小</option>
+                    <option value="large">大</option>
+                  </select>
+                </label>
+                <label class="setting-field">語言
+                  <select id="languageSelect">
+                    <option value="zh">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                </label>
+              </section>
+              <section class="history-card">
+                <strong>聯繫客服</strong>
+                <div class="history-item"><span class="heart">問</span><span>問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。</span></div>
+                <div class="history-item"><span class="heart">@</span><span>support@app-service.example</span></div>
+              </section>
+            </div>
+          </section>
+        </div>
+
+        <nav class="nav" aria-label="main navigation">
+          <button class="active" data-page="consultPage"><span class="nav-symbol">♡</span>諮詢</button>
+          <button data-page="historyPage"><span class="nav-symbol">✧</span>紀錄</button>
+          <button data-page="upgradePage"><span class="nav-symbol">◇</span>升級</button>
+          <button data-page="settingsPage"><span class="nav-symbol">⚙</span>設定</button>
+        </nav>
+      </div>
+    </section>
+
+    <aside class="brief">
+      <h2>愛情大師 iOS App 原型</h2>
+      <p>使用者輸入遇到的愛情問題，按下按鈕後送出 request 給 ChatGPT，下面顯示感情解決方法。正式版應由後端轉送請求，不在前端放 API key。</p>
+      <div class="specs">
+        <div class="spec"><b>核心流程</b><span>輸入問題、選情境標籤、送出、顯示可執行的感情建議。</span></div>
+        <div class="spec"><b>回覆結構</b><span>先穩住情緒，再分析對方訊號，最後給具體訊息範本。</span></div>
+        <div class="spec"><b>AI 狀態</b><span>送出後顯示 request 中與分析中，回來後呈現解法。</span></div>
+        <div class="spec"><b>安全提醒</b><span>遇到威脅、控制或暴力情境時，優先提醒尋求真人協助。</span></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const questionInput = document.querySelector("#question");
+    const charCount = document.querySelector("#charCount");
+    const askButton = document.querySelector("#askButton");
+    const appStatus = document.querySelector("#appStatus");
+    const pageControls = document.querySelector("#pageControls");
+    const prevPageButton = document.querySelector("#prevPageButton");
+    const nextPageButton = document.querySelector("#nextPageButton");
+    const answerCard = document.querySelector("#answerCard");
+    const answerTitle = document.querySelector("#answerTitle");
+    const answerText = document.querySelector("#answerText");
+    const topicButtons = [...document.querySelectorAll(".topic")];
+    const userProfileButton = document.querySelector("#userProfileButton");
+    const creditPill = document.querySelector("#creditPill");
+    const toolbar = document.querySelector(".toolbar");
+    const nav = document.querySelector(".nav");
+    const registerName = document.querySelector("#registerName");
+    const registerPhone = document.querySelector("#registerPhone");
+    const registerSmsCode = document.querySelector("#registerSmsCode");
+    const sendRegisterSms = document.querySelector("#sendRegisterSms");
+    const smsHint = document.querySelector("#smsHint");
+    const registerEmail = document.querySelector("#registerEmail");
+    const registerBirthday = document.querySelector("#registerBirthday");
+    const genderChoices = [...document.querySelectorAll(".gender-choice")];
+    const toggleTermsButton = document.querySelector("#toggleTermsButton");
+    const termsPanel = document.querySelector("#termsPanel");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const finishRegisterButton = document.querySelector("#finishRegisterButton");
+    const registerHint = document.querySelector("#registerHint");
+    const profileName = document.querySelector("#profileName");
+    const profileEmail = document.querySelector("#profileEmail");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profilePlan = document.querySelector("#profilePlan");
+    const profileCredits = document.querySelector("#profileCredits");
+    const saveProfileButton = document.querySelector("#saveProfileButton");
+    const pages = [...document.querySelectorAll(".page")];
+    const navButtons = [...document.querySelectorAll(".nav button")];
+    const screen = document.querySelector(".screen");
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSizeSelect = document.querySelector("#fontSizeSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const planButtons = [...document.querySelectorAll(".plan-card")];
+    const selectedPlanText = document.querySelector("#selectedPlanText");
+    const payUpgradeButton = document.querySelector("#payUpgradeButton");
+    let registered = false;
+    let termsOpened = false;
+    let registerSmsToken = "";
+    let currentTopic = "曖昧";
+    let remainingCredits = 3;
+    let currentPlan = "免費方案";
+    let selectedPlan = null;
+    let pageHistory = ["registerPage"];
+    let pageHistoryIndex = 0;
+    const uiCopy = {
+      zh: {
+        title: "愛情大師",
+        status: "輸入你遇到的愛情問題，送出後取得感情解法",
+        nav: ["諮詢", "紀錄", "升級", "設定"],
+        question: "你的愛情問題",
+        ask: "詢問",
+        answerTitle: "感情解決方法",
+        safety: "提醒：建議可以幫你整理方向，但如果關係中有威脅、控制、暴力或安全疑慮，請優先找可信任的人或專業資源協助。",
+        history: "最近諮詢",
+        upgrade: "升級方案",
+        credits: count => `剩餘次數 ${count}`,
+        noCredits: "今日次數已用完，請明天再使用或升級方案。",
+        selectedPlan: (plan, price, count) => `已選擇 ${plan} ${price}，每月可以詢問 ${count} 次。`,
+        choosePlan: "請先選擇升級方案。",
+        payUpgrade: "升級付費",
+        upgraded: (plan, count) => `已升級 ${plan}，本月可詢問 ${count} 次。`,
+        settings: "設定",
+        background: "App 背景",
+        fontSize: "字體大小",
+        language: "語言",
+        support: "聯繫客服",
+        supportText: "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。",
+        updated: "語言設定已更新"
+      },
+      en: {
+        title: "Love Master",
+        status: "Enter your relationship question to get advice.",
+        nav: ["Consult", "History", "Upgrade", "Settings"],
+        question: "Your relationship question",
+        ask: "Ask",
+        answerTitle: "Relationship Advice",
+        safety: "Reminder: Advice can organize your thoughts, but if there is threat, control, violence, or safety risk, seek trusted or professional help first.",
+        history: "Recent Consultations",
+        upgrade: "Upgrade Plans",
+        credits: count => `${count} remaining`,
+        noCredits: "Today's uses are finished. Please try tomorrow or upgrade.",
+        selectedPlan: (plan, price, count) => `Selected ${plan} ${price}, ${count} questions per month.`,
+        choosePlan: "Please select an upgrade plan first.",
+        payUpgrade: "Pay to Upgrade",
+        upgraded: (plan, count) => `Upgraded to ${plan}. You can ask ${count} times this month.`,
+        settings: "Settings",
+        background: "App Background",
+        fontSize: "Font Size",
+        language: "Language",
+        support: "Contact Support",
+        supportText: "For issue reports or partnership inquiries, contact us by Email.",
+        updated: "Language updated"
+      },
+      ja: {
+        title: "恋愛マスター",
+        status: "恋愛の悩みを入力するとアドバイスを表示します。",
+        nav: ["相談", "履歴", "アップグレード", "設定"],
+        question: "恋愛の悩み",
+        ask: "相談する",
+        answerTitle: "恋愛アドバイス",
+        safety: "注意：助言は方向整理のためのものです。脅迫、支配、暴力、安全上の不安がある場合は信頼できる人や専門機関に相談してください。",
+        history: "最近の相談",
+        upgrade: "アップグレード",
+        credits: count => `残り ${count} 回`,
+        noCredits: "本日の回数を使い切りました。明日またはアップグレードしてください。",
+        selectedPlan: (plan, price, count) => `${plan} ${price} を選択しました。毎月 ${count} 回相談できます。`,
+        choosePlan: "先にアップグレードプランを選択してください。",
+        payUpgrade: "支払ってアップグレード",
+        upgraded: (plan, count) => `${plan} にアップグレードしました。今月 ${count} 回相談できます。`,
+        settings: "設定",
+        background: "App 背景",
+        fontSize: "文字サイズ",
+        language: "言語",
+        support: "サポート連絡",
+        supportText: "問題報告、提携相談は Email でお問い合わせください。",
+        updated: "言語設定を更新しました"
+      }
+    };
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function updateCount() {
+      charCount.textContent = `${questionInput.value.length} / 240`;
+    }
+
+    function updatePageControls(pageId) {
+      pageControls.classList.toggle("show", registered && pageId !== "consultPage");
+      prevPageButton.disabled = pageHistoryIndex <= 0;
+      nextPageButton.disabled = pageHistoryIndex >= pageHistory.length - 1;
+    }
+
+    function showPage(pageId, record = true) {
+      if (!registered && pageId !== "registerPage") {
+        pageId = "registerPage";
+      }
+      const currentPage = pageHistory[pageHistoryIndex];
+      if (record && pageId !== currentPage) {
+        pageHistory = pageHistory.slice(0, pageHistoryIndex + 1);
+        pageHistory.push(pageId);
+        pageHistoryIndex = pageHistory.length - 1;
+      }
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      toolbar.style.display = registered ? "flex" : "none";
+      nav.style.display = registered ? "grid" : "none";
+      updatePageControls(pageId);
+    }
+
+    function updateCredits() {
+      const copy = uiCopy[languageSelect.value] || uiCopy.zh;
+      creditPill.textContent = copy.credits(remainingCredits);
+      profileCredits.textContent = remainingCredits;
+      profilePlan.textContent = currentPlan;
+    }
+
+    function consumeCredit() {
+      const copy = uiCopy[languageSelect.value] || uiCopy.zh;
+      if (remainingCredits <= 0) {
+        appStatus.textContent = copy.noCredits;
+        return false;
+      }
+      remainingCredits -= 1;
+      updateCredits();
+      return true;
+    }
+
+    function setLabelText(select, text) {
+      const label = select.closest("label");
+      label.childNodes[0].textContent = text;
+    }
+
+    function applyLanguage() {
+      const copy = uiCopy[languageSelect.value] || uiCopy.zh;
+      document.querySelector("h1").textContent = copy.title;
+      appStatus.textContent = copy.status;
+      updateCredits();
+      navButtons.forEach((button, index) => {
+        button.lastChild.textContent = copy.nav[index];
+      });
+      document.querySelector("#consultPage .label-row strong").textContent = copy.question;
+      askButton.textContent = copy.ask;
+      if (!answerCard.classList.contains("loading")) answerTitle.textContent = copy.answerTitle;
+      document.querySelector(".safe-note").textContent = copy.safety;
+      document.querySelector("#historyPage strong").textContent = copy.history;
+      document.querySelector("#upgradePage strong").textContent = copy.upgrade;
+      document.querySelector("#paymentPage strong").textContent = languageSelect.value === "en" ? "Credit Card Payment" : languageSelect.value === "ja" ? "カード決済" : "信用卡付費";
+      selectedPlanText.textContent = selectedPlan
+        ? copy.selectedPlan(selectedPlan.dataset.plan, selectedPlan.dataset.price, selectedPlan.dataset.credits)
+        : copy.choosePlan;
+      payUpgradeButton.textContent = copy.payUpgrade;
+      document.querySelector("#settingsPage .history-card:first-child strong").textContent = copy.settings;
+      setLabelText(themeSelect, copy.background);
+      setLabelText(fontSizeSelect, copy.fontSize);
+      setLabelText(languageSelect, copy.language);
+      document.querySelector("#settingsPage .history-card:last-child strong").textContent = copy.support;
+      document.querySelector("#settingsPage .history-card:last-child .history-item:first-of-type span:last-child").textContent = copy.supportText;
+    }
+
+    function buildAdvice(question) {
+      const safeQuestion = escapeHtml(question || "目前沒有輸入問題");
+      const topicAdvice = {
+        "曖昧": "先不要用質問開場，改用低壓確認。曖昧最需要看的是行動是否穩定，而不是單次訊息熱度。",
+        "復合": "先確認分開的原因是否真的被處理，再談重新開始。不要只因為想念就跳過問題本身。",
+        "溝通": "把感受、事件、需求拆開說，避免一次丟出太多指責。目標是讓對方理解，不是贏下辯論。",
+        "遠距": "遠距需要固定節奏與明確期待。先討論聯絡頻率，再討論見面安排與安全感來源。",
+        "告白": "告白前先觀察對方是否願意投入時間。用邀約升溫，比突然給壓力更容易得到真實回應。"
+      };
+
+      return `<b>你問的問題</b>：${safeQuestion}<br><br><b>判斷</b>：${topicAdvice[currentTopic]}<br><br><b>下一步</b>：先約一次輕鬆見面或通話，觀察對方是否願意配合時間，而不是只看訊息長短。<br><br><b>可以這樣說</b>：「我最近感覺我們聊天少了一點，但見面又很自在。我想知道你比較希望我們維持什麼樣的節奏？」`;
+    }
+
+    topicButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        currentTopic = button.dataset.topic;
+        topicButtons.forEach(item => item.classList.toggle("active", item === button));
+      });
+    });
+
+    questionInput.addEventListener("input", updateCount);
+
+    askButton.addEventListener("click", () => {
+      if (!consumeCredit()) return;
+      askButton.disabled = true;
+      answerCard.classList.add("show", "loading");
+      answerTitle.textContent = "正在分析感情問題";
+      answerText.textContent = "正在把你的問題送出 request 給 ChatGPT，整理情緒、關係狀態與下一步建議…";
+      appStatus.textContent = "ChatGPT 分析中…";
+
+      window.setTimeout(() => {
+        askButton.disabled = false;
+        answerCard.classList.remove("loading");
+        answerTitle.textContent = "感情解決方法";
+        answerText.innerHTML = buildAdvice(questionInput.value.trim());
+        appStatus.textContent = "已產生感情建議";
+      }, 850);
+    });
+
+    navButtons.forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
+    genderChoices.forEach(button => {
+      button.addEventListener("click", () => {
+        genderChoices.forEach(item => item.classList.toggle("active", item === button));
+      });
+    });
+    toggleTermsButton.addEventListener("click", () => {
+      termsOpened = true;
+      termsPanel.classList.toggle("show");
+      toggleTermsButton.textContent = termsPanel.classList.contains("show")
+        ? "收合使用條款、隱私權政策與免責聲明"
+        : "展開使用條款、隱私權政策與免責聲明";
+    });
+    sendRegisterSms.addEventListener("click", () => {
+      const phone = registerPhone.value.trim();
+      if (!phone) {
+        smsHint.textContent = "請先輸入電話號碼。";
+        return;
+      }
+      registerSmsToken = String(Math.floor(1000 + Math.random() * 9000));
+      smsHint.textContent = `已發送 4 位數簡訊驗證碼。原型示範碼：${registerSmsToken}`;
+      registerHint.textContent = "請填寫資料並完成註冊。";
+    });
+    finishRegisterButton.addEventListener("click", () => {
+      const name = registerName.value.trim();
+      const phone = registerPhone.value.trim();
+      const smsCode = registerSmsCode.value.trim();
+      const email = registerEmail.value.trim();
+      const birthday = registerBirthday.value.trim();
+      if (!name || !phone || !email || !birthday) {
+        registerHint.textContent = "請完整填寫姓名、電話、Email 與生日。";
+        return;
+      }
+      if (!smsCode) {
+        smsHint.textContent = "請輸入簡訊 4 碼驗證碼。";
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        registerHint.textContent = "請輸入正確 Email。";
+        return;
+      }
+      if (!registerSmsToken) {
+        smsHint.textContent = "請先發送簡訊驗證碼。";
+        return;
+      }
+      if (smsCode !== registerSmsToken) {
+        smsHint.textContent = "簡訊碼輸入錯誤。";
+        return;
+      }
+      if (!termsOpened) {
+        registerHint.textContent = "請先展開條文閱讀後再完成註冊。";
+        return;
+      }
+      if (!agreeTerms.checked) {
+        registerHint.textContent = "請勾選我已閱讀並同意使用條款、隱私權政策與免責聲明。";
+        return;
+      }
+      registered = true;
+      profileName.value = name;
+      profilePhone.value = phone;
+      profileEmail.value = email;
+      userProfileButton.textContent = name;
+      pageHistory = ["consultPage"];
+      pageHistoryIndex = 0;
+      registerHint.textContent = "註冊成功。";
+      appStatus.textContent = "註冊成功，可以開始使用愛情大師。";
+      showPage("consultPage", false);
+    });
+    prevPageButton.addEventListener("click", () => {
+      if (pageHistoryIndex <= 0) return;
+      pageHistoryIndex -= 1;
+      showPage(pageHistory[pageHistoryIndex], false);
+    });
+    nextPageButton.addEventListener("click", () => {
+      if (pageHistoryIndex >= pageHistory.length - 1) return;
+      pageHistoryIndex += 1;
+      showPage(pageHistory[pageHistoryIndex], false);
+    });
+    userProfileButton.addEventListener("click", () => {
+      updateCredits();
+      showPage("profilePage");
+    });
+    creditPill.addEventListener("click", () => {
+      updateCredits();
+      showPage("upgradePage");
+    });
+    saveProfileButton.addEventListener("click", () => {
+      const name = profileName.value.trim() || "使用者";
+      userProfileButton.textContent = name;
+      appStatus.textContent = "使用者資料已更新。";
+      showPage("consultPage");
+    });
+    planButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const copy = uiCopy[languageSelect.value] || uiCopy.zh;
+        selectedPlan = button;
+        selectedPlanText.textContent = copy.selectedPlan(button.dataset.plan, button.dataset.price, button.dataset.credits);
+        appStatus.textContent = copy.selectedPlan(button.dataset.plan, button.dataset.price, button.dataset.credits);
+        showPage("paymentPage");
+      });
+    });
+    payUpgradeButton.addEventListener("click", () => {
+      const copy = uiCopy[languageSelect.value] || uiCopy.zh;
+      if (!selectedPlan) {
+        appStatus.textContent = copy.choosePlan;
+        showPage("upgradePage");
+        return;
+      }
+      currentPlan = `${selectedPlan.dataset.plan} ${selectedPlan.dataset.price}`;
+      remainingCredits += Number(selectedPlan.dataset.credits);
+      updateCredits();
+      appStatus.textContent = copy.upgraded(selectedPlan.dataset.plan, selectedPlan.dataset.credits);
+      showPage("consultPage");
+    });
+
+    themeSelect.addEventListener("change", () => {
+      screen.classList.remove("theme-deep", "theme-light");
+      if (themeSelect.value !== "default") screen.classList.add(`theme-${themeSelect.value}`);
+    });
+
+    fontSizeSelect.addEventListener("change", () => {
+      screen.classList.remove("font-small", "font-large");
+      if (fontSizeSelect.value !== "normal") screen.classList.add(`font-${fontSizeSelect.value}`);
+    });
+
+    languageSelect.addEventListener("change", () => {
+      applyLanguage();
+      appStatus.textContent = (uiCopy[languageSelect.value] || uiCopy.zh).updated;
+    });
+
+    applyLanguage();
+    updateCount();
+    showPage("registerPage", false);
+    appStatus.textContent = "請先完成註冊並同意條文後開始使用。";
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

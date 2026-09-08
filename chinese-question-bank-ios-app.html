@@ -1,0 +1,1730 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chinese Question Bank iOS App Prototype</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --ink: #f7fbff;
+      --muted: #a6b4c6;
+      --line: rgba(255,255,255,.13);
+      --panel: #111d2b;
+      --panel-2: #18283a;
+      --panel-3: #243a53;
+      --blue: #64d2ff;
+      --green: #30d158;
+      --yellow: #ffd60a;
+      --red: #ff453a;
+      --app-font-size: 14px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      padding: 28px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(100,210,255,.18), transparent 24rem),
+        radial-gradient(circle at 88% 92%, rgba(48,209,88,.13), transparent 22rem),
+        #06101b;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100%, 1060px);
+      display: grid;
+      grid-template-columns: 390px minmax(280px, 1fr);
+      gap: 44px;
+      align-items: start;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #334252, #05070a 34%, #3b4d5f);
+      box-shadow: 0 30px 80px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.16);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(100,210,255,.18), transparent 13rem),
+        linear-gradient(180deg, rgba(48,209,88,.08), transparent 34%),
+        var(--bg);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .screen.theme-green {
+      --bg: #07140f;
+      --panel: #102119;
+      --panel-2: #173326;
+      --panel-3: #204935;
+      --blue: #7ee7bd;
+    }
+
+    .screen.theme-light {
+      color-scheme: light;
+      --bg: #f4f7fb;
+      --ink: #102033;
+      --muted: #607084;
+      --line: rgba(20,40,60,.14);
+      --panel: #ffffff;
+      --panel-2: #e9f0f7;
+      --panel-3: #dbe8f2;
+      --blue: #0a84ff;
+    }
+
+    .screen.font-small { --app-font-size: 12px; }
+    .screen.font-large { --app-font-size: 16px; }
+
+    .island {
+      position: absolute;
+      z-index: 10;
+      top: 11px;
+      left: 50%;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+    }
+
+    .status {
+      height: 58px;
+      padding: 12px 26px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .app {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 84px;
+      overflow: hidden;
+      font-size: var(--app-font-size);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      min-height: 36px;
+      gap: 8px;
+    }
+
+    .user,
+    .points {
+      height: 36px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 12px;
+      color: #061018;
+      font-weight: 950;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .user {
+      max-width: 168px;
+      background: linear-gradient(135deg, #fff, #bdefff 44%, var(--blue));
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .points {
+      margin-left: auto;
+      background: var(--yellow);
+    }
+
+    .credit-alert {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      color: #061018;
+      background: var(--yellow);
+      font-weight: 950;
+    }
+
+    .credit-alert.show { display: flex; }
+
+    .credit-alert button {
+      min-height: 32px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 12px;
+      color: #061018;
+      background: var(--green);
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    h1 {
+      margin: 16px 0 6px;
+      font-size: calc(var(--app-font-size) + 19px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 1px);
+      line-height: 1.35;
+    }
+
+    .content {
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding-right: 2px;
+    }
+
+    .content::-webkit-scrollbar { width: 0; }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background:
+        linear-gradient(145deg, rgba(100,210,255,.11), transparent 48%),
+        var(--panel);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: calc(var(--app-font-size) + 4px);
+      letter-spacing: 0;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 850;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 0;
+      border-radius: 15px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 96px;
+      padding-top: 12px;
+      resize: none;
+      line-height: 1.45;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .terms-box {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .terms-toggle {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: var(--panel-3);
+      font: inherit;
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .terms-panel {
+      display: none;
+      max-height: 220px;
+      overflow-y: auto;
+      white-space: pre-line;
+      color: #d7e5f2;
+      font-size: calc(var(--app-font-size) - 2px);
+      line-height: 1.55;
+      scrollbar-width: thin;
+    }
+
+    .terms-panel.show {
+      display: block;
+    }
+
+    .terms-consent {
+      display: grid;
+      grid-template-columns: 20px 1fr;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      font-size: calc(var(--app-font-size) - 2px);
+      font-weight: 850;
+    }
+
+    .terms-consent input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue);
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.05);
+      padding: 10px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 15px;
+    }
+
+    .segment {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .segment button,
+    .primary,
+    .secondary {
+      min-height: 42px;
+      border: 0;
+      border-radius: 15px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .segment button,
+    .secondary {
+      color: var(--ink);
+      background: var(--panel-3);
+      border: 1px solid var(--line);
+    }
+
+    .segment button.active {
+      color: #061018;
+      background: var(--blue);
+    }
+
+    .primary {
+      color: #061018;
+      background: var(--blue);
+    }
+
+    .question-card {
+      padding: 13px;
+      margin-bottom: 10px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.055);
+      border: 1px solid var(--line);
+    }
+
+    .question-card.correct {
+      border: 3px solid var(--green);
+      background: rgba(48,209,88,.18);
+      box-shadow: 0 0 0 3px rgba(48,209,88,.16), 0 12px 28px rgba(48,209,88,.16);
+    }
+
+    .question-card.incorrect {
+      border: 2px solid var(--red);
+      background: rgba(255,69,58,.12);
+    }
+
+    .question-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--blue);
+    }
+
+    .question-card p {
+      margin: 0;
+      color: var(--ink);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .solution {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 14px;
+      color: #061018;
+      background: rgba(48,209,88,.9);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .solution.show { display: block; }
+
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .plan {
+      min-height: 82px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .plan.active {
+      color: #061018;
+      background: var(--yellow);
+      box-shadow: 0 0 0 4px rgba(255,214,10,.14);
+    }
+
+    .school-card {
+      width: 100%;
+      display: grid;
+      gap: 6px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--ink);
+      background: var(--panel-2);
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .school-card strong { color: var(--blue); }
+    .school-card span { color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .recommend-badge {
+      align-self: flex-start;
+      background: rgba(94, 210, 255, .16);
+      border: 1px solid rgba(94, 210, 255, .75);
+      border-radius: 999px;
+      color: var(--blue) !important;
+      font-size: 12px !important;
+      font-weight: 900;
+      max-width: 92px;
+      overflow: hidden;
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+    .recommend-badge::before {
+      animation: recommendMarquee 2.4s linear infinite;
+      color: var(--blue);
+      content: "★ 推薦 ★";
+      display: inline-block;
+      min-width: 100%;
+      transform: translateX(100%);
+    }
+    .recommend-badge { color: transparent !important; }
+    @keyframes recommendMarquee {
+      from { transform: translateX(100%); }
+      to { transform: translateX(-100%); }
+    }
+    .contact-form { display: none; }
+    .contact-form.show { display: grid; }
+
+    .paywall { display: none; }
+    .paywall.show { display: grid; }
+
+    .nav {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      height: 64px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border-radius: 0 0 38px 38px;
+      background: rgba(8,16,24,.86);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-size: calc(var(--app-font-size) - 3px);
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .nav button.active { color: var(--blue); }
+
+    .brief {
+      max-width: 520px;
+      padding-top: 32px;
+    }
+
+    .brief h2 {
+      margin: 0 0 14px;
+      font-size: clamp(30px, 4vw, 52px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .brief p {
+      margin: 0;
+      color: #b9c7d6;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="iPhone Chinese question bank app prototype">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status"><span>9:41</span><span>5G  ▰</span></div>
+
+        <div class="app">
+          <div class="toolbar">
+            <button class="user" id="userNameButton">尚未註冊</button>
+            <button class="points" id="pointsButton">3 點</button>
+          </div>
+          <div class="credit-alert" id="creditAlert">
+            <span id="creditAlertText">點數已用完 請點選升級</span>
+            <button id="creditAlertUpgrade" type="button">升級</button>
+          </div>
+
+          <h1 id="title">國文題庫</h1>
+          <p class="subline" id="appStatus">完成註冊後開始產生國文題庫。</p>
+
+          <section class="content">
+            <section class="page active" id="loginPage">
+              <div class="card">
+                <h2>註冊登入</h2>
+                <label>姓名<input id="studentName" value="Clay Tseng" placeholder="請輸入姓名"></label>
+                <label>電話<input id="studentPhone" value="0912-345-678" inputmode="tel" placeholder="請輸入電話"></label>
+                <label>Email<input id="studentEmail" value="clay.tseng@example.com" inputmode="email" placeholder="請輸入 Email"></label>
+                <div class="grid-2">
+                  <label>地址縣市<input id="studentCity" value="台北市" placeholder="例如：台北市"></label>
+                  <label>地址區域<input id="studentDistrict" value="大安區" placeholder="例如：大安區"></label>
+                </div>
+                <div class="grid-2">
+                  <label>簡訊驗證碼<input id="smsCode" maxlength="4" inputmode="numeric" placeholder="4 位數"></label>
+                  <button class="secondary" id="sendSms" type="button">發送簡訊</button>
+                </div>
+                <p class="subline" id="smsHint">按下發送簡訊後會產生 4 位數驗證碼。</p>
+                <div class="terms-box">
+                  <button class="terms-toggle" id="toggleTermsButton" type="button">展開使用條款、隱私權政策與免責聲明</button>
+                  <div class="terms-panel" id="termsPanel">國文題庫 App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「國文題庫 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供國文題庫、國字練習、閱讀測驗、作文練習、成語學習、古文解析、AI 解題、學習分析、模擬測驗、語音互動及相關國文教育與學習輔助服務，所有內容僅供教育、學習與參考用途。
+
+二、AI 與學習內容聲明
+
+本 App 部分內容可能由 AI 系統自動生成，包括國文解析、作文建議、學習建議、語音回覆或其他互動內容。
+
+本公司不保證相關內容之正確性、完整性、即時性、適法性或完全符合特定考試需求。
+
+所有題目、解析、作文建議、AI 解題與學習建議僅供學習與參考用途，不構成正式教育保證、考試保證或成績保證。
+
+三、使用風險與免責聲明
+
+使用者應自行判斷並承擔使用本 App 所產生之一切風險與責任。
+
+本 App 僅提供教育與學習輔助服務，本公司不保證任何學習成果、考試結果、成績提升或 AI 解題內容之準確性。
+
+使用者因依據本 App 提供之題目、解析、建議、AI 回覆或資訊所作之任何學習安排、考試準備或決策而產生之結果、損失或爭議，均由使用者自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+本 App 之語音、AI、網路及第三方服務功能，可能受網路環境、裝置效能、第三方服務或系統狀況影響，本公司不保證服務之穩定性、即時性或完全無錯誤。
+
+四、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+* 使用者帳號資訊
+* Email
+* 裝置資訊
+* 使用紀錄
+* IP 位址
+* 學習紀錄
+* 作答紀錄
+* 語音內容
+* AI 互動紀錄
+* 崩潰紀錄與分析資料
+
+五、資料用途
+
+蒐集資料主要用於：
+
+* 提供國文題庫與學習服務
+* AI 解題與學習分析
+* 提供個人化學習內容
+* 語音互動與 AI 回覆
+* 改善使用體驗
+* 系統安全維護
+* 客服支援
+* 防止詐騙、濫用或違法行為
+* 提升 AI 與系統服務品質
+
+六、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+* OpenAI
+* Firebase
+* Google Analytics
+* 語音辨識服務
+* 雲端儲存服務
+* AI 模型服務
+
+部分資料可能因服務需求而傳輸至第三方服務供應商。
+
+七、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、語音通訊或儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及裝置安全。
+
+八、使用者責任
+
+使用者不得利用本 App 從事任何違法、侵權、作弊、散布惡意程式或其他損害他人權益之行為。
+
+若因使用者違法或不當行為導致任何損害或法律責任，應由使用者自行負責。
+
+九、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、題庫內容、資料、AI 系統及相關內容，均屬本公司或合法授權人所有。
+
+未經授權不得重製、修改、散布、反向工程、破解或用於商業用途。
+
+十、使用者權利
+
+使用者得依法請求查詢、更正或刪除其個人資料。
+
+十一、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利，修改後內容將公布於本 App，使用者繼續使用即視為同意修改內容。</div>
+                  <label class="terms-consent">
+                    <input id="agreeTerms" type="checkbox">
+                    我已打開並同意使用條款、隱私權政策與免責聲明
+                  </label>
+                </div>
+                <button class="primary" id="finishLogin" type="button">完成註冊</button>
+              </div>
+            </section>
+
+            <section class="page" id="profilePage">
+              <div class="card">
+                <h2>使用者資料</h2>
+                <label>使用者名稱<input id="profileName" placeholder="請輸入使用者名稱"></label>
+                <label>Email<input id="profileEmail" inputmode="email" placeholder="請輸入 Email"></label>
+                <label>電話<input id="profilePhone" readonly disabled></label>
+                <div class="grid-2">
+                  <label>地址縣市<input id="profileCity" placeholder="例如：台北市"></label>
+                  <label>地址區域<input id="profileDistrict" placeholder="例如：大安區"></label>
+                </div>
+                <p class="subline">電話不可自行修改，請聯繫客服進行更改。客服電話：02-1234-5678</p>
+                <div class="grid-2">
+                  <div class="metric"><span>目前方案</span><strong id="profilePlan">免費方案</strong></div>
+                  <div class="metric"><span>剩餘點數</span><strong id="profileCredits">3 點</strong></div>
+                </div>
+                <button class="primary" id="saveProfile" type="button">儲存資料</button>
+              </div>
+            </section>
+
+            <section class="page" id="practicePage">
+              <div class="card">
+                <h2>產生國文題庫</h2>
+                <div class="segment" id="schoolStage">
+                  <button class="active" data-stage="國小">國小</button>
+                  <button data-stage="國中">國中</button>
+                  <button data-stage="高中">高中</button>
+                </div>
+                <label>年級<select id="gradeSelect"></select></label>
+                <label>國文單元<select id="englishUnitSelect"></select></label>
+                <label>題目難易度</label>
+                <div class="segment" id="difficultyLevel">
+                  <button class="active" data-difficulty="易">易</button>
+                  <button data-difficulty="中">中</button>
+                  <button data-difficulty="難">難</button>
+                </div>
+                <button class="primary" id="generateQuestions" type="button">產生題庫</button>
+              </div>
+              <div id="questionList"></div>
+              <div class="card paywall" id="paywall">
+                <h2>點數已用完</h2>
+                <p class="subline">點數已用完 請點選升級</p>
+                <button class="primary" id="goUpgrade" type="button">升級</button>
+              </div>
+            </section>
+
+            <section class="page" id="solverPage">
+              <div class="card">
+                <h2>國文詳解助手</h2>
+                <label>輸入國文題目<textarea id="manualQuestion" placeholder="例如：請判斷「一日千里」的意思與用法。"></textarea></label>
+                <button class="primary" id="solveProblem" type="button">產生詳解</button>
+              </div>
+              <div class="card" id="solveResult">
+                <h2>詳解結果</h2>
+                <p class="subline">輸入國文題目後按下產生詳解，這裡會顯示答案、解析、修辭或文意判斷。</p>
+              </div>
+            </section>
+
+            <section class="page" id="tutoringPage">
+              <div class="card">
+                <h2>補習班</h2>
+                <p class="subline">依使用者註冊地址或定位地址排序，點選補習班留下資料，系統會自動以 Email 或簡訊通知補習班。</p>
+                <div class="grid-2">
+                  <label>篩選縣市<select id="tutorCityFilter"></select></label>
+                  <label>篩選區域<select id="tutorDistrictFilter"></select></label>
+                </div>
+                <button class="school-card" type="button" data-school="翰林國文補習班" data-email="chinese@hanlin.example" data-phone="02-2345-3311" data-city="台北市" data-district="大安區" data-paid="true"><span class="recommend-badge">★ 推薦 ★</span><strong>翰林國文補習班</strong><span>閱讀理解、作文、會考與學測國文</span><span>地址：台北市大安區信義路三段 75 號</span><span>Email：chinese@hanlin.example｜電話：02-2345-3311</span></button>
+                <button class="school-card" type="button" data-school="文心作文學院" data-email="contact@wenxin-writing.example" data-phone="02-2766-6622" data-city="新北市" data-district="板橋區"><strong>文心作文學院</strong><span>作文批改、古文理解、閱讀素養</span><span>地址：新北市板橋區中山路一段 92 號</span><span>Email：contact@wenxin-writing.example｜電話：02-2766-6622</span></button>
+                <button class="school-card" type="button" data-school="拾光國文家教中心" data-email="hello@shiguang-chinese.example" data-phone="02-2555-7788" data-city="桃園市" data-district="桃園區"><strong>拾光國文家教中心</strong><span>一對一國文、弱點補強、升學規劃</span><span>地址：桃園市桃園區民權路 36 號</span><span>Email：hello@shiguang-chinese.example｜電話：02-2555-7788</span></button>
+              </div>
+              <div class="card contact-form" id="tutorContactForm">
+                <h2 id="selectedTutorTitle">補習班洽談</h2>
+                <label>姓名<input id="tutorContactName" placeholder="請輸入姓名"></label>
+                <label>電話<input id="tutorContactPhone" inputmode="tel" placeholder="請輸入電話"></label>
+                <label>要洽談的問題<textarea id="tutorContactQuestion" placeholder="請輸入想洽談的課程、年級或學習問題"></textarea></label>
+                <button class="primary" id="sendTutorContact" type="button">送出</button>
+                <p class="subline" id="tutorContactResult"></p>
+              </div>
+            </section>
+
+            <section class="page" id="plansPage">
+              <div class="card">
+                <h2>升級方案</h2>
+                <p class="subline">目前剩餘：<strong id="pointsSummary">3 點</strong></p>
+                <div class="plans">
+                  <button class="plan" data-plan="Basic" data-price="NTD$99" data-points="30">Basic<br>NTD$99<br>每月 30 次</button>
+                  <button class="plan" data-plan="Plus" data-price="NTD$399" data-points="150">Plus<br>NTD$399<br>每月 150 次</button>
+                  <button class="plan" data-plan="Pro" data-price="NTD$599" data-points="300">Pro<br>NTD$599<br>每月 300 次</button>
+                  <button class="plan" data-plan="VIP" data-price="NTD$999" data-points="1000">VIP<br>NTD$999<br>每月 1000 次</button>
+                </div>
+                <button class="primary" id="confirmPlan" type="button">確認方案並前往付款</button>
+              </div>
+            </section>
+
+            <section class="page" id="paymentPage">
+              <div class="card">
+                <h2>信用卡付費</h2>
+                <p class="subline" id="paymentPlan">請先選擇方案。</p>
+                <label>持卡人<input id="cardName" value="Clay Tseng"></label>
+                <label>卡號<input id="cardNumber" value="4242 4242 4242 4242" inputmode="numeric"></label>
+                <div class="grid-2">
+                  <label>有效期限<input id="cardExp" value="12/29"></label>
+                  <label>CVV<input id="cardCvv" value="123" inputmode="numeric"></label>
+                </div>
+                <button class="primary" id="payNow" type="button">確認付款</button>
+              </div>
+            </section>
+
+            <section class="page" id="settingsPage">
+              <div class="card">
+                <h2>設定</h2>
+                <label>App 背景
+                  <select id="themeSelect">
+                    <option value="dark">深色藍黑</option>
+                    <option value="green">護眼綠</option>
+                    <option value="light">明亮白</option>
+                  </select>
+                </label>
+                <label>字體大小
+                  <select id="fontSizeSelect">
+                    <option value="normal">標準</option>
+                    <option value="small">小</option>
+                    <option value="large">大</option>
+                  </select>
+                </label>
+                <label>語言
+                  <select id="languageSelect">
+                    <option value="zh">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                </label>
+              </div>
+              <div class="card">
+                <h2>聯繫客服</h2>
+                <p class="subline">問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。</p>
+                <p class="subline">Email：support@app-service.example</p>
+              </div>
+            </section>
+          </section>
+        </div>
+
+        <nav class="nav" aria-label="main navigation">
+          <button class="active" data-page="practicePage">題庫</button>
+          <button data-page="solverPage">詳解</button>
+          <button data-page="tutoringPage">補習班</button>
+          <button data-page="plansPage">升級</button>
+          <button data-page="settingsPage">設定</button>
+        </nav>
+      </div>
+    </section>
+
+    <aside class="brief">
+      <h2>國文題庫 iOS App</h2>
+      <p>學生可依國小、國中、高中與年級選擇國文單元，產生真正分級的國文題目。易題重字詞辨識，中題重文意理解，難題重閱讀推論、文言文與寫作分析。</p>
+    </aside>
+  </main>
+
+  <script>
+    const pages = [...document.querySelectorAll(".page")];
+    const navButtons = [...document.querySelectorAll(".nav button")];
+    const screen = document.querySelector(".screen");
+    const title = document.querySelector("#title");
+    const userNameButton = document.querySelector("#userNameButton");
+    const pointsButton = document.querySelector("#pointsButton");
+    const creditAlert = document.querySelector("#creditAlert");
+    const creditAlertText = document.querySelector("#creditAlertText");
+    const creditAlertUpgrade = document.querySelector("#creditAlertUpgrade");
+    const appStatus = document.querySelector("#appStatus");
+    const studentName = document.querySelector("#studentName");
+    const studentPhone = document.querySelector("#studentPhone");
+    const studentEmail = document.querySelector("#studentEmail");
+    const studentCity = document.querySelector("#studentCity");
+    const studentDistrict = document.querySelector("#studentDistrict");
+    const profileName = document.querySelector("#profileName");
+    const profileEmail = document.querySelector("#profileEmail");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profileCity = document.querySelector("#profileCity");
+    const profileDistrict = document.querySelector("#profileDistrict");
+    const saveProfile = document.querySelector("#saveProfile");
+    const profilePlan = document.querySelector("#profilePlan");
+    const profileCredits = document.querySelector("#profileCredits");
+    const smsCode = document.querySelector("#smsCode");
+    const smsHint = document.querySelector("#smsHint");
+    const sendSms = document.querySelector("#sendSms");
+    const finishLogin = document.querySelector("#finishLogin");
+    const toggleTermsButton = document.querySelector("#toggleTermsButton");
+    const termsPanel = document.querySelector("#termsPanel");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const schoolStage = document.querySelector("#schoolStage");
+    const gradeSelect = document.querySelector("#gradeSelect");
+    const englishUnitSelect = document.querySelector("#englishUnitSelect");
+    const difficultyLevel = document.querySelector("#difficultyLevel");
+    const generateQuestions = document.querySelector("#generateQuestions");
+    const questionList = document.querySelector("#questionList");
+    const paywall = document.querySelector("#paywall");
+    const manualQuestion = document.querySelector("#manualQuestion");
+    const solveProblem = document.querySelector("#solveProblem");
+    const solveResult = document.querySelector("#solveResult");
+    const planButtons = [...document.querySelectorAll(".plan")];
+    const pointsSummary = document.querySelector("#pointsSummary");
+    const confirmPlan = document.querySelector("#confirmPlan");
+    const paymentPlan = document.querySelector("#paymentPlan");
+    const payNow = document.querySelector("#payNow");
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSizeSelect = document.querySelector("#fontSizeSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const tutorCityFilter = document.querySelector("#tutorCityFilter");
+    const tutorDistrictFilter = document.querySelector("#tutorDistrictFilter");
+    const schoolCards = [...document.querySelectorAll(".school-card")];
+    const tutorContactForm = document.querySelector("#tutorContactForm");
+    const selectedTutorTitle = document.querySelector("#selectedTutorTitle");
+    const tutorContactName = document.querySelector("#tutorContactName");
+    const tutorContactPhone = document.querySelector("#tutorContactPhone");
+    const sendTutorContact = document.querySelector("#sendTutorContact");
+    const tutorContactResult = document.querySelector("#tutorContactResult");
+
+    let smsToken = "";
+    let loggedIn = false;
+    let termsOpened = false;
+    let credits = 3;
+    let currentPlan = "免費方案";
+    let selectedStage = "國小";
+    let selectedDifficulty = "易";
+    let selectedPlan = null;
+    let selectedTutor = null;
+
+    const gradeMap = {
+      "國小": ["1 年級", "2 年級", "3 年級", "4 年級", "5 年級", "6 年級"],
+      "國中": ["1 年級", "2 年級", "3 年級"],
+      "高中": ["1 年級", "2 年級", "3 年級"]
+    };
+
+    const unitMap = {
+      "國小": ["字音字形", "成語詞語", "閱讀理解", "造句作文"],
+      "國中": ["修辭判讀", "文意推論", "文言基礎", "作文架構"],
+      "高中": ["國學常識", "文言閱讀", "現代文分析", "作文論述"]
+    };
+
+    const pageTitles = {
+      loginPage: "國文題庫",
+      profilePage: "使用者資料",
+      practicePage: "國文題庫",
+      solverPage: "國文詳解",
+      tutoringPage: "補習班",
+      plansPage: "升級方案",
+      paymentPage: "信用卡付費",
+      settingsPage: "設定"
+    };
+
+    function showPage(pageId) {
+      const protectedPages = ["profilePage", "practicePage", "solverPage", "tutoringPage", "plansPage", "paymentPage", "settingsPage"];
+      if (!loggedIn && protectedPages.includes(pageId)) {
+        appStatus.textContent = "請先完成註冊後才能使用 App。";
+        pageId = "loginPage";
+      }
+      if (pageId === "tutoringPage") sortTutorSchools();
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      title.textContent = pageTitles[pageId] || "國文題庫";
+    }
+
+    function updateCredits() {
+      pointsButton.textContent = `${credits} 點`;
+      pointsSummary.textContent = `${credits} 點`;
+      profileCredits.textContent = `${credits} 點`;
+      profilePlan.textContent = currentPlan;
+      paywall.classList.toggle("show", credits <= 0);
+      creditAlert.classList.toggle("show", credits <= 0);
+      creditAlertText.textContent = "點數已用完 請點選升級";
+    }
+
+    function consumeCredit() {
+      if (!loggedIn) {
+        appStatus.textContent = "請先完成註冊後才能使用 App。";
+        showPage("loginPage");
+        return false;
+      }
+      if (credits <= 0) {
+        appStatus.textContent = "點數已用完 請點選升級";
+        showPage("plansPage");
+        return false;
+      }
+      credits -= 1;
+      updateCredits();
+      return true;
+    }
+
+    function renderGrades() {
+      const currentGrade = gradeSelect.value;
+      gradeSelect.innerHTML = gradeMap[selectedStage]
+        .map(grade => `<option value="${grade}">${grade}</option>`)
+        .join("");
+      if (gradeMap[selectedStage].includes(currentGrade)) gradeSelect.value = currentGrade;
+    }
+
+    function renderUnits() {
+      const currentUnit = englishUnitSelect.value;
+      englishUnitSelect.innerHTML = unitMap[selectedStage]
+        .map(unit => `<option value="${unit}">${unit}</option>`)
+        .join("");
+      if (unitMap[selectedStage].includes(currentUnit)) englishUnitSelect.value = currentUnit;
+    }
+
+    function gradeNumber() {
+      return Number(gradeSelect.value.match(/\d+/)?.[0] || 1);
+    }
+
+    function geminiPromptForChineseQuestions(stage, grade, unit, difficulty) {
+      return [
+        "你是國文題庫 iOS app 的內部產題服務。",
+        `請產生 ${stage}${grade}、國文單元「${unit}」、難度「${difficulty}」的 5 題四選一國文題。`,
+        "易：字詞、成語或基礎文意辨識；中：段落理解、修辭判讀與應用；難：深層推論、文言文、賞析或作文論述。",
+        "每題必須回傳 title、question、choices（4 個選項）、answer（正確選項文字）、solution。solution 必須包含答案、詳細解題步驟、文意分析、修辭或例句。"
+      ].join("\n");
+    }
+
+    async function requestInternalGeminiQuestions(stage, grade, unit, difficulty) {
+      const prompt = geminiPromptForChineseQuestions(stage, grade, unit, difficulty);
+      // Production hook: send this prompt to your backend, where the Gemini API key is stored securely.
+      // Example backend route: POST /api/gemini/chinese-questions { prompt }
+      return { prompt, questions: null };
+    }
+
+    function difficultyNote(difficulty) {
+      return {
+        "易": "基礎辨識：重點是認出字詞、成語、句意或基本修辭。",
+        "中": "應用理解：需要讀懂語境、比較選項，並說明文意線索。",
+        "難": "整合挑戰：需要深層推論、文言翻譯、賞析或作文結構判斷。"
+      }[difficulty];
+    }
+
+    function chineseQuestions(stage, grade, unit, difficulty) {
+      const baseTitle = `${stage}${grade} · ${difficulty} · ${unit}`;
+      const set = items => items.map((item, index) => ({
+        title: `${baseTitle} · 題目 ${index + 1}`,
+        question: item.question,
+        answer: item.answer,
+        solution: `${difficultyNote(difficulty)}<br><br><strong>答案</strong><br>${item.answer}<br><br><strong>詳細解題過程</strong><br>${item.steps}`
+      }));
+
+      const banks = {
+        "字音字形": {
+          "易": set([
+            { question: "下列哪一個字形正確？（A）再接再厲（B）再接再勵（C）在接再厲", answer: "A 再接再厲", steps: "「厲」有磨練、激勵自己更進一步的意思。成語正確寫法是「再接再厲」，不是「再勵」。" },
+            { question: "「乾淨」的「乾」讀音為何？", answer: "ㄍㄢ", steps: "「乾淨」中的乾讀 ㄍㄢ，表示沒有髒汙；若讀 ㄑㄧㄢˊ，常見於乾卦等特殊用法。" },
+            { question: "下列何者沒有錯別字？（A）迫不急待（B）迫不及待（C）迫不既待", answer: "B 迫不及待", steps: "「及」有趕上的意思，「迫不及待」表示急迫到不能再等待。" }
+          ]),
+          "中": set([
+            { question: "「他做事一向（ㄐㄧㄣˇ）慎。」括號中應填哪個字？", answer: "謹", steps: "「謹慎」表示小心慎重，應用言字旁的「謹」。若寫成「僅」則是只有的意思。" },
+            { question: "「辨、辯、瓣」三字中，哪一個適合填入「分__是非」？", answer: "辨", steps: "「辨」是分辨、辨別；「辯」是辯論；「瓣」是花瓣。分辨是非應用「辨」。" },
+            { question: "請判斷「精采」與「精彩」何者較常用於形容表演？", answer: "精彩", steps: "現代標準用法多寫「精彩」，表示內容出色、引人入勝；「精采」較少作常用寫法。" }
+          ]),
+          "難": set([
+            { question: "「他為人剛愎自用」中的「愎」不可寫成哪個近形字？請說明。", answer: "不可寫成「復」或「腹」", steps: "「愎」從心部，與固執心理有關；「復」是回復，「腹」是肚腹，字義完全不同。" },
+            { question: "請分辨「部署」與「佈署」在正式書寫中的建議用法。", answer: "正式建議用「部署」", steps: "「部署」指安排、配置，多用於正式文本；「佈署」雖常見但不如「部署」標準。" },
+            { question: "「罄竹難書」的「罄」讀音與意思為何？", answer: "讀 ㄑㄧㄥˋ，意為用盡", steps: "「罄」有盡、空的意思；成語形容罪行多到用盡竹簡也寫不完。" }
+          ])
+        },
+        "成語詞語": {
+          "易": set([
+            { question: "「一日千里」最接近下列哪個意思？", answer: "進步或發展非常快速", steps: "字面是一天跑千里，引申為速度快、進步快，常用於形容學習或發展。" },
+            { question: "「畫蛇添足」的意思是什麼？", answer: "多此一舉，反而壞事", steps: "故事中畫蛇已完成，卻多畫腳，反而失敗；因此比喻不必要的添加。" },
+            { question: "「守株待兔」用來形容哪一種態度？", answer: "不知變通，只想僥倖成功", steps: "農夫等兔子再撞樹，表示只靠運氣，不主動努力。" }
+          ]),
+          "中": set([
+            { question: "「他臨危不亂，終於帶領大家脫困。」最適合用哪個成語形容？", answer: "處變不驚", steps: "句中強調遇到危急狀況仍不慌亂，「處變不驚」符合語境。" },
+            { question: "請用「雪中送炭」造句。", answer: "在我最困難時，他的幫助真是雪中送炭。", steps: "成語意思是在困難時給予最需要的幫助，造句必須呈現困境與及時援助。" },
+            { question: "「杯水車薪」與「雪中送炭」差異為何？", answer: "前者指幫助太少無濟於事，後者指及時有效的幫助。", steps: "兩者都與幫助有關，但效果相反：杯水車薪不足，雪中送炭有用。" }
+          ]),
+          "難": set([
+            { question: "「望梅止渴」可否用來形容真正解決問題？請說明。", answer: "不適合", steps: "望梅止渴是用想像暫時安慰或激勵，並非真正解決口渴或問題。" },
+            { question: "「曲突徙薪」的深層意義是什麼？", answer: "事先預防災禍，比事後補救更重要。", steps: "曲突是改彎煙囪，徙薪是移走柴薪，都是防火措施，引申為防患未然。" },
+            { question: "比較「盲人摸象」與「管中窺豹」的共同點與差異。", answer: "共同點都是見識片面；差異在盲人摸象偏誤判全貌，管中窺豹偏只見局部。", steps: "先抓共同語意：片面；再分辨使用情境與比喻重點。" }
+          ])
+        },
+        "閱讀理解": {
+          "易": set([
+            { question: "短文：「小雨忘了帶傘，只好站在騎樓下等雨停。」小雨為什麼站在騎樓下？", answer: "因為下雨且她忘了帶傘。", steps: "從「忘了帶傘」和「等雨停」可直接找到原因。" },
+            { question: "短文：「弟弟把最後一塊蛋糕留給媽媽。」弟弟可能具有什麼特質？", answer: "體貼、孝順或願意分享。", steps: "把喜歡的東西留給媽媽，顯示關心他人。" },
+            { question: "短文：「鐘聲一響，同學們立刻回到座位。」鐘聲代表什麼？", answer: "上課或集合的信號。", steps: "同學回座位是反應，鐘聲是造成反應的線索。" }
+          ]),
+          "中": set([
+            { question: "短文：「他看著滿分考卷，卻沒有笑，因為好友這次失常了。」主角沒有笑的原因是什麼？", answer: "他顧及好友心情。", steps: "滿分通常開心，但沒有笑，原因在後半句好友失常，需推論其體貼。" },
+            { question: "「窗外雨聲滴答，屋內燈光昏黃。」這句營造何種氣氛？", answer: "安靜、孤寂或略帶憂愁。", steps: "雨聲與昏黃燈光常營造沉靜、低迴的氛圍。" },
+            { question: "若文章先寫失敗，再寫努力，最後寫成功，主旨可能是什麼？", answer: "努力不懈能克服困難。", steps: "從情節發展找主旨：失敗是困境，努力是方法，成功是結果。" }
+          ]),
+          "難": set([
+            { question: "文章中反覆出現「老樹」，可能具有什麼象徵意義？", answer: "可能象徵記憶、故鄉、時間或守護。", steps: "反覆出現的意象通常不只具體物，也承載情感與主題。" },
+            { question: "作者先寫熱鬧街景，再寫主角孤單背影，這種對比有何效果？", answer: "凸顯主角內心孤獨。", steps: "外在熱鬧與內心孤單形成反差，使情緒更鮮明。" },
+            { question: "若結尾沒有明說結果，而只寫「他終於推開那扇門」，可能有何作用？", answer: "留下想像空間，象徵主角願意面對或開始改變。", steps: "開門常是行動與轉變的象徵，開放式結尾使讀者自行延伸。" }
+          ])
+        },
+        "修辭判讀": {
+          "易": set([
+            { question: "「月亮像一艘小船」使用何種修辭？", answer: "譬喻", steps: "用「像」把月亮比成小船，是明喻的一種。" },
+            { question: "「風兒輕輕唱歌」使用何種修辭？", answer: "擬人", steps: "風不會唱歌，作者賦予人的動作，因此是擬人。" },
+            { question: "「他跑得比風還快」使用何種修辭？", answer: "誇飾", steps: "速度超過風不合現實，是故意誇大以強調跑得快。" }
+          ]),
+          "中": set([
+            { question: "「書是打開世界的鑰匙」使用何種修辭？效果為何？", answer: "譬喻；凸顯閱讀能拓展視野。", steps: "把書比作鑰匙，暗示書能開啟知識與世界。" },
+            { question: "「教室裡安靜得連一根針掉下來都聽得見」是何修辭？", answer: "誇飾", steps: "用極端情況放大安靜程度，讓讀者感受更強烈。" },
+            { question: "「春天醒了，花兒笑了」用了哪些修辭？", answer: "擬人", steps: "春天不會醒，花不會笑，皆賦予人的行為。" }
+          ]),
+          "難": set([
+            { question: "「沉默是一堵牆，把兩人隔在世界兩端」有何修辭與意義？", answer: "隱喻；沉默被比作牆，表示情感隔閡。", steps: "沒有使用像、彷彿等詞，直接把抽象沉默寫成具體牆，屬隱喻。" },
+            { question: "分析「時間在指縫間溜走」的修辭效果。", answer: "擬人兼具意象化，強調時間流逝難以掌握。", steps: "時間不會溜走，作者賦予動作，並用指縫意象表現抓不住。" },
+            { question: "「城市是一座不眠的森林」可如何解讀？", answer: "隱喻城市複雜、旺盛且充滿未知。", steps: "城市與森林兩者並置，製造陌生化效果，引導讀者感受城市生命力。" }
+          ])
+        },
+        "作文架構": {
+          "易": set([
+            { question: "作文題目「我的一天」適合用哪種順序安排？", answer: "時間順序", steps: "一天的活動可從早到晚排列，條理最清楚。" },
+            { question: "請為「我的好朋友」寫一句開頭。", answer: "我有一位很特別的好朋友，他總是在我需要時陪伴我。", steps: "開頭要點出主題人物，並留下吸引讀者的特點。" },
+            { question: "作文結尾通常有什麼功能？", answer: "總結全文、表達感想或呼應開頭。", steps: "結尾不是新增無關內容，而是收束主旨。" }
+          ]),
+          "中": set([
+            { question: "題目「一次難忘的旅行」可如何安排三段式？", answer: "起因：出發背景；經過：旅途中事件；結果：收穫與感想。", steps: "敘事作文重點是事件發展，三段式能呈現完整脈絡。" },
+            { question: "請改善句子：「我很開心。很好玩。」", answer: "這次活動讓我十分開心，因為我不但學到新知識，也和朋友留下美好回憶。", steps: "把籠統感受具體化，補上原因與細節。" },
+            { question: "作文中如何讓段落銜接更自然？", answer: "使用轉折、因果、時間等連接詞。", steps: "例如：首先、接著、然而、因此、最後，可幫助讀者理解文章脈絡。" }
+          ]),
+          "難": set([
+            { question: "論說文題目「手機是否應帶進校園」可提出哪些正反論點？", answer: "正方：方便聯絡與查資料；反方：分心、影響學習與社交。", steps: "論說文需先界定立場，再提出理由、例子與反駁。" },
+            { question: "請為「挫折使人成長」設計一個有力結尾。", answer: "挫折不是終點，而是一面鏡子，讓我們看見不足，也照亮下一次重新出發的方向。", steps: "結尾使用譬喻並回扣主題，使文章更有餘韻。" },
+            { question: "如何把流水帳改成有主旨的敘事作文？", answer: "選擇一個核心事件，刪除無關細節，強化轉折與感悟。", steps: "流水帳只排列事情；有主旨的敘事需凸顯衝突、改變與收穫。" }
+          ])
+        }
+      };
+
+      const fallback = {
+        "易": set([
+          { question: `請回答一題 ${unit} 的基礎辨識題。`, answer: "依題目規則判斷。", steps: "先找關鍵字，再套用字詞、修辭或文意規則。" },
+          { question: `請判斷下列語句與 ${unit} 有關的基本概念。`, answer: "依語境判斷。", steps: "先讀懂句子表面意思，再辨認題型。" },
+          { question: `請完成一題 ${unit} 的簡單應用。`, answer: "合理答案即可。", steps: "找主題、關鍵詞與語意線索。" }
+        ]),
+        "中": set([
+          { question: `請解一題 ${unit} 的語境應用題。`, answer: "依上下文線索判斷。", steps: "先找前後文關係，再排除不符合語意的選項。" },
+          { question: `請比較兩個 ${unit} 選項何者較適合。`, answer: "較符合文意者。", steps: "比較字義、語氣、修辭效果與段落主旨。" },
+          { question: `請改寫或補強一個 ${unit} 相關句子。`, answer: "改寫後語意完整。", steps: "保留原意，補上具體細節或更精準的詞語。" }
+        ]),
+        "難": set([
+          { question: `請分析一題較難的 ${unit} 題目並說明理由。`, answer: "需整合多個線索。", steps: "同時檢查主旨、語氣、修辭與隱含意義。" },
+          { question: `請針對 ${unit} 寫出賞析或論述。`, answer: "論述需有觀點與證據。", steps: "先提出觀點，再引用文字線索支持。" },
+          { question: `請從隱含線索推論 ${unit} 的最佳答案。`, answer: "依文本線索推論。", steps: "找明示與暗示線索，排除過度延伸的答案。" }
+        ])
+      };
+
+      return banks[unit]?.[difficulty] || fallback[difficulty];
+    }
+
+    function makeQuestions() {
+      const grade = gradeSelect.value;
+      const unit = englishUnitSelect.value;
+      requestInternalGeminiQuestions(selectedStage, grade, unit, selectedDifficulty);
+      return [
+        ...chineseQuestions(selectedStage, grade, unit, selectedDifficulty),
+        ...chineseExtraQuestions(selectedStage, grade, unit, selectedDifficulty)
+      ];
+    }
+
+    function chineseExtraQuestions(stage, grade, unit, difficulty) {
+      const baseTitle = `${stage}${grade} · ${difficulty} · ${unit} · 補充題`;
+      const set = items => items.map((item, index) => ({
+        title: `${baseTitle} ${index + 1}`,
+        question: item.question,
+        answer: item.answer,
+        solution: `${difficultyNote(difficulty)}<br><br><strong>答案</strong><br>${item.answer}<br><br><strong>詳細解題過程</strong><br>${item.steps}`
+      }));
+      return set([
+        { question: `下列哪一項最符合「${unit}」的基本判斷？`, answer: "依語境與題目線索判斷。", steps: "國文題需先讀懂題幹，再依字詞、文意或修辭線索排除不合者。" },
+        { question: `關於「${unit}」題型，下列哪一種作答方式最恰當？`, answer: "先找關鍵字，再比對選項語意。", steps: "先抓題目核心，再檢查選項是否符合語境和用法。" },
+        { question: `若題目要求判斷「${unit}」的最佳答案，應優先注意什麼？`, answer: "題幹中的語氣、上下文與用法限制。", steps: "國文選擇題常以語境和用法設計干擾選項，必須回到原句判斷。" }
+      ]);
+    }
+
+    function normalizeQuizAnswer(value) {
+      return String(value || "").toLowerCase().replace(/[。．.，,\s]/g, "").trim();
+    }
+
+    function escapeQuizText(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function shuffledItems(items) {
+      return [...items].sort(() => Math.random() - 0.5);
+    }
+
+    function uniqueQuestionKey(item) {
+      return normalizeQuizAnswer(item.question);
+    }
+
+    function makeQuizVariant(item, variantIndex) {
+      const stems = [
+        "延伸題：請依同一國文觀念判斷，",
+        "變化題：請換一個語境思考，",
+        "應用題：請依同一閱讀線索選出答案，"
+      ];
+      return {
+        ...item,
+        title: `${item.title} · 延伸 ${variantIndex}`,
+        question: `${stems[variantIndex % stems.length]}${item.question}`
+      };
+    }
+
+    function expandQuizItems(items) {
+      const pool = shuffledItems(items);
+      const picked = [];
+      const seen = new Set();
+      pool.forEach(item => {
+        const key = uniqueQuestionKey(item);
+        if (seen.has(key) || picked.length >= 5) return;
+        seen.add(key);
+        picked.push(item);
+      });
+      let variantIndex = 1;
+      while (picked.length < 5 && pool.length) {
+        const variant = makeQuizVariant(pool[(variantIndex - 1) % pool.length], variantIndex);
+        const key = uniqueQuestionKey(variant);
+        if (!seen.has(key)) {
+          seen.add(key);
+          picked.push(variant);
+        }
+        variantIndex += 1;
+      }
+      return picked.slice(0, 5).map((source, index) => ({ ...source, title: `${source.title} · 第 ${index + 1} 題` }));
+    }
+
+    function parseInlineChoices(question) {
+      return [...String(question || "").matchAll(/[（(]([A-D])[）)]\s*([^（(]+)/g)]
+        .map(match => `${match[1]}. ${match[2].trim()}`);
+    }
+
+    function stripInlineChoices(question) {
+      const text = String(question || "");
+      const firstChoice = text.search(/[（(]A[）)]/);
+      return firstChoice >= 0 ? text.slice(0, firstChoice).trim() : text;
+    }
+
+    function cleanChoiceText(value) {
+      return String(value || "")
+        .replace(/^[A-D][.、\s]+/i, "")
+        .trim();
+    }
+
+    function uniqueQuizChoices(choices) {
+      const seen = new Set();
+      return choices.filter(choice => {
+        const key = normalizeQuizAnswer(cleanChoiceText(choice));
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function matchedChineseChoices(item, correct) {
+      const question = String(item.question || "");
+      const exactChoices = {
+        "進步或發展非常快速": ["進步或發展非常快速", "事情完全沒有改變", "形容人走路很慢", "表示只重視外表"],
+        "多此一舉，反而壞事": ["多此一舉，反而壞事", "及時幫助別人", "等待幸運降臨", "快速完成任務"],
+        "不知變通，只想僥倖成功": ["不知變通，只想僥倖成功", "事先做好預防", "主動改進方法", "努力累積實力"],
+        "處變不驚": ["處變不驚", "手忙腳亂", "畫蛇添足", "杯水車薪"],
+        "在我最困難時，他的幫助真是雪中送炭。": ["在我最困難時，他的幫助真是雪中送炭。", "他每天準時上學，真是雪中送炭。", "天空忽然放晴，真是雪中送炭。", "我把作業寫完，真是雪中送炭。"],
+        "前者指幫助太少無濟於事，後者指及時有效的幫助。": ["前者指幫助太少無濟於事，後者指及時有效的幫助。", "兩者都表示事情發展很快。", "前者指預防災禍，後者指等待機會。", "兩者都表示多此一舉。"],
+        "不適合": ["不適合", "非常適合", "只能用於真正喝水", "只能用於形容天氣"],
+        "事先預防災禍，比事後補救更重要。": ["事先預防災禍，比事後補救更重要。", "事情發生後再處理一定最好。", "只要運氣好就能避免問題。", "看到局部就能判斷全部。"],
+        "共同點都是見識片面；差異在盲人摸象偏誤判全貌，管中窺豹偏只見局部。": ["共同點都是見識片面；差異在盲人摸象偏誤判全貌，管中窺豹偏只見局部。", "兩者都表示進步很快；差異在速度大小。", "兩者都表示及時幫助；差異在幫助多少。", "兩者都表示預防危險；差異在方法不同。"],
+        "因為下雨且她忘了帶傘。": ["因為下雨且她忘了帶傘。", "因為她想買蛋糕。", "因為鐘聲響了。", "因為她正在等公車司機。"],
+        "體貼、孝順或願意分享。": ["體貼、孝順或願意分享。", "粗心、健忘且急躁。", "自私、不願分享。", "害怕上課鐘聲。"],
+        "上課或集合的信號。": ["上課或集合的信號。", "放學後吃點心的通知。", "天氣變好的象徵。", "比賽結束的獎勵。"],
+        "他顧及好友心情。": ["他顧及好友心情。", "他不喜歡滿分。", "他忘了帶傘。", "他想離開教室。"],
+        "安靜、孤寂或略帶憂愁。": ["安靜、孤寂或略帶憂愁。", "熱鬧歡騰且充滿喜劇感。", "緊張刺激的比賽氣氛。", "明亮奔放的夏日氣氛。"],
+        "努力不懈能克服困難。": ["努力不懈能克服困難。", "失敗後應立刻放棄。", "成功完全只靠運氣。", "文章主旨與努力無關。"],
+        "可能象徵記憶、故鄉、時間或守護。": ["可能象徵記憶、故鄉、時間或守護。", "只表示路邊植物種類。", "必定象徵科技進步。", "只表示作者討厭樹木。"],
+        "凸顯主角內心孤獨。": ["凸顯主角內心孤獨。", "淡化主角的情緒。", "說明街景完全不重要。", "證明主角很喜歡熱鬧。"],
+        "留下想像空間，象徵主角願意面對或開始改變。": ["留下想像空間，象徵主角願意面對或開始改變。", "明確交代所有事件結局。", "表示主角完全沒有行動。", "只是在描寫門的材質。"],
+        "譬喻；凸顯閱讀能拓展視野。": ["譬喻；凸顯閱讀能拓展視野。", "擬人；表示書會自己走路。", "誇飾；表示鑰匙非常巨大。", "排比；強調句式重複。"],
+        "擬人": ["擬人", "譬喻", "誇飾", "設問"],
+        "隱喻；沉默被比作牆，表示情感隔閡。": ["隱喻；沉默被比作牆，表示情感隔閡。", "擬人；沉默被寫成會唱歌的人。", "排比；三個句式連續排列。", "引用；借用古人名言說明。"],
+        "時間順序": ["時間順序", "空間順序", "倒敘", "總分總議論"],
+        "我有一位很特別的好朋友，他總是在我需要時陪伴我。": ["我有一位很特別的好朋友，他總是在我需要時陪伴我。", "今天天氣很好，所以我要介紹一種水果。", "我昨天先吃早餐，再去睡覺，沒有朋友。", "好朋友就是好朋友，本文結束。"],
+        "起因：出發背景；經過：旅途中事件；結果：收穫與感想。": ["起因：出發背景；經過：旅途中事件；結果：收穫與感想。", "只列景點名稱，不寫事件與感受。", "先寫結論，再完全改寫成論說文。", "每段都重複同一句話。"],
+        "這次活動讓我十分開心，因為我不但學到新知識，也和朋友留下美好回憶。": ["這次活動讓我十分開心，因為我不但學到新知識，也和朋友留下美好回憶。", "我很開心，很好玩，很開心，很好玩。", "活動活動活動，真的活動。", "我不知道發生什麼事。"],
+        "使用轉折、因果、時間等連接詞。": ["使用轉折、因果、時間等連接詞。", "完全刪除段落間的關係。", "每段都只寫一個標點符號。", "把所有句子隨機排列。"],
+        "正方：方便聯絡與查資料；反方：分心、影響學習與社交。": ["正方：方便聯絡與查資料；反方：分心、影響學習與社交。", "正反兩方都只討論午餐菜色。", "只寫手機品牌，不討論校園。", "完全不提出理由。"],
+        "挫折不是終點，而是一面鏡子，讓我們看見不足，也照亮下一次重新出發的方向。": ["挫折不是終點，而是一面鏡子，讓我們看見不足，也照亮下一次重新出發的方向。", "以上就是我的文章，沒有任何感想。", "天氣很好，我想去買飲料。", "挫折就是挫折，結尾不用呼應。"],
+        "選擇一個核心事件，刪除無關細節，強化轉折與感悟。": ["選擇一個核心事件，刪除無關細節，強化轉折與感悟。", "把所有生活瑣事照時間全部列出。", "不需要主旨，只要句子很多。", "每段都寫無關的人名與地點。"]
+      };
+      const exactKey = Object.keys(exactChoices).find(key => normalizeQuizAnswer(correct) === normalizeQuizAnswer(key));
+      if (exactKey) return exactChoices[exactKey];
+
+      const keywordDistractors = {
+        "ㄍㄢ": ["ㄑㄧㄢˊ", "ㄏㄢˋ", "ㄍㄢˇ"],
+        "謹": ["僅", "緊", "瑾"],
+        "辨": ["辯", "瓣", "辦"],
+        "精彩": ["精采", "經采", "菁彩"],
+        "正式建議用「部署」": ["正式建議用「佈署」", "兩者完全不能使用", "正式建議用「部屬」"],
+        "讀 ㄑㄧㄥˋ，意為用盡": ["讀 ㄑㄧㄣˋ，意為安靜", "讀 ㄐㄧㄥˋ，意為竹簡", "讀 ㄑㄧㄥ，意為清楚"],
+        "譬喻": ["擬人", "誇飾", "排比"],
+        "擬人": ["譬喻", "誇飾", "設問"],
+        "誇飾": ["擬人", "映襯", "引用"],
+        "隱喻；沉默被比作牆，表示情感隔閡。": ["擬人；把沉默寫成會行動的人", "誇飾；誇大兩人的距離", "排比；重複相同句式強調節奏"],
+        "擬人兼具意象化，強調時間流逝難以掌握。": ["譬喻月亮像小船", "引用名言強化論點", "設問引起讀者思考"],
+        "隱喻城市複雜、旺盛且充滿未知。": ["明喻城市像睡著的人", "誇飾城市人口非常多", "對偶強調城市整齊"],
+        "時間順序": ["空間順序", "倒敘", "議論順序"],
+        "總結全文、表達感想或呼應開頭。": ["加入全新無關事件", "只重複第一段每個字", "改寫成另一篇文章的開頭"]
+      };
+      const key = Object.keys(keywordDistractors).find(key => normalizeQuizAnswer(correct).includes(normalizeQuizAnswer(key)));
+      if (key) return [correct, ...keywordDistractors[key]];
+
+      if (/成語|一日千里|畫蛇添足|守株待兔|雪中送炭|杯水車薪|望梅止渴|曲突徙薪|盲人摸象|管中窺豹/.test(question)) {
+        return [correct, "只看字面而誤解成語意思", "與題目情境相反的解釋", "語意接近但使用場合不正確"];
+      }
+      if (/短文|作者|文章|主旨|氣氛|象徵|結尾|街景|老樹/.test(question)) {
+        return [correct, "只擷取單一句子，忽略全文線索", "過度延伸，原文沒有支持", "與人物行動或情境相反"];
+      }
+      if (/作文|開頭|結尾|段落|論說文|敘事/.test(question)) {
+        return [correct, "堆疊事件但沒有主旨", "只列標題，缺少內容安排", "加入無關細節造成離題"];
+      }
+      if (/字|讀音|錯別字|字形|正式書寫|填/.test(question)) {
+        return [correct, "近音近形但字義不合", "口語常見但正式書寫不精確", "與題目詞義完全不同"];
+      }
+      return [correct, "只看字面但忽略語境", "概念接近但用法不精確", "語意相反或不符合題意"];
+    }
+
+    function choicePrompt(question) {
+      const text = stripInlineChoices(question);
+      if (/請用「(.+?)」造句/.test(text)) return text.replace(/請用「(.+?)」造句。?/, "下列哪一句最符合「$1」的用法？");
+      if (/請為「(.+?)」寫一句開頭/.test(text)) return text.replace(/請為「(.+?)」寫一句開頭。?/, "下列哪一句最適合作為「$1」的開頭？");
+      if (/請改善句子/.test(text)) return `${text} 下列哪一個改寫最恰當？`;
+      if (/比較|差異/.test(text)) return `${text} 下列哪一項比較最正確？`;
+      if (/可否|如何|為何|原因|作用|效果|意義/.test(text)) return `${text} 下列哪一項最適合？`;
+      if (/是什麼|是何|為何|哪一種|哪個|何者|多少|代表什麼/.test(text)) return text;
+      return `${text} 下列哪一個答案最適合？`;
+    }
+
+    function toMultipleChoiceItem(source, index) {
+      const inlineChoices = parseInlineChoices(source.question);
+      if (inlineChoices.length >= 2) {
+        const correct = inlineChoices.find(choice => normalizeQuizAnswer(choice) === normalizeQuizAnswer(source.answer))
+          || inlineChoices.find(choice => normalizeQuizAnswer(source.answer).startsWith(normalizeQuizAnswer(choice[0])))
+          || source.answer;
+        const choices = uniqueQuizChoices(inlineChoices);
+        while (choices.length < 4) choices.push(`${String.fromCharCode(65 + choices.length)}. 以上皆非`);
+        return {
+          ...source,
+          question: stripInlineChoices(source.question),
+          answer: correct,
+          choices: choices.slice(0, 4)
+        };
+      }
+
+      const correct = source.answer || "正確答案";
+      const choices = uniqueQuizChoices(matchedChineseChoices(source, correct));
+      while (choices.length < 4) choices.push(`不符合題目第 ${choices.length + 1} 個線索`);
+      const picked = choices.slice(0, 4);
+      const shift = index % picked.length;
+      return {
+        ...source,
+        question: choicePrompt(source.question),
+        answer: correct,
+        choices: picked.slice(shift).concat(picked.slice(0, shift))
+      };
+    }
+
+    function buildQuizChoices(item, index) {
+      const choices = item.choices?.length ? item.choices : toMultipleChoiceItem(item, index).choices;
+      return choices;
+    }
+
+    function renderQuestions() {
+      if (!consumeCredit()) return;
+      const quizItems = expandQuizItems(makeQuestions()).map(toMultipleChoiceItem);
+      questionList.innerHTML = `
+        <div class="card" id="scoreCard" style="display:none;"></div>
+        ${quizItems.map((item, index) => `
+          <article class="question-card" data-answer="${escapeQuizText(item.answer || "正確答案")}">
+            <strong>${index + 1}. ${item.title}</strong>
+            <p>${item.question}</p>
+            <div class="quiz-options" style="display:grid;gap:8px;margin-top:10px;">
+              ${buildQuizChoices(item, index).map(choice => `
+                <label class="secondary" style="display:flex;align-items:center;gap:8px;padding:10px;color:var(--ink);">
+                  <input class="quiz-answer" type="radio" name="quiz-${index}" value="${escapeQuizText(choice)}" style="width:auto;min-height:auto;">
+                  <span>${escapeQuizText(choice)}</span>
+                </label>
+              `).join("")}
+            </div>
+            <div class="solution">${item.solution}</div>
+          </article>
+        `).join("")}
+        <button class="primary" id="submitQuiz" type="button" style="width:100%;margin:4px 0 12px;">提交答案並計分</button>
+      `;
+      document.querySelector("#submitQuiz").addEventListener("click", () => {
+        const cards = [...questionList.querySelectorAll(".question-card")];
+        const selectedAnswers = cards.map((card, index) => card.querySelector(`input[name="quiz-${index}"]:checked`));
+        if (selectedAnswers.some(input => !input)) {
+          appStatus.textContent = "請先答完所有 5 題，再提交計分。";
+          return;
+        }
+        let score = 0;
+        selectedAnswers.forEach(input => {
+          const card = input.closest(".question-card");
+          const expected = card.dataset.answer;
+          const isCorrect = normalizeQuizAnswer(input.value) === normalizeQuizAnswer(expected);
+          card.classList.toggle("correct", isCorrect);
+          card.classList.toggle("incorrect", !isCorrect);
+          if (isCorrect) score += 20;
+        });
+        questionList.querySelector("#scoreCard").style.display = "grid";
+        const tutorHint = score < 60 ? `<p class="subline">分數低於 60 分，建議點選補習班尋求專業教師協助。</p><button class="secondary" id="scoreTutorButton" type="button">前往補習班</button>` : "";
+        questionList.querySelector("#scoreCard").innerHTML = `<h2>總分：${score} / 100</h2><p class="subline">已完成 5 題作答，詳解已解鎖。</p>${tutorHint}`;
+        questionList.querySelector("#scoreTutorButton")?.addEventListener("click", () => showPage("tutoringPage"));
+        questionList.querySelectorAll(".solution").forEach(solution => solution.classList.add("show"));
+        questionList.querySelectorAll(".quiz-answer").forEach(input => input.disabled = true);
+        document.querySelector("#submitQuiz").disabled = true;
+        appStatus.textContent = `已完成計分：${score} / 100 · 詳解已解鎖`;
+      });
+      appStatus.textContent = `已產生 ${selectedStage}${gradeSelect.value} ${englishUnitSelect.value} ${selectedDifficulty} 國文題庫 5 題 · 每題 20 分`;
+    }
+
+    function solveUploadedProblem() {
+      if (!consumeCredit()) return;
+      const text = manualQuestion.value.trim() || "請判斷「一日千里」的意思與用法。";
+      solveResult.innerHTML = `
+        <h2>詳解結果</h2>
+        <p><strong>題目：</strong>${text}</p>
+        <p><strong>答案判斷：</strong>先判斷題目屬於字詞、成語、閱讀、修辭、文言或作文類型。</p>
+        <p><strong>解析步驟：</strong>找關鍵字與上下文線索，再說明字義、文意、修辭效果或寫作結構。</p>
+        <p><strong>例句：</strong>「一日千里」可用於形容學習進步很快，例如：他每天練習寫作，進步一日千里。</p>
+      `;
+      appStatus.textContent = `已產出國文詳解 · 剩餘 ${credits} 點`;
+    }
+
+    function syncProfileFields() {
+      profileName.value = studentName.value.trim() || "學生";
+      profileEmail.value = studentEmail.value.trim();
+      profilePhone.value = studentPhone.value.trim();
+      profileCity.value = studentCity.value.trim();
+      profileDistrict.value = studentDistrict.value.trim();
+    }
+
+    function userLocation() {
+      return {
+        city: (profileCity.value || studentCity.value || "").trim(),
+        district: (profileDistrict.value || studentDistrict.value || "").trim()
+      };
+    }
+
+    function sortTutorSchools() {
+      const { city, district } = userLocation();
+      const container = document.querySelector("#tutoringPage .card");
+      schoolCards
+        .map((card, index) => ({ card, index }))
+        .sort((a, b) => {
+          const paid = item => item.card.dataset.paid === "true" ? 100 : 0;
+          const score = item => paid(item) + (item.card.dataset.city === city ? 2 : 0) + (item.card.dataset.district === district ? 1 : 0);
+          return score(b) - score(a) || a.index - b.index;
+        })
+        .forEach(item => container.appendChild(item.card));
+      applyTutorFilters();
+    }
+
+    function populateTutorFilters() {
+      const currentCity = tutorCityFilter.value;
+      const currentDistrict = tutorDistrictFilter.value;
+      const cities = [...new Set(schoolCards.map(card => card.dataset.city))];
+      tutorCityFilter.innerHTML = `<option value="">全部縣市</option>${cities.map(city => `<option value="${city}">${city}</option>`).join("")}`;
+      tutorCityFilter.value = cities.includes(currentCity) ? currentCity : "";
+      const districts = [...new Set(schoolCards
+        .filter(card => !tutorCityFilter.value || card.dataset.city === tutorCityFilter.value)
+        .map(card => card.dataset.district))];
+      tutorDistrictFilter.innerHTML = `<option value="">全部區域</option>${districts.map(district => `<option value="${district}">${district}</option>`).join("")}`;
+      tutorDistrictFilter.value = districts.includes(currentDistrict) ? currentDistrict : "";
+    }
+
+    function applyTutorFilters() {
+      const city = tutorCityFilter.value;
+      const district = tutorDistrictFilter.value;
+      schoolCards.forEach(card => {
+        const visible = (!city || card.dataset.city === city) && (!district || card.dataset.district === district);
+        card.style.display = visible ? "" : "none";
+      });
+    }
+
+    function applyTheme() {
+      screen.classList.remove("theme-green", "theme-light");
+      if (themeSelect.value !== "dark") screen.classList.add(`theme-${themeSelect.value}`);
+    }
+
+    function applyFontSize() {
+      screen.classList.remove("font-small", "font-large");
+      if (fontSizeSelect.value !== "normal") screen.classList.add(`font-${fontSizeSelect.value}`);
+    }
+
+    function applyLanguage() {
+      const lang = languageSelect.value;
+      const copy = {
+        zh: { nav: ["題庫", "詳解", "補習班", "升級", "設定"], titles: { practicePage: "國文題庫", solverPage: "國文詳解", tutoringPage: "補習班", plansPage: "升級方案", paymentPage: "信用卡付費", settingsPage: "設定", profilePage: "使用者資料", loginPage: "國文題庫" }, settings: "設定", theme: "App 背景", font: "字體大小", language: "語言", support: "聯繫客服", supportText: "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。", email: "Email：support@app-service.example" },
+        en: { nav: ["Quiz", "Solution", "Tutors", "Upgrade", "Settings"], titles: { practicePage: "Chinese Quiz Bank", solverPage: "Chinese Solution", tutoringPage: "Tutoring Centers", plansPage: "Plans", paymentPage: "Credit Card Payment", settingsPage: "Settings", profilePage: "Profile", loginPage: "Chinese Bank" }, settings: "Settings", theme: "App Background", font: "Font Size", language: "Language", support: "Contact Support", supportText: "For issue reports or partnership inquiries, contact us by Email.", email: "Email: support@app-service.example" },
+        ja: { nav: ["問題", "解説", "塾", "プラン", "設定"], titles: { practicePage: "国語問題集", solverPage: "国語解説", tutoringPage: "塾", plansPage: "プラン", paymentPage: "カード決済", settingsPage: "設定", profilePage: "プロフィール", loginPage: "国語問題集" }, settings: "設定", theme: "App 背景", font: "文字サイズ", language: "言語", support: "サポート連絡", supportText: "問題報告、提携相談は Email でお問い合わせください。", email: "Email：support@app-service.example" }
+      }[lang];
+      Object.assign(pageTitles, copy.titles);
+      navButtons.forEach((button, index) => { button.textContent = copy.nav[index]; });
+      const activePage = pages.find(page => page.classList.contains("active"));
+      title.textContent = pageTitles[activePage?.id || "practicePage"];
+      const settingsLabels = document.querySelectorAll("#settingsPage .card:first-child label");
+      document.querySelector("#settingsPage .card:first-child h2").textContent = copy.settings;
+      settingsLabels[0].childNodes[0].textContent = copy.theme;
+      settingsLabels[1].childNodes[0].textContent = copy.font;
+      settingsLabels[2].childNodes[0].textContent = copy.language;
+      const supportCard = document.querySelector("#settingsPage .card:nth-of-type(2)");
+      supportCard.querySelector("h2").textContent = copy.support;
+      supportCard.querySelectorAll(".subline")[0].textContent = copy.supportText;
+      supportCard.querySelectorAll(".subline")[1].textContent = copy.email;
+    }
+
+    navButtons.forEach(button => button.addEventListener("click", () => showPage(button.dataset.page)));
+    pointsButton.addEventListener("click", () => showPage("plansPage"));
+    creditAlertUpgrade.addEventListener("click", () => showPage("plansPage"));
+    userNameButton.addEventListener("click", () => {
+      syncProfileFields();
+      showPage("profilePage");
+    });
+    saveProfile.addEventListener("click", () => {
+      studentName.value = profileName.value.trim() || "學生";
+      studentEmail.value = profileEmail.value.trim();
+      studentCity.value = profileCity.value.trim();
+      studentDistrict.value = profileDistrict.value.trim();
+      sortTutorSchools();
+      userNameButton.textContent = studentName.value;
+      appStatus.textContent = "使用者資料已更新。";
+      showPage("practicePage");
+    });
+    sendSms.addEventListener("click", () => {
+      smsToken = String(Math.floor(1000 + Math.random() * 9000));
+      smsHint.textContent = `已發送 4 位數簡訊驗證碼。原型示範碼：${smsToken}`;
+    });
+    toggleTermsButton.addEventListener("click", () => {
+      termsOpened = true;
+      termsPanel.classList.toggle("show");
+      toggleTermsButton.textContent = termsPanel.classList.contains("show")
+        ? "收合使用條款、隱私權政策與免責聲明"
+        : "展開使用條款、隱私權政策與免責聲明";
+    });
+    finishLogin.addEventListener("click", () => {
+      if (!smsToken) {
+        smsHint.textContent = "請先發送簡訊驗證碼。";
+        return;
+      }
+      if (smsCode.value.trim() !== smsToken) {
+        smsHint.textContent = "簡訊碼輸入錯誤。";
+        return;
+      }
+      if (!studentCity.value.trim() || !studentDistrict.value.trim()) {
+        smsHint.textContent = "請填入地址縣市與區域後再完成註冊。";
+        return;
+      }
+      if (!termsOpened) {
+        smsHint.textContent = "請先展開條文閱讀後再完成註冊。";
+        return;
+      }
+      if (!agreeTerms.checked) {
+        smsHint.textContent = "請勾選我已打開並同意使用條款、隱私權政策與免責聲明。";
+        return;
+      }
+      loggedIn = true;
+      userNameButton.textContent = studentName.value.trim() || "學生";
+      syncProfileFields();
+      sortTutorSchools();
+      appStatus.textContent = "註冊成功，可以開始產生國文題庫。";
+      showPage("practicePage");
+    });
+
+    schoolStage.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedStage = button.dataset.stage;
+        schoolStage.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button));
+        renderGrades();
+        renderUnits();
+      });
+    });
+
+    difficultyLevel.querySelectorAll("button").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedDifficulty = button.dataset.difficulty;
+        difficultyLevel.querySelectorAll("button").forEach(item => item.classList.toggle("active", item === button));
+      });
+    });
+
+    generateQuestions.addEventListener("click", renderQuestions);
+    solveProblem.addEventListener("click", solveUploadedProblem);
+    document.querySelector("#goUpgrade").addEventListener("click", () => showPage("plansPage"));
+    schoolCards.forEach(card => {
+      card.addEventListener("click", () => {
+        selectedTutor = { school: card.dataset.school, email: card.dataset.email, phone: card.dataset.phone };
+        selectedTutorTitle.textContent = `補習班洽談：${selectedTutor.school}`;
+        tutorContactName.value = profileName.value || studentName.value;
+        tutorContactPhone.value = profilePhone.value || studentPhone.value;
+        tutorContactResult.textContent = "";
+        tutorContactForm.classList.add("show");
+        tutorContactForm.scrollIntoView({ behavior: "smooth", block: "end" });
+      });
+    });
+    sendTutorContact.addEventListener("click", () => {
+      if (!selectedTutor) return;
+      tutorContactResult.textContent = `感謝您的留言，已自動寄送 Email 並簡訊通知 ${selectedTutor.school}。Email：${selectedTutor.email}｜SMS：${selectedTutor.phone}`;
+    });
+    themeSelect.addEventListener("change", applyTheme);
+    fontSizeSelect.addEventListener("change", applyFontSize);
+    languageSelect.addEventListener("change", applyLanguage);
+    tutorCityFilter.addEventListener("change", () => {
+      populateTutorFilters();
+      applyTutorFilters();
+    });
+    tutorDistrictFilter.addEventListener("change", applyTutorFilters);
+
+    planButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        selectedPlan = button;
+        planButtons.forEach(item => item.classList.toggle("active", item === button));
+        paymentPlan.textContent = `已選擇 ${button.dataset.plan} ${button.dataset.price}，每月 ${button.dataset.points} 次。`;
+      });
+    });
+    confirmPlan.addEventListener("click", () => {
+      if (!selectedPlan) {
+        appStatus.textContent = "請先選擇升級方案。";
+        return;
+      }
+      showPage("paymentPage");
+    });
+    payNow.addEventListener("click", () => {
+      if (!selectedPlan) return;
+      currentPlan = `${selectedPlan.dataset.plan} ${selectedPlan.dataset.price}`;
+      credits += Number(selectedPlan.dataset.points);
+      updateCredits();
+      appStatus.textContent = `付款完成，已升級 ${selectedPlan.dataset.plan}。`;
+      showPage("practicePage");
+    });
+
+    renderGrades();
+    renderUnits();
+    populateTutorFilters();
+    sortTutorSchools();
+    updateCredits();
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

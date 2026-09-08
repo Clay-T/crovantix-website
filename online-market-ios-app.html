@@ -1,0 +1,1889 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>線上交易 iOS App</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07100d;
+      --ink: #f8fbf7;
+      --muted: #9dacaa;
+      --line: rgba(255,255,255,.12);
+      --panel: #101a18;
+      --panel-2: #182522;
+      --panel-3: #23342f;
+      --green: #52e0a3;
+      --blue: #66b7ff;
+      --yellow: #ffd166;
+      --rose: #ff7f9a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(82,224,163,.18), transparent 28rem),
+        radial-gradient(circle at 88% 70%, rgba(102,183,255,.15), transparent 26rem),
+        linear-gradient(135deg, #07100d, #111822);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans TC", Arial, sans-serif;
+    }
+
+    .stage {
+      width: min(100vw, 1120px);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 420px minmax(320px, 1fr);
+      gap: 50px;
+      align-items: start;
+      padding: 32px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      padding: 12px;
+      border-radius: 54px;
+      background: linear-gradient(145deg, #3b4641, #050807 34%, #4b5954);
+      box-shadow: 0 30px 80px rgba(0,0,0,.48), inset 0 0 0 1px rgba(255,255,255,.16);
+      position: relative;
+    }
+
+    .screen {
+      height: 100%;
+      overflow: hidden;
+      border-radius: 42px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(82,224,163,.16), transparent 14rem),
+        linear-gradient(180deg, rgba(102,183,255,.10), transparent 34%),
+        var(--bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen.theme-light {
+      --bg: #f6fbf8;
+      --ink: #102018;
+      --muted: #5f7468;
+      --panel: #ffffff;
+      --panel-2: #eaf5ee;
+      --panel-3: #d8eadf;
+    }
+
+    .screen.theme-teal {
+      --bg: #061615;
+      --panel: #102321;
+      --panel-2: #17312e;
+      --green: #5eead4;
+    }
+
+    .screen.font-small { font-size: 12px; }
+    .screen.font-large { font-size: 16px; }
+
+    .island {
+      position: absolute;
+      z-index: 10;
+      top: 11px;
+      left: 50%;
+      width: 118px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #000;
+    }
+
+    .status {
+      height: 58px;
+      padding: 12px 26px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .icons { display: flex; gap: 6px; align-items: center; }
+    .signal { display: flex; gap: 2px; align-items: end; height: 12px; }
+    .signal i { width: 3px; border-radius: 2px; background: #fff; display: block; }
+    .signal i:nth-child(1) { height: 4px; }
+    .signal i:nth-child(2) { height: 7px; }
+    .signal i:nth-child(3) { height: 9px; }
+    .signal i:nth-child(4) { height: 12px; }
+    .battery { width: 24px; height: 12px; border: 1.6px solid #fff; border-radius: 4px; position: relative; }
+    .battery::before { content: ""; position: absolute; right: -4px; top: 3px; width: 2px; height: 5px; background: #fff; border-radius: 0 2px 2px 0; }
+    .battery::after { content: ""; position: absolute; inset: 2px 5px 2px 2px; background: #fff; border-radius: 2px; }
+
+    .app {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 78px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 3px;
+      gap: 10px;
+    }
+
+    .brand {
+      min-height: 34px;
+      display: grid;
+      place-items: center;
+      padding: 0 12px;
+      border-radius: 999px;
+      color: #07100d;
+      background: linear-gradient(135deg, #f4fffb, var(--green));
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .user-button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      max-width: 150px;
+      padding: 0 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,.04);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 950;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-button[hidden] {
+      display: none;
+    }
+
+    h1 {
+      margin: 18px 0 6px;
+      font-size: 32px;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.38;
+    }
+
+    .page-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 12px 0 0;
+    }
+
+    .page-controls[hidden] {
+      display: none;
+    }
+
+    .page-controls button {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: rgba(255,255,255,.05);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .page {
+      min-height: 0;
+      flex: 1;
+      display: none;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding: 14px 2px 12px 0;
+    }
+
+    .page.active { display: block; }
+    .page::-webkit-scrollbar { width: 0; }
+
+    .card {
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(82,224,163,.10), transparent 48%), var(--panel);
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .label-row strong { font-size: 15px; }
+    .label-row span { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+    .form {
+      display: grid;
+      gap: 10px;
+    }
+
+    label.field {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 0;
+      outline: none;
+      border-radius: 16px;
+      padding: 12px;
+      color: var(--ink);
+      background: var(--panel-2);
+      font: inherit;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: none;
+      line-height: 1.45;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .segmented button,
+    .primary,
+    .secondary {
+      min-height: 42px;
+      border: 0;
+      border-radius: 16px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 920;
+      cursor: pointer;
+    }
+
+    .segmented button {
+      color: var(--ink);
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+    }
+
+    .segmented button.active {
+      color: #07100d;
+      background: var(--green);
+      border-color: transparent;
+    }
+
+    .primary {
+      color: #07100d;
+      background: var(--green);
+    }
+
+    .primary:disabled {
+      color: var(--muted);
+      background: var(--panel-3);
+      border: 1px solid var(--line);
+      cursor: not-allowed;
+      opacity: .68;
+    }
+
+    .secondary {
+      color: var(--ink);
+      background: var(--panel-3);
+      border: 1px solid var(--line);
+    }
+
+    .sms-row {
+      display: grid;
+      grid-template-columns: 1fr 96px;
+      gap: 8px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .product-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .product {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 11px;
+      align-items: start;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--panel);
+      cursor: pointer;
+    }
+
+    .product.with-message {
+      grid-template-columns: 58px 1fr auto;
+    }
+
+    .thumb {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      color: #07100d;
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      font-size: 22px;
+      font-weight: 950;
+    }
+
+    .product h3 {
+      margin: 0 0 4px;
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+
+    .chip {
+      min-height: 22px;
+      display: inline-grid;
+      place-items: center;
+      padding: 0 8px;
+      border-radius: 999px;
+      color: #c8d7d3;
+      background: rgba(255,255,255,.07);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .price {
+      color: var(--yellow);
+      font-size: 15px;
+      font-weight: 950;
+    }
+
+    .detail-hero {
+      min-height: 132px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      color: #07100d;
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      font-size: 48px;
+      font-weight: 950;
+      margin-bottom: 12px;
+    }
+
+    .detail-title {
+      margin: 0 0 6px;
+      font-size: 22px;
+      line-height: 1.12;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .profile-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .profile-item {
+      min-height: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-2);
+      font-size: 14px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .profile-item span { color: var(--muted); font-size: 12px; }
+
+    .message-dot {
+      min-width: 28px;
+      height: 28px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #07100d;
+      background: var(--yellow);
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .message-dot.unread {
+      color: #fff;
+      background: #ff453a;
+    }
+
+    .message-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 11px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      cursor: pointer;
+    }
+
+    .message-row b {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+
+    .message-row span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .notice {
+      padding: 11px;
+      border-radius: 16px;
+      color: #cfe8df;
+      background: rgba(82,224,163,.08);
+      border: 1px solid rgba(82,224,163,.2);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .terms-box {
+      display: grid;
+      gap: 10px;
+      padding: 11px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line);
+    }
+
+    .terms-text {
+      display: none;
+      max-height: 170px;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: 14px;
+      color: #d8eee7;
+      background: var(--panel-2);
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+
+    .terms-box.open .terms-text {
+      display: block;
+    }
+
+    .terms-agree {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .terms-agree input {
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      accent-color: var(--green);
+    }
+
+    .sms-hint {
+      display: none;
+      margin: 0;
+      padding: 10px 11px;
+      border-radius: 14px;
+      color: #07100d;
+      background: var(--yellow);
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1.4;
+    }
+
+    .sms-hint.show {
+      display: block;
+    }
+
+    .nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 6;
+      height: 74px;
+      padding-bottom: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid var(--line);
+      background: rgba(7,13,11,.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 820;
+      cursor: pointer;
+    }
+
+    .nav button.active { color: var(--green); }
+    .nav-symbol { width: 22px; height: 22px; display: grid; place-items: center; border-radius: 8px; font-size: 15px; }
+
+    .brief { max-width: 540px; }
+    .brief h2 { margin: 0 0 16px; font-size: clamp(30px, 4vw, 54px); line-height: 1.02; letter-spacing: 0; }
+    .brief p { margin: 0 0 22px; color: #b9c7d2; font-size: 17px; line-height: 1.55; }
+    .specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .spec { border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: 14px; background: rgba(255,255,255,.05); }
+    .spec b { display: block; margin-bottom: 6px; font-size: 14px; }
+    .spec span { color: #aebdcc; font-size: 13px; line-height: 1.45; }
+
+    @media (max-width: 860px) {
+      .stage { grid-template-columns: 1fr; justify-items: center; gap: 24px; padding: 18px 14px 28px; }
+      .phone { width: min(390px, calc(100vw - 28px)); height: min(844px, calc(100vh - 28px)); min-height: 720px; }
+      .brief { width: min(390px, calc(100vw - 28px)); }
+      .specs { grid-template-columns: 1fr; }
+    }
+    body.portfolio-watermark::after {
+      content: "Crovantix";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      z-index: 9999;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      color: rgba(85, 215, 255, .1);
+      font-size: clamp(64px, 18vw, 168px);
+      font-weight: 950;
+      letter-spacing: 0;
+      white-space: nowrap;
+      text-shadow: 0 0 34px rgba(85, 215, 255, .18);
+    }
+
+    /* Crovantix launch splash */
+    .crovantix-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(88,215,255,.22), transparent 30rem),
+        radial-gradient(circle at 62% 60%, rgba(125,86,255,.18), transparent 28rem),
+        linear-gradient(145deg, #050913, #0b1420 56%, #05070c);
+      color: #f8fbff;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+      pointer-events: auto;
+      animation: crovantixSplashFade 3.55s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: crovantixMarkIn 3.25s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: min(360px, 72vw);
+      max-height: 210px;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.28);
+    }
+
+    .crovantix-launch-mark strong {
+      font-size: clamp(18px, 4.6vw, 34px);
+      font-weight: 900;
+      letter-spacing: .05em;
+      background: linear-gradient(90deg, #63dcff, #7c66ff, #63dcff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .crovantix-launch-copy {
+      margin-top: 2px;
+      font-size: clamp(12px, 3vw, 16px);
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: rgba(248,251,255,.72);
+    }
+
+    @keyframes crovantixMarkIn {
+      0% { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(8px); }
+      17% { opacity: 1; filter: blur(0); }
+      79% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 0; transform: translateY(-8px) scale(1.02); filter: blur(6px); }
+    }
+
+    @keyframes crovantixSplashFade {
+      0%, 83% { opacity: 1; visibility: visible; }
+      99% { opacity: 0; visibility: visible; pointer-events: auto; }
+      100% { opacity: 0; visibility: hidden; pointer-events: none; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+    <div class="crovantix-launch-mark">
+      <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+      <strong>Crovantix Technologies</strong>
+      <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+    </div>
+  </div>
+  <main class="stage">
+    <section class="phone" aria-label="online marketplace iOS app">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <div class="status">
+          <span>9:41</span>
+          <span class="icons" aria-hidden="true">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span>5G</span>
+            <span class="battery"></span>
+          </span>
+        </div>
+
+        <div class="app">
+          <div class="topbar">
+            <span class="brand">MarketGo</span>
+            <button class="user-button" id="userButton" type="button" hidden>使用者</button>
+          </div>
+
+          <h1 id="pageTitle">會員註冊</h1>
+          <p class="subline" id="pageStatus">輸入個人資料並完成手機與 Email 驗證後，即可買賣商品。</p>
+          <div class="page-controls" id="pageControls">
+            <button id="prevPage">&lt; 上一頁</button>
+            <button id="nextPage">下一頁 &gt;</button>
+          </div>
+
+          <section class="page active" id="registerPage">
+            <section class="card">
+              <div class="label-row">
+                <strong>註冊資料</strong>
+                <span id="registerStatus">待認證</span>
+              </div>
+              <div class="form">
+                <label class="field">姓名
+                  <input id="userName" value="Clay Tseng" autocomplete="name">
+                </label>
+                <label class="field">電話
+                  <input id="userPhone" value="0912-345-678" autocomplete="tel">
+                </label>
+                <label class="field">Email
+                  <input id="userEmail" value="clay@example.com" autocomplete="email">
+                </label>
+                <div class="sms-row">
+                  <input id="emailCode" placeholder="輸入 4 碼 Email 驗證碼" inputmode="numeric" maxlength="4">
+                  <button class="secondary" id="sendEmailCode">驗證 Email</button>
+                </div>
+                <p class="sms-hint" id="emailHint"></p>
+                <label class="field">通訊地址
+                  <input id="userAddress" value="台北市信義區松仁路 100 號" autocomplete="street-address">
+                </label>
+                <label class="field">生日
+                  <input id="userBirthday" type="date" value="1990-05-12">
+                </label>
+                <div class="sms-row">
+                  <input id="smsCode" placeholder="輸入 4 碼簡訊驗證碼" inputmode="numeric" maxlength="4">
+                  <button class="secondary" id="sendSms">發送簡訊</button>
+                </div>
+                <p class="sms-hint" id="smsHint"></p>
+                <section class="terms-box" id="termsBox">
+                  <button class="secondary" id="toggleTerms" type="button">展開使用條款、隱私權政策與免責聲明</button>
+                  <div class="terms-text" id="termsText">線上交易 App 使用條款、隱私權政策與免責聲明
+
+歡迎使用「線上交易 App」（以下稱「本 App」）。本 App 由創微科技（以下稱「本公司」）提供相關服務。使用本 App 即表示您已閱讀、了解並同意遵守本使用條款、隱私權政策及免責聲明。
+
+一、服務內容
+
+本 App 提供商品刊登、交易資訊展示、買賣雙方媒合、聊天互動、付款資訊輔助、語音互動及相關線上交易平台服務，所有內容僅供使用者進行一般交易與資訊交流用途。
+
+二、平台性質聲明
+
+本 App 僅提供買家與賣家之間的交易平台服務，本公司並非交易當事人、商品持有人、代理人、保證人或付款中介機構。
+
+本公司不參與任何實際交易、付款、物流、商品驗證、品質檢驗或履約行為。
+
+所有商品資訊、價格、描述、圖片及交易內容均由使用者自行提供，本公司不保證其真實性、合法性、完整性、品質、安全性或適用性。
+
+三、交易風險與免責聲明
+
+使用者應自行判斷並承擔使用本 App 所產生之一切交易風險與責任。
+
+使用者因商品交易、金錢往來、付款行為、物流配送、面交、退款、詐騙、商品瑕疵、侵權或其他交易糾紛所產生之任何損失、損害或法律責任，均由交易雙方自行承擔，本公司不負任何直接、間接、附帶或衍生性損害之責任。
+
+本公司不保證交易安全性、商品品質、賣家身分、付款安全或交易成功率，使用者應自行採取必要風險控管措施。
+
+若交易上有問題，請直接聯繫交易對方、付款平台、物流業者或相關金融機構處理。
+
+四、資料蒐集
+
+本 App 可能蒐集以下資訊：
+
+* 使用者帳號資訊
+* Email
+* 裝置資訊
+* 使用紀錄
+* IP 位址
+* 商品刊登資料
+* 聊天與互動紀錄
+* 語音內容
+* AI 互動紀錄
+* 崩潰紀錄與分析資料
+
+五、資料用途
+
+蒐集資料主要用於：
+
+* 提供線上交易平台服務
+* 買賣雙方媒合
+* AI 與客服功能
+* 語音互動服務
+* 改善使用體驗
+* 系統安全維護
+* 防止詐騙、濫用或違法行為
+* 提升系統與服務品質
+
+六、第三方服務
+
+本 App 可能使用第三方服務，包括但不限於：
+
+* OpenAI
+* Firebase
+* Google Analytics
+* 金流服務
+* 雲端儲存服務
+* 語音辨識服務
+
+部分資料可能因服務需求而傳輸至第三方服務供應商。
+
+七、資料安全
+
+本公司將採取合理安全措施保護使用者資料，但無法保證網路傳輸、通訊內容、付款資訊或儲存系統之絕對安全。
+
+使用者應妥善保管自身帳號、密碼及個人資料，避免向他人提供敏感資訊或進行高風險交易。
+
+八、使用者責任
+
+使用者不得利用本 App 從事任何違法、詐騙、販售違禁品、侵權、洗錢、散布惡意程式、騷擾或其他損害他人權益之行為。
+
+若因使用者違法或不當行為導致任何損害或法律責任，應由使用者自行負責。
+
+九、智慧財產權
+
+本 App 之程式、介面設計、商標、圖像、文字、資料、AI 系統及相關內容，均屬本公司或合法授權人所有。
+
+未經授權不得重製、修改、散布、反向工程、破解或用於商業用途。
+
+十、使用者權利
+
+使用者得依法請求查詢、更正或刪除其個人資料。
+
+十一、條款與政策修改
+
+本公司保留隨時修改本使用條款、隱私權政策及免責聲明之權利，修改後內容將公布於本 App，使用者繼續使用即視為同意修改內容。</div>
+                  <label class="terms-agree">
+                    <input id="agreeTerms" type="checkbox">
+                    我已閱讀並同意使用條款、隱私權政策與免責聲明
+                  </label>
+                </section>
+                <button class="primary" id="verifySms" disabled>完成認證</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="buyPage">
+            <section class="card">
+              <div class="label-row">
+                <strong>買東西</strong>
+                <span id="buyCount">所有類別</span>
+              </div>
+              <div class="filters">
+                <select id="categoryFilter">
+                  <option value="所有類別">所有類別</option>
+                  <option value="家電">家電</option>
+                  <option value="電腦周邊">電腦周邊</option>
+                  <option value="書籍">書籍</option>
+                  <option value="家具">家具</option>
+                  <option value="生活用品">生活用品</option>
+                </select>
+                <select id="sortFilter">
+                  <option value="year-desc">製造年份新到舊</option>
+                  <option value="year-asc">製造年份舊到新</option>
+                  <option value="condition-new">全新優先</option>
+                  <option value="condition-used">二手優先</option>
+                  <option value="price-asc">價格低到高</option>
+                  <option value="price-desc">價格高到低</option>
+                </select>
+              </div>
+              <div class="product-list" id="productList"></div>
+            </section>
+          </section>
+
+          <section class="page" id="sellPage">
+            <section class="card">
+              <div class="label-row">
+                <strong>賣東西</strong>
+                <span id="sellStatus">建立商品</span>
+              </div>
+              <div class="form">
+                <label class="field">物品類別
+                  <select id="sellCategory">
+                    <option>家電</option>
+                    <option>電腦周邊</option>
+                    <option>書籍</option>
+                    <option>家具</option>
+                    <option>生活用品</option>
+                  </select>
+                </label>
+                <label class="field">物品名稱
+                  <input id="sellName" value="藍牙降噪耳機">
+                </label>
+                <label class="field">全新或二手
+                  <div class="segmented">
+                    <button class="active" data-condition="全新">全新</button>
+                    <button data-condition="二手">二手</button>
+                  </div>
+                </label>
+                <div class="split">
+                  <label class="field">廠牌
+                    <input id="sellBrand" value="Sony">
+                  </label>
+                  <label class="field">製造年份
+                    <input id="sellYear" type="number" value="2024" min="1990" max="2026">
+                  </label>
+                </div>
+                <label class="field">價格
+                  <input id="sellPrice" type="number" value="4200" min="0">
+                </label>
+                <label class="field">其他補充資料
+                  <textarea id="sellDescription">盒裝完整，保固內，因升級新款出售。</textarea>
+                </label>
+                <button class="primary" id="uploadItem">上傳商品</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="detailPage">
+            <section class="card" id="detailCard"></section>
+          </section>
+
+          <section class="page" id="paymentPage">
+            <section class="card">
+              <div class="label-row">
+                <strong>信用卡交易</strong>
+                <span id="paymentAmount">待付款</span>
+              </div>
+              <div class="form">
+                <label class="field">卡號
+                  <input value="4242 4242 4242 4242" inputmode="numeric">
+                </label>
+                <div class="split">
+                  <label class="field">有效期限
+                    <input value="12/29">
+                  </label>
+                  <label class="field">安全碼
+                    <input value="168" inputmode="numeric">
+                  </label>
+                </div>
+                <label class="field">持卡人姓名
+                  <input value="CLAY TSENG">
+                </label>
+                <label class="field">收件人
+                  <input id="receiverName" value="Clay Tseng" autocomplete="name">
+                </label>
+                <label class="field">收件電話
+                  <input id="receiverPhone" value="0912-345-678" autocomplete="tel">
+                </label>
+                <label class="field">收件地址
+                  <input id="receiverAddress" value="台北市信義區松仁路 100 號" autocomplete="street-address">
+                </label>
+                <button class="primary" id="payNow">確認付款</button>
+                <button class="secondary" id="backToDetail">返回商品</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="thanksPage">
+            <section class="card">
+              <div class="label-row">
+                <strong>感謝購買</strong>
+                <span id="thanksAmount">交易完成</span>
+              </div>
+              <p class="notice" id="thanksMessage">付款成功，賣家將準備出貨。你可以到個人頁面查詢出貨進度。</p>
+              <div class="actions">
+                <button class="primary" id="goShipping">查看出貨進度</button>
+                <button class="secondary" id="goBuyMore">繼續逛商品</button>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="profilePage">
+            <section class="card">
+              <div class="label-row">
+                <strong>個人選單</strong>
+                <span id="profileName">Clay Tseng</span>
+              </div>
+              <div class="profile-grid">
+                <div class="profile-item" data-profile="selling">正在賣的東西 <span id="sellingCount">0 件</span></div>
+                <div class="profile-item" data-profile="sold">賣過的東西 <span>2 件</span></div>
+                <div class="profile-item" data-profile="bought">買過的東西 <span id="boughtCount">0 件</span></div>
+                <div class="profile-item" data-profile="shipping">出貨進度 <span id="shippingCount">0 筆</span></div>
+                <div class="profile-item" data-profile="messages">互相留言 <span id="messageCount">0 則</span></div>
+                <div class="profile-item" data-profile="info">個人資訊 <span>姓名、電話、Email</span></div>
+              </div>
+            </section>
+            <section class="card" id="profileResult">
+              <p class="notice">點選上方項目可查看清單或個人資料。</p>
+            </section>
+          </section>
+
+          <section class="page" id="settingsPage">
+            <section class="card">
+              <div class="label-row">
+                <strong>設定</strong>
+                <span>系統設定</span>
+              </div>
+              <div class="form">
+                <label class="field">App 背景
+                  <select id="themeSelect">
+                    <option value="default">深色綠</option>
+                    <option value="teal">青綠</option>
+                    <option value="light">明亮白</option>
+                  </select>
+                </label>
+                <label class="field">字體大小
+                  <select id="fontSizeSelect">
+                    <option value="normal">標準</option>
+                    <option value="small">小</option>
+                    <option value="large">大</option>
+                  </select>
+                </label>
+                <label class="field">語言
+                  <select id="languageSelect">
+                    <option value="zh">繁體中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                </label>
+              </div>
+            </section>
+            <section class="card">
+              <div class="label-row">
+                <strong>聯繫客服</strong>
+                <span>問題回報 / 廣告投放 / 合作洽談</span>
+              </div>
+              <p class="notice">問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。</p>
+              <p class="notice">Email：support@app-service.example</p>
+            </section>
+          </section>
+        </div>
+
+        <nav class="nav" aria-label="main navigation">
+          <button data-page="buyPage"><span class="nav-symbol">B</span>買東西</button>
+          <button data-page="sellPage"><span class="nav-symbol">+</span>賣東西</button>
+          <button data-page="profilePage"><span class="nav-symbol">P</span>個人</button>
+          <button data-page="settingsPage"><span class="nav-symbol">⚙</span>設定</button>
+        </nav>
+      </div>
+    </section>
+
+    <aside class="brief">
+      <h2>線上交易 iOS App</h2>
+      <p>使用者完成註冊與手機簡訊碼認證後，可以上架商品、依分類與排序瀏覽商品、留言給賣家、加入或取消最愛，並在購買時進入信用卡交易頁面。</p>
+      <div class="specs">
+        <div class="spec"><b>會員註冊</b><span>姓名、電話、Email、通訊地址、生日、手機與 Email 驗證。</span></div>
+        <div class="spec"><b>賣東西</b><span>類別、名稱、新舊狀態、廠牌、年份、價格與補充描述。</span></div>
+        <div class="spec"><b>買東西</b><span>支援所有類別或指定類別，並可依年份、新舊、價格排序。</span></div>
+        <div class="spec"><b>個人中心</b><span>查看正在賣、賣過、買過、互相留言、出貨進度與個人資訊。</span></div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const pages = [...document.querySelectorAll(".page")];
+    const navButtons = [...document.querySelectorAll(".nav button")];
+    const pageTitle = document.querySelector("#pageTitle");
+    const pageStatus = document.querySelector("#pageStatus");
+    const pageControls = document.querySelector("#pageControls");
+    const userButton = document.querySelector("#userButton");
+    const prevPage = document.querySelector("#prevPage");
+    const nextPage = document.querySelector("#nextPage");
+    const registerStatus = document.querySelector("#registerStatus");
+    const smsCode = document.querySelector("#smsCode");
+    const smsHint = document.querySelector("#smsHint");
+    const sendSms = document.querySelector("#sendSms");
+    const emailCode = document.querySelector("#emailCode");
+    const emailHint = document.querySelector("#emailHint");
+    const sendEmailCode = document.querySelector("#sendEmailCode");
+    const verifySms = document.querySelector("#verifySms");
+    const termsBox = document.querySelector("#termsBox");
+    const toggleTerms = document.querySelector("#toggleTerms");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const productList = document.querySelector("#productList");
+    const categoryFilter = document.querySelector("#categoryFilter");
+    const sortFilter = document.querySelector("#sortFilter");
+    const buyCount = document.querySelector("#buyCount");
+    const detailCard = document.querySelector("#detailCard");
+    const paymentAmount = document.querySelector("#paymentAmount");
+    const receiverName = document.querySelector("#receiverName");
+    const receiverPhone = document.querySelector("#receiverPhone");
+    const receiverAddress = document.querySelector("#receiverAddress");
+    const thanksAmount = document.querySelector("#thanksAmount");
+    const thanksMessage = document.querySelector("#thanksMessage");
+    const goShipping = document.querySelector("#goShipping");
+    const goBuyMore = document.querySelector("#goBuyMore");
+    const uploadItem = document.querySelector("#uploadItem");
+    const sellStatus = document.querySelector("#sellStatus");
+    const profileName = document.querySelector("#profileName");
+    const profileResult = document.querySelector("#profileResult");
+    const sellingCount = document.querySelector("#sellingCount");
+    const boughtCount = document.querySelector("#boughtCount");
+    const shippingCount = document.querySelector("#shippingCount");
+    const messageCount = document.querySelector("#messageCount");
+    const payNow = document.querySelector("#payNow");
+    const backToDetail = document.querySelector("#backToDetail");
+    const conditionButtons = [...document.querySelectorAll("[data-condition]")];
+    const screen = document.querySelector(".screen");
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSizeSelect = document.querySelector("#fontSizeSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+    const uiCopy = {
+      zh: {
+        nav: ["買東西", "賣東西", "個人", "設定"],
+        titles: {
+          registerPage: ["會員註冊", "輸入個人資料並完成手機與 Email 驗證後，即可買賣商品。"],
+          buyPage: ["買東西", "選擇商品類別，並依製造年份、新舊狀態或價格排序。"],
+          sellPage: ["賣東西", "輸入商品資訊並上傳，買家就可以看到你的商品。"],
+          detailPage: ["商品資訊", "查看商品詳情，留言給賣家或進入信用卡交易。"],
+          paymentPage: ["信用卡交易", "確認商品與信用卡資訊後完成付款。"],
+          thanksPage: ["感謝購買", "付款成功，後續可到個人頁面查詢出貨進度。"],
+          profilePage: ["個人", "查詢正在賣、賣過、買過、互相留言、出貨進度與個人資訊。"],
+          settingsPage: ["設定", "調整 App 背景、字體大小、語言與聯繫客服。"]
+        },
+        settings: "設定",
+        system: "系統設定",
+        background: "App 背景",
+        fontSize: "字體大小",
+        language: "語言",
+        support: "聯繫客服",
+        supportBadge: "問題回報 / 廣告投放 / 合作洽談",
+        supportText: "問題回報、廣告投放、合作洽談皆可透過 Email 聯繫。",
+        updated: "語言設定已更新。"
+      },
+      en: {
+        nav: ["Buy", "Sell", "Profile", "Settings"],
+        titles: {
+          registerPage: ["Registration", "Enter your profile and verify SMS to start trading."],
+          buyPage: ["Buy", "Browse by category and sort by year, condition, or price."],
+          sellPage: ["Sell", "Enter item details and upload so buyers can see it."],
+          detailPage: ["Item Details", "View details, message the seller, or pay by credit card."],
+          paymentPage: ["Credit Card Payment", "Confirm item and card information to complete payment."],
+          thanksPage: ["Thank You", "Payment complete. Check shipping progress from Profile."],
+          profilePage: ["Profile", "View listings, purchases, messages, shipping, and profile info."],
+          settingsPage: ["Settings", "Adjust app background, font size, language, and support."]
+        },
+        settings: "Settings",
+        system: "System",
+        background: "App Background",
+        fontSize: "Font Size",
+        language: "Language",
+        support: "Contact Support",
+        supportBadge: "Issue Report / Partnership",
+        supportText: "For issue reports or partnership inquiries, contact us by Email.",
+        updated: "Language updated."
+      },
+      ja: {
+        nav: ["購入", "出品", "個人", "設定"],
+        titles: {
+          registerPage: ["会員登録", "個人情報とSMS認証を完了すると取引できます。"],
+          buyPage: ["購入", "カテゴリ、年式、状態、価格で商品を探せます。"],
+          sellPage: ["出品", "商品情報を入力して購入者に表示します。"],
+          detailPage: ["商品情報", "詳細確認、出品者へのメッセージ、カード決済ができます。"],
+          paymentPage: ["カード決済", "商品とカード情報を確認して支払います。"],
+          thanksPage: ["購入完了", "支払い完了。個人ページで配送状況を確認できます。"],
+          profilePage: ["個人", "出品、購入、メッセージ、配送、個人情報を確認します。"],
+          settingsPage: ["設定", "背景、文字サイズ、言語、サポートを調整します。"]
+        },
+        settings: "設定",
+        system: "システム設定",
+        background: "App 背景",
+        fontSize: "文字サイズ",
+        language: "言語",
+        support: "サポート連絡",
+        supportBadge: "問題報告 / 提携相談",
+        supportText: "問題報告、提携相談は Email でお問い合わせください。",
+        updated: "言語設定を更新しました。"
+      }
+    };
+
+    const user = {
+      name: "Clay Tseng",
+      phone: "0912-345-678",
+      email: "clay@example.com",
+      address: "台北市信義區松仁路 100 號",
+      birthday: "1990-05-12",
+      verified: false
+    };
+
+    const products = [
+      { id: 1, category: "家電", name: "智慧空氣清淨機", condition: "二手", brand: "Dyson", year: 2022, price: 6800, seller: "Mina", icon: "A", description: "使用一年，濾網剛更換，適合 10-15 坪空間。" },
+      { id: 2, category: "電腦周邊", name: "機械鍵盤 RGB", condition: "全新", brand: "Keychron", year: 2025, price: 3200, seller: "Leo", icon: "K", description: "全新未拆封，茶軸，支援 Mac 與 Windows。" },
+      { id: 3, category: "書籍", name: "產品設計思考套書", condition: "二手", brand: "O'Reilly", year: 2020, price: 900, seller: "Annie", icon: "B", description: "共三本，內頁乾淨，有少量標籤。" },
+      { id: 4, category: "家具", name: "升降電腦桌", condition: "二手", brand: "IKEA", year: 2023, price: 5200, seller: "Ken", icon: "D", description: "電動升降正常，桌面有輕微使用痕跡。" },
+      { id: 5, category: "生活用品", name: "全新旅行收納組", condition: "全新", brand: "無印風", year: 2024, price: 680, seller: "Yuki", icon: "T", description: "六件組，適合行李箱分類收納。" }
+    ];
+
+    let selectedProduct = products[0];
+    let selectedCondition = "全新";
+    let generatedSmsCode = "";
+    let generatedEmailCode = "";
+    let profilePhoneCode = "";
+    let profileEmailCode = "";
+    let currentPageId = "registerPage";
+    pageControls.hidden = true;
+    let pageHistory = [];
+    let pageFuture = [];
+    let mySelling = [
+      { id: 9001, category: "電腦周邊", name: "藍牙降噪耳機", condition: "全新", brand: "Sony", year: 2024, price: 4200, seller: "Clay Tseng", icon: "N", description: "盒裝完整，保固內，因升級新款出售。" }
+    ];
+    let myBought = [];
+    let myFavorites = [];
+    let myOrders = [];
+    let sellerMessages = [
+      {
+        itemName: "藍牙降噪耳機",
+        seller: "Clay Tseng",
+        buyer: "Ivy Chen",
+        time: "2026-06-25 10:18",
+        content: "請問耳機可以今天晚上面交嗎？如果可以我想直接購買。",
+        reply: "",
+        unread: true
+      },
+      {
+        itemName: "藍牙降噪耳機",
+        seller: "Clay Tseng",
+        buyer: "Howard Lin",
+        time: "2026-06-25 09:42",
+        content: "請問保固還剩多久？有購買證明嗎？",
+        reply: "",
+        unread: false
+      }
+    ];
+
+    function showPage(pageId, options = {}) {
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      const titles = (uiCopy[languageSelect.value] || uiCopy.zh).titles;
+      pageTitle.textContent = titles[pageId][0];
+      pageStatus.textContent = titles[pageId][1];
+      pageControls.hidden = pageId === "registerPage";
+      if (!options.skipHistory && currentPageId !== pageId) {
+        pageHistory.push(currentPageId);
+        pageFuture = [];
+      }
+      currentPageId = pageId;
+      if (pageId === "profilePage" && !options.skipProfileRender) {
+        renderProfile("messages");
+      }
+    }
+
+    function goToPreviousPage() {
+      if (pageHistory.length > 1) {
+        const previousPage = pageHistory.pop();
+        pageFuture.push(currentPageId);
+        showPage(previousPage, { skipHistory: true });
+        return;
+      }
+      if (pageHistory.length === 1) {
+        const previousPage = pageHistory.pop();
+        pageFuture.push(currentPageId);
+        showPage(previousPage, { skipHistory: true });
+        return;
+      }
+      pageStatus.textContent = "沒有上一頁紀錄。";
+    }
+
+    function goToNextPage() {
+      if (pageFuture.length) {
+        const nextVisitedPage = pageFuture.pop();
+        pageHistory.push(currentPageId);
+        showPage(nextVisitedPage, { skipHistory: true });
+        return;
+      }
+      pageStatus.textContent = "沒有下一頁紀錄。";
+    }
+
+    function requireVerification(nextPage) {
+      if (user.verified) {
+        showPage(nextPage);
+        return;
+      }
+      showPage("registerPage");
+      pageStatus.textContent = "請先完成手機簡訊碼認證，才能使用買賣功能。";
+    }
+
+    function renderProducts() {
+      const category = categoryFilter.value;
+      const sort = sortFilter.value;
+      let items = products.filter(item => category === "所有類別" || item.category === category);
+
+      items = items.sort((a, b) => {
+        if (sort === "year-desc") return b.year - a.year;
+        if (sort === "year-asc") return a.year - b.year;
+        if (sort === "price-asc") return a.price - b.price;
+        if (sort === "price-desc") return b.price - a.price;
+        if (sort === "condition-new") return a.condition === b.condition ? 0 : a.condition === "全新" ? -1 : 1;
+        if (sort === "condition-used") return a.condition === b.condition ? 0 : a.condition === "二手" ? -1 : 1;
+        return 0;
+      });
+
+      buyCount.textContent = `${items.length} 件商品`;
+      productList.innerHTML = "";
+      items.forEach(item => {
+        const card = document.createElement("article");
+        card.className = "product";
+        card.innerHTML = `
+          <div class="thumb">${item.icon}</div>
+          <div>
+            <h3>${item.name}</h3>
+            <div class="meta">
+              <span class="chip">${item.category}</span>
+              <span class="chip">${item.condition}</span>
+              <span class="chip">${item.year}</span>
+            </div>
+            <div class="price">NT$ ${item.price.toLocaleString("zh-TW")}</div>
+          </div>
+        `;
+        card.addEventListener("click", () => showDetail(item));
+        productList.appendChild(card);
+      });
+    }
+
+    function getMessageCountForItem(itemName) {
+      return sellerMessages.filter(message => message.itemName === itemName).length;
+    }
+
+    function updateMessageCount() {
+      const unreadCount = sellerMessages.filter(message => message.unread).length;
+      messageCount.textContent = unreadCount ? `${sellerMessages.length} 則 !` : `${sellerMessages.length} 則`;
+    }
+
+    function showDetail(item) {
+      selectedProduct = item;
+      const favorite = myFavorites.some(product => product.id === item.id);
+      detailCard.innerHTML = `
+        <div class="detail-hero">${item.icon}</div>
+        <h2 class="detail-title">${item.name}</h2>
+        <div class="meta">
+          <span class="chip">${item.category}</span>
+          <span class="chip">${item.condition}</span>
+          <span class="chip">${item.brand}</span>
+          <span class="chip">${item.year}</span>
+        </div>
+        <div class="price">NT$ ${item.price.toLocaleString("zh-TW")}</div>
+        <p class="subline" style="margin-top:8px;">賣家：${item.seller}</p>
+        <p class="notice" style="margin-top:10px;">${item.description}</p>
+        <label class="field" style="margin-top:12px;">留言給賣家
+          <textarea id="sellerMessage" placeholder="例如：請問可以面交嗎？">請問商品目前還在嗎？</textarea>
+        </label>
+        <div class="actions">
+          <button class="secondary" id="favoriteItem">${favorite ? "已加入最愛" : "加入最愛"}</button>
+          <button class="secondary" id="messageSeller">留言給賣家</button>
+          <button class="primary" id="purchaseItem" style="grid-column:1 / -1;">購買</button>
+        </div>
+      `;
+      showPage("detailPage");
+      document.querySelector("#messageSeller").addEventListener("click", () => {
+        sellerMessages.unshift({
+          itemName: item.name,
+          seller: item.seller,
+          buyer: user.name,
+          time: "2026-06-25 10:40",
+          content: document.querySelector("#sellerMessage").value.trim() || "請問商品目前還在嗎？",
+          reply: "您好，商品目前還在，可以直接下單或再留言詢問細節。",
+          unread: false
+        });
+        updateMessageCount();
+        pageStatus.textContent = "留言已送給賣家，等待賣家回覆。";
+      });
+      document.querySelector("#favoriteItem").addEventListener("click", event => {
+        const favoriteIndex = myFavorites.findIndex(product => product.id === item.id);
+        if (favoriteIndex >= 0) {
+          myFavorites.splice(favoriteIndex, 1);
+          event.currentTarget.textContent = "加入最愛";
+          pageStatus.textContent = "商品已從我的最愛移除。";
+        } else {
+          myFavorites.push(item);
+          event.currentTarget.textContent = "已加入最愛";
+          pageStatus.textContent = "商品已加入我的最愛。";
+        }
+      });
+      document.querySelector("#purchaseItem").addEventListener("click", () => {
+        paymentAmount.textContent = `NT$ ${item.price.toLocaleString("zh-TW")}`;
+        showPage("paymentPage");
+      });
+    }
+
+    function showMessageList(itemName) {
+      const messages = sellerMessages
+        .filter(message => !itemName || message.itemName === itemName)
+        .sort((a, b) => new Date(b.time.replace(" ", "T")) - new Date(a.time.replace(" ", "T")));
+
+      profileResult.innerHTML = `
+        <div class="label-row">
+          <strong>${itemName ? `${itemName} 留言` : "互相留言"}</strong>
+          <span>${messages.length} 則</span>
+        </div>
+        <div class="product-list">
+          ${messages.map((message, index) => `
+            <div class="message-row" data-message-index="${index}">
+              <div>
+                <b>${message.buyer === user.name ? `賣家：${message.seller}` : message.buyer}</b>
+                <span>${message.itemName} · ${message.buyer === user.name ? "我留言給賣家" : "買家留言"} · ${message.time}</span>
+              </div>
+              <span class="message-dot ${message.unread ? "unread" : ""}">${message.unread ? "!" : "›"}</span>
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      profileResult.querySelectorAll("[data-message-index]").forEach(row => {
+        row.addEventListener("click", () => showMessageDetail(messages[Number(row.dataset.messageIndex)]));
+      });
+    }
+
+    function showMessageDetail(message) {
+      message.unread = false;
+      updateMessageCount();
+      const isMyMessage = message.buyer === user.name;
+      if (isMyMessage) {
+        profileResult.innerHTML = `
+          <div class="label-row">
+            <strong>賣家：${message.seller}</strong>
+            <span>${message.time}</span>
+          </div>
+          <p class="notice">我留言：${message.content}</p>
+          <p class="notice">賣家回覆：${message.reply || "賣家尚未回覆，回覆後會直接顯示在這裡。"}</p>
+          <label class="field" style="margin-top:12px;">我要再留言
+            <textarea id="buyerMessage" placeholder="輸入要給賣家的訊息..."></textarea>
+          </label>
+          <button class="primary" id="sendBuyerMessage" style="margin-top:10px;width:100%;">送出留言</button>
+        `;
+        document.querySelector("#sendBuyerMessage").addEventListener("click", () => {
+          const nextMessage = document.querySelector("#buyerMessage").value.trim() || "我想再確認商品細節，謝謝。";
+          message.content = `${message.content}\n我補充：${nextMessage}`;
+          message.time = "2026-06-25 10:45";
+          pageStatus.textContent = "已送出留言給賣家，等待賣家回覆。";
+          showMessageDetail(message);
+        });
+        return;
+      }
+      profileResult.innerHTML = `
+        <div class="label-row">
+          <strong>${message.buyer}</strong>
+          <span>${message.time}</span>
+        </div>
+        <p class="notice">${message.content}</p>
+        ${message.reply ? `<p class="notice">已回覆：${message.reply}</p>` : ""}
+        <label class="field" style="margin-top:12px;">賣家回覆
+          <textarea id="replyMessage" placeholder="輸入回覆訊息...">${message.reply}</textarea>
+        </label>
+        <button class="primary" id="sendReply" style="margin-top:10px;width:100%;">送出回覆</button>
+      `;
+      document.querySelector("#sendReply").addEventListener("click", () => {
+        message.reply = document.querySelector("#replyMessage").value.trim() || "謝謝詢問，我會再和你確認細節。";
+        pageStatus.textContent = "已送出回覆給買家。";
+        showMessageDetail(message);
+      });
+    }
+
+    function renderShippingProgress() {
+      if (!myOrders.length) {
+        profileResult.innerHTML = `<p class="notice">目前沒有出貨進度。</p>`;
+        return;
+      }
+      profileResult.innerHTML = `<div class="product-list">${myOrders.map(order => `
+        <article class="product">
+          <div class="thumb">${order.product.icon}</div>
+          <div>
+            <h3>${order.product.name}</h3>
+            <div class="meta">
+              <span class="chip">${order.status}</span>
+              <span class="chip">${order.receiver}</span>
+            </div>
+            <div class="price">NT$ ${order.product.price.toLocaleString("zh-TW")}</div>
+          </div>
+        </article>
+      `).join("")}</div>`;
+    }
+
+    function renderProfile(type) {
+      if (type === "info") {
+        profilePhoneCode = "";
+        profileEmailCode = "";
+        profileResult.innerHTML = `
+          <div class="form">
+            <label class="field">姓名
+              <input id="profileEditName" value="${user.name}" autocomplete="name">
+            </label>
+            <label class="field">電話
+              <input id="profileEditPhone" value="${user.phone}" autocomplete="tel">
+            </label>
+            <div class="sms-row">
+              <input id="profilePhoneCode" placeholder="電話變更需輸入 4 碼" inputmode="numeric" maxlength="4">
+              <button class="secondary" id="sendProfilePhoneCode" type="button">發送驗證碼</button>
+            </div>
+            <p class="sms-hint" id="profilePhoneHint"></p>
+            <label class="field">Email
+              <input id="profileEditEmail" value="${user.email}" autocomplete="email">
+            </label>
+            <div class="sms-row">
+              <input id="profileEmailCode" placeholder="Email 變更需輸入 4 碼" inputmode="numeric" maxlength="4">
+              <button class="secondary" id="sendProfileEmailCode" type="button">驗證 Email</button>
+            </div>
+            <p class="sms-hint" id="profileEmailHint"></p>
+            <label class="field">生日
+              <input id="profileEditBirthday" type="date" value="${user.birthday}">
+            </label>
+            <label class="field">通訊地址
+              <input id="profileEditAddress" value="${user.address}" autocomplete="street-address">
+            </label>
+            <button class="primary" id="saveProfileInfo" type="button">儲存使用者資料</button>
+            <p class="notice" id="profileSaveHint">若修改電話或 Email，需先完成 4 碼驗證。</p>
+          </div>`;
+        const phoneInput = document.querySelector("#profileEditPhone");
+        const emailInput = document.querySelector("#profileEditEmail");
+        const phoneHint = document.querySelector("#profilePhoneHint");
+        const emailEditHint = document.querySelector("#profileEmailHint");
+        document.querySelector("#sendProfilePhoneCode").addEventListener("click", () => {
+          const phone = phoneInput.value.trim();
+          if (!phone) {
+            phoneHint.textContent = "請先輸入電話。";
+            phoneHint.classList.add("show");
+            return;
+          }
+          profilePhoneCode = String(Math.floor(1000 + Math.random() * 9000));
+          document.querySelector("#profilePhoneCode").value = "";
+          phoneHint.textContent = `已發送 4 碼簡訊驗證碼到 ${phone}。設計稿測試碼：${profilePhoneCode}`;
+          phoneHint.classList.add("show");
+        });
+        document.querySelector("#sendProfileEmailCode").addEventListener("click", () => {
+          const email = emailInput.value.trim();
+          if (!email) {
+            emailEditHint.textContent = "請先輸入 Email。";
+            emailEditHint.classList.add("show");
+            return;
+          }
+          profileEmailCode = String(Math.floor(1000 + Math.random() * 9000));
+          document.querySelector("#profileEmailCode").value = "";
+          emailEditHint.textContent = `已發送 4 碼 Email 驗證碼到 ${email}。設計稿測試碼：${profileEmailCode}`;
+          emailEditHint.classList.add("show");
+        });
+        document.querySelector("#saveProfileInfo").addEventListener("click", () => {
+          const nextName = document.querySelector("#profileEditName").value.trim() || "使用者";
+          const nextPhone = phoneInput.value.trim();
+          const nextEmail = emailInput.value.trim();
+          const nextBirthday = document.querySelector("#profileEditBirthday").value;
+          const nextAddress = document.querySelector("#profileEditAddress").value.trim();
+          const saveHint = document.querySelector("#profileSaveHint");
+          if (nextPhone !== user.phone && (!profilePhoneCode || document.querySelector("#profilePhoneCode").value.trim() !== profilePhoneCode)) {
+            phoneHint.textContent = "電話驗證碼錯誤，請先完成電話驗證。";
+            phoneHint.classList.add("show");
+            return;
+          }
+          if (nextEmail !== user.email && (!profileEmailCode || document.querySelector("#profileEmailCode").value.trim() !== profileEmailCode)) {
+            emailEditHint.textContent = "Email 驗證碼錯誤，請先完成 Email 驗證。";
+            emailEditHint.classList.add("show");
+            return;
+          }
+          user.name = nextName;
+          user.phone = nextPhone;
+          user.email = nextEmail;
+          user.birthday = nextBirthday;
+          user.address = nextAddress;
+          profileName.textContent = user.name;
+          userButton.textContent = user.name;
+          saveHint.textContent = "使用者資料已更新。";
+        });
+        return;
+      }
+      if (type === "shipping") {
+        renderShippingProgress();
+        return;
+      }
+      if (type === "messages") {
+        showMessageList();
+        return;
+      }
+
+      const data = {
+        selling: mySelling,
+        sold: [
+          { name: "二手螢幕", price: 2600 },
+          { name: "咖啡磨豆機", price: 1200 }
+        ],
+        bought: myBought,
+      }[type];
+
+      if (!data.length) {
+        profileResult.innerHTML = `<p class="notice">目前沒有資料。</p>`;
+        return;
+      }
+
+      profileResult.innerHTML = `<div class="product-list">${data.map(item => `
+        <article class="product">
+          <div class="thumb">${item.icon || "✓"}</div>
+          <div>
+            <h3>${item.name}</h3>
+            <div class="price">NT$ ${(item.price || 0).toLocaleString("zh-TW")}</div>
+          </div>
+          ${type === "selling" && getMessageCountForItem(item.name) ? `<span class="message-dot" data-open-messages="${item.name}">訊</span>` : ""}
+        </article>
+      `).join("")}</div>`;
+
+      profileResult.querySelectorAll("[data-open-messages]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          showMessageList(button.dataset.openMessages);
+        });
+      });
+    }
+
+    sendSms.addEventListener("click", () => {
+      generatedSmsCode = String(Math.floor(1000 + Math.random() * 9000));
+      registerStatus.textContent = "已發送";
+      smsCode.value = "";
+      smsHint.textContent = `後台已送出 4 碼驗證碼到 ${document.querySelector("#userPhone").value.trim() || "使用者手機"}。設計稿測試碼：${generatedSmsCode}`;
+      smsHint.classList.add("show");
+      pageStatus.textContent = "後台已送出 4 碼隨機簡訊驗證碼，請輸入後完成認證。";
+      smsCode.focus();
+    });
+
+    sendEmailCode.addEventListener("click", () => {
+      const email = document.querySelector("#userEmail").value.trim();
+      if (!email) {
+        emailHint.textContent = "請先輸入 Email。";
+        emailHint.classList.add("show");
+        return;
+      }
+      generatedEmailCode = String(Math.floor(1000 + Math.random() * 9000));
+      emailCode.value = "";
+      emailHint.textContent = `後台已送出 4 碼 Email 驗證碼到 ${email}。設計稿測試碼：${generatedEmailCode}`;
+      emailHint.classList.add("show");
+      pageStatus.textContent = "後台已送出 Email 驗證碼，請輸入後完成認證。";
+      emailCode.focus();
+    });
+
+    function updateVerifyButtonState() {
+      verifySms.disabled = !(termsBox.classList.contains("open") && agreeTerms.checked);
+    }
+
+    toggleTerms.addEventListener("click", () => {
+      const isOpen = termsBox.classList.toggle("open");
+      toggleTerms.textContent = isOpen ? "收合使用條款、隱私權政策與免責聲明" : "展開使用條款、隱私權政策與免責聲明";
+      updateVerifyButtonState();
+    });
+
+    agreeTerms.addEventListener("change", updateVerifyButtonState);
+    updateVerifyButtonState();
+
+    verifySms.addEventListener("click", () => {
+      if (!termsBox.classList.contains("open")) {
+        pageStatus.textContent = "請先展開使用條款、隱私權政策與免責聲明，閱讀條文後再勾選同意。";
+        termsBox.classList.add("open");
+        toggleTerms.textContent = "收合使用條款、隱私權政策與免責聲明";
+        updateVerifyButtonState();
+        return;
+      }
+      if (!agreeTerms.checked) {
+        pageStatus.textContent = "請勾選「我已閱讀並同意使用條款、隱私權政策與免責聲明」後才能註冊。";
+        return;
+      }
+      if (!generatedSmsCode) {
+        pageStatus.textContent = "請先按下發送簡訊，取得 4 碼驗證碼。";
+        return;
+      }
+      if (smsCode.value.trim() !== generatedSmsCode) {
+        pageStatus.textContent = "簡訊碼錯誤，請確認後再試。";
+        return;
+      }
+      if (!generatedEmailCode) {
+        pageStatus.textContent = "請先按下驗證 Email，取得 4 碼驗證碼。";
+        return;
+      }
+      if (emailCode.value.trim() !== generatedEmailCode) {
+        pageStatus.textContent = "Email 驗證碼錯誤，請確認後再試。";
+        return;
+      }
+      user.verified = true;
+      user.name = document.querySelector("#userName").value.trim() || "使用者";
+      user.phone = document.querySelector("#userPhone").value.trim();
+      user.email = document.querySelector("#userEmail").value.trim();
+      user.address = document.querySelector("#userAddress").value.trim();
+      user.birthday = document.querySelector("#userBirthday").value;
+      registerStatus.textContent = "完成";
+      smsHint.textContent = "手機驗證成功，註冊已完成。";
+      profileName.textContent = user.name;
+      userButton.textContent = user.name;
+      userButton.hidden = false;
+      showPage("buyPage");
+      renderProducts();
+    });
+
+    userButton.addEventListener("click", () => {
+      if (user.verified) {
+        showPage("profilePage", { skipProfileRender: true });
+        renderProfile("info");
+        return;
+      }
+      showPage("registerPage");
+    });
+
+    navButtons.forEach(button => {
+      button.addEventListener("click", () => requireVerification(button.dataset.page));
+    });
+
+    function setLabelText(select, text) {
+      const label = select.closest("label");
+      label.childNodes[0].textContent = text;
+    }
+
+    function applyLanguage() {
+      const copy = uiCopy[languageSelect.value] || uiCopy.zh;
+      navButtons.forEach((button, index) => {
+        button.lastChild.textContent = copy.nav[index];
+      });
+      document.querySelector("#settingsPage .label-row strong").textContent = copy.settings;
+      document.querySelector("#settingsPage .label-row span").textContent = copy.system;
+      setLabelText(themeSelect, copy.background);
+      setLabelText(fontSizeSelect, copy.fontSize);
+      setLabelText(languageSelect, copy.language);
+      const supportRow = document.querySelectorAll("#settingsPage .label-row")[1];
+      supportRow.querySelector("strong").textContent = copy.support;
+      supportRow.querySelector("span").textContent = copy.supportBadge;
+      document.querySelector("#settingsPage .notice").textContent = copy.supportText;
+      const titles = copy.titles[currentPageId] || copy.titles.settingsPage;
+      pageTitle.textContent = titles[0];
+      pageStatus.textContent = titles[1];
+    }
+
+    themeSelect.addEventListener("change", () => {
+      screen.classList.remove("theme-teal", "theme-light");
+      if (themeSelect.value !== "default") screen.classList.add(`theme-${themeSelect.value}`);
+    });
+
+    fontSizeSelect.addEventListener("change", () => {
+      screen.classList.remove("font-small", "font-large");
+      if (fontSizeSelect.value !== "normal") screen.classList.add(`font-${fontSizeSelect.value}`);
+    });
+
+    languageSelect.addEventListener("change", () => {
+      applyLanguage();
+      pageStatus.textContent = (uiCopy[languageSelect.value] || uiCopy.zh).updated;
+    });
+
+    conditionButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        conditionButtons.forEach(item => item.classList.toggle("active", item === button));
+        selectedCondition = button.dataset.condition;
+      });
+    });
+
+    uploadItem.addEventListener("click", () => {
+      const item = {
+        id: Date.now(),
+        category: document.querySelector("#sellCategory").value,
+        name: document.querySelector("#sellName").value.trim() || "未命名商品",
+        condition: selectedCondition,
+        brand: document.querySelector("#sellBrand").value.trim() || "未填寫",
+        year: Number(document.querySelector("#sellYear").value) || 2026,
+        price: Number(document.querySelector("#sellPrice").value) || 0,
+        seller: user.name,
+        icon: "N",
+        description: document.querySelector("#sellDescription").value.trim() || "賣家尚未補充描述。"
+      };
+      products.unshift(item);
+      mySelling.unshift(item);
+      sellerMessages.unshift({
+        itemName: item.name,
+        seller: user.name,
+        buyer: "Chris Wang",
+        time: "2026-06-25 10:32",
+        content: "我對這個商品有興趣，請問可以保留到今天晚上嗎？",
+        reply: "",
+        unread: true
+      });
+      sellingCount.textContent = `${mySelling.length} 件`;
+      updateMessageCount();
+      sellStatus.textContent = "已上傳";
+      pageStatus.textContent = "商品已上傳，買家可以在買東西頁面看到。";
+      renderProducts();
+    });
+
+    categoryFilter.addEventListener("change", renderProducts);
+    sortFilter.addEventListener("change", renderProducts);
+
+    payNow.addEventListener("click", () => {
+      if (!myBought.some(item => item.id === selectedProduct.id)) myBought.push(selectedProduct);
+      myOrders.unshift({
+        product: selectedProduct,
+        receiver: receiverName.value.trim() || user.name,
+        phone: receiverPhone.value.trim() || user.phone,
+        address: receiverAddress.value.trim() || user.address,
+        status: "賣家準備出貨"
+      });
+      boughtCount.textContent = `${myBought.length} 件`;
+      shippingCount.textContent = `${myOrders.length} 筆`;
+      thanksAmount.textContent = `NT$ ${selectedProduct.price.toLocaleString("zh-TW")}`;
+      thanksMessage.textContent = `感謝購買「${selectedProduct.name}」。賣家將寄送到：${receiverAddress.value.trim() || user.address}。後續可以到個人頁面查詢出貨進度。`;
+      showPage("thanksPage");
+    });
+
+    backToDetail.addEventListener("click", () => showDetail(selectedProduct));
+
+    goShipping.addEventListener("click", () => {
+      showPage("profilePage");
+      renderProfile("shipping");
+    });
+
+    goBuyMore.addEventListener("click", () => showPage("buyPage"));
+
+    prevPage.addEventListener("click", goToPreviousPage);
+    nextPage.addEventListener("click", goToNextPage);
+
+    document.querySelectorAll(".profile-item").forEach(item => {
+      item.addEventListener("click", () => renderProfile(item.dataset.profile));
+    });
+
+    sellingCount.textContent = `${mySelling.length} 件`;
+    updateMessageCount();
+    renderProducts();
+    if (new URLSearchParams(window.location.search).get("demo") === "home") {
+      user.verified = true;
+      userButton.textContent = user.name;
+      userButton.hidden = false;
+      pageStatus.textContent = "作品集展示模式：已進入買東西頁面。";
+      showPage("buyPage");
+      if (new URLSearchParams(window.location.search).get("preview") === "1") {
+        document.body.classList.add("portfolio-watermark");
+        userButton.textContent = "Crovantix";
+        document.querySelectorAll("button, input, select, textarea").forEach(element => { element.disabled = true; });
+        document.querySelectorAll("a").forEach(element => { element.style.pointerEvents = "none"; });
+        const blockPreviewEvent = event => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        };
+        ["click", "submit", "change", "input", "keydown"].forEach(type => document.addEventListener(type, blockPreviewEvent, true));
+        pageStatus.textContent = "作品集首頁樣板展示，互動功能已關閉。";
+      }
+    }
+  </script>
+  <script src="app-database.js"></script>
+  <script src="ai-share-module.js"></script>
+
+  <script>
+    (() => {
+      const playCrovantixLaunchSound = () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        const audioContext = new AudioContextClass();
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        masterGain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.08);
+        masterGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 2.35);
+        masterGain.connect(audioContext.destination);
+
+        const notes = [392, 523.25, 659.25, 783.99];
+        notes.forEach((frequency, index) => {
+          const oscillator = audioContext.createOscillator();
+          const noteGain = audioContext.createGain();
+          oscillator.type = index % 2 ? "triangle" : "sine";
+          oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + index * 0.22);
+          noteGain.gain.setValueAtTime(0.0001, audioContext.currentTime + index * 0.22);
+          noteGain.gain.exponentialRampToValueAtTime(0.16, audioContext.currentTime + index * 0.22 + 0.05);
+          noteGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + index * 0.22 + 1.05);
+          oscillator.connect(noteGain);
+          noteGain.connect(masterGain);
+          oscillator.start(audioContext.currentTime + index * 0.22);
+          oscillator.stop(audioContext.currentTime + index * 0.22 + 1.12);
+        });
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        try {
+          const maybePromise = playCrovantixLaunchSound();
+          if (maybePromise && typeof maybePromise.catch === "function") maybePromise.catch(() => {});
+        } catch (error) {}
+      }, { once: true });
+    })();
+  </script>
+  <script src="crovantix-product-promo.js"></script>
+</body>
+</html>

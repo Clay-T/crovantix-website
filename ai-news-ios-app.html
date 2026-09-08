@@ -1,0 +1,1489 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>每日新聞 iOS App</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #071018;
+      --panel: #101b27;
+      --panel-2: #18283a;
+      --ink: #f7fbff;
+      --muted: #a8b8c8;
+      --line: rgba(255,255,255,.14);
+      --cyan: #5bd8ff;
+      --green: #7df2b4;
+      --amber: #ffd166;
+      --red: #ff5b6e;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(91,216,255,.2), transparent 34%),
+        radial-gradient(circle at 82% 4%, rgba(125,242,180,.14), transparent 32%),
+        linear-gradient(145deg, #061018, #122132 58%, #071018);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", "Segoe UI", sans-serif;
+    }
+
+    body[data-theme="light"] {
+      --bg: #eef8fc;
+      --panel: #ffffff;
+      --panel-2: #e9f5fb;
+      --ink: #102033;
+      --muted: #526373;
+      --line: rgba(16,32,51,.14);
+      background: linear-gradient(145deg, #e8f7ff, #f7fbff);
+    }
+
+    body[data-theme="warm"] {
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255,209,102,.2), transparent 34%),
+        radial-gradient(circle at 82% 4%, rgba(255,91,110,.14), transparent 32%),
+        linear-gradient(145deg, #140d10, #241827 58%, #0e0b10);
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .phone {
+      width: min(430px, 100%);
+      height: min(900px, calc(100vh - 28px));
+      min-height: 760px;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 34px;
+      padding: 12px;
+      background: #05080d;
+      box-shadow: 0 28px 90px rgba(0,0,0,.5);
+    }
+
+    .screen {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(16,27,39,.98), rgba(7,16,24,.98));
+    }
+
+    .crovantix-launch-screen {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      z-index: 20;
+      background: #fff;
+      pointer-events: none;
+      animation: splashFade 3.45s ease forwards;
+    }
+
+    .crovantix-launch-mark {
+      display: grid;
+      place-items: center;
+      gap: 12px;
+      opacity: 0;
+      transform: scale(.94);
+      animation: markIn 3.15s ease forwards;
+    }
+
+    .crovantix-launch-logo {
+      width: 250px;
+      max-width: 72vw;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .crovantix-launch-copy {
+      color: #102033;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    @keyframes markIn {
+      0% { opacity: 0; transform: scale(.94); }
+      22%, 78% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.02); }
+    }
+
+    @keyframes splashFade {
+      0%, 82% { opacity: 1; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+
+    .island {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 112px;
+      height: 28px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #03050a;
+      z-index: 4;
+    }
+
+    .status {
+      height: 46px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 22px 8px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .app {
+      height: calc(100% - 46px);
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 76px;
+      overflow: hidden;
+    }
+
+    .app.font-small { font-size: 14px; }
+    .app.font-large { font-size: 18px; }
+    .app.font-small h1 { font-size: 25px; }
+    .app.font-large h1 { font-size: 31px; }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0 12px;
+    }
+
+    .pill {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 13px;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      font-size: 13px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .pill.primary {
+      border: 0;
+      color: #061018;
+      background: linear-gradient(135deg, #d9f8ff, var(--cyan));
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .subline {
+      min-height: 34px;
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .content {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .page { display: none; }
+    .page.active { display: grid; gap: 12px; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: rgba(16,27,39,.9);
+    }
+
+    body[data-theme="light"] .card { background: rgba(255,255,255,.92); }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .label-row strong {
+      font-size: 19px;
+      letter-spacing: 0;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      outline: none;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    input, select { min-height: 46px; }
+
+    textarea {
+      min-height: 104px;
+      resize: none;
+      line-height: 1.45;
+    }
+
+    select,
+    select option {
+      appearance: auto;
+      color: #061018;
+      background: #fff;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .sms-row {
+      display: grid;
+      grid-template-columns: 1fr 128px;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .terms {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .2s ease;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .terms.open {
+      max-height: 240px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 8px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .check-row input { width: 16px; height: 16px; padding: 0; }
+
+    .primary-button,
+    .secondary-button {
+      border: 0;
+      border-radius: 8px;
+      min-height: 46px;
+      padding: 10px 14px;
+      color: #061018;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      font-weight: 950;
+      font-size: 14px;
+      line-height: 1.2;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .secondary-button {
+      color: var(--ink);
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--line);
+    }
+
+    .sms-row .secondary-button {
+      height: 46px;
+      padding: 0 10px;
+      align-self: end;
+      white-space: nowrap;
+    }
+
+    .news-list,
+    .case-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .news-card,
+    .case-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,.05);
+      text-align: left;
+    }
+
+    .case-item.unlocked {
+      border-color: rgba(125,242,180,.72);
+      background:
+        linear-gradient(135deg, rgba(125,242,180,.2), rgba(91,216,255,.12)),
+        rgba(255,255,255,.05);
+      box-shadow: 0 0 0 1px rgba(125,242,180,.16) inset;
+      cursor: default;
+    }
+
+    .case-item.unlocked .tag {
+      color: #052015;
+      background: var(--green);
+    }
+
+    .case-item:disabled {
+      opacity: 1;
+    }
+
+    .news-card h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      line-height: 1.35;
+    }
+
+    .news-card p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .news-card a {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    .ai-points {
+      display: none;
+      margin: 10px 0;
+      border: 1px solid rgba(125,242,180,.28);
+      border-radius: 8px;
+      padding: 10px;
+      background: rgba(125,242,180,.08);
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .ai-points.show { display: block; }
+
+    .ai-points b {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--green);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: #061018;
+      background: var(--cyan);
+    }
+
+    .result {
+      display: none;
+      white-space: pre-line;
+      border: 1px solid rgba(91,216,255,.32);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(91,216,255,.08);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .result.show { display: block; }
+
+    .tabbar {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 16px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 5px;
+      min-height: 64px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 8px;
+      background: rgba(5,8,13,.92);
+      backdrop-filter: blur(16px);
+      z-index: 5;
+    }
+
+    .tabbar button {
+      min-width: 0;
+      border: 0;
+      border-radius: 18px;
+      color: var(--muted);
+      background: transparent;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tabbar button.active {
+      color: var(--cyan);
+      background: rgba(91,216,255,.1);
+    }
+
+    .nav-symbol { font-size: 18px; line-height: 1; }
+
+    .toast {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 92px;
+      display: none;
+      border: 1px solid rgba(255,209,102,.45);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: rgba(39,29,13,.94);
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+      z-index: 8;
+    }
+
+    .toast.show { display: block; }
+  </style>
+</head>
+<body data-crovantix-disable-shared-tabs="true">
+  <div class="phone">
+    <div class="screen">
+      <div class="crovantix-launch-screen" aria-label="Crovantix Technologies 啟動畫面">
+        <div class="crovantix-launch-mark">
+          <img class="crovantix-launch-logo" src="crovantix-launch-logo.png" alt="Crovantix logo">
+          <small class="crovantix-launch-copy">© Crovantix Technologies</small>
+        </div>
+      </div>
+      <div class="island"></div>
+      <div class="status"><span>9:41</span><span>5G ▰</span></div>
+      <section class="app font-normal" id="app">
+        <div class="toolbar">
+          <button class="pill primary" id="userButton" type="button">尚未註冊</button>
+          <button class="pill" id="creditButton" type="button">升級AI助手</button>
+        </div>
+        <h1 id="pageTitle">每日新聞</h1>
+        <p class="subline" id="appStatus">先完成註冊，即可搜尋 1 到 5 天內新聞。</p>
+        <main class="content">
+          <section class="page active" id="registerPage">
+            <section class="card">
+              <div class="label-row"><strong>登入 / 註冊</strong><span>首次使用</span></div>
+              <div class="grid-2">
+                <label>姓名<input id="registerName" value="Clay Tseng"></label>
+                <label>性別<select id="registerGender"><option>男</option><option>女</option><option>其他</option></select></label>
+              </div>
+              <label>電話<input id="registerPhone" value="0912-345-678" inputmode="tel"></label>
+              <label>生日<input id="registerBirthday" type="date" value="1990-01-01"></label>
+              <label>Email<input id="registerEmail" value="clay@example.com" inputmode="email"></label>
+              <div class="sms-row">
+                <label>簡訊驗證碼<input id="smsCode" maxlength="4" placeholder="輸入 4 位數" inputmode="numeric"></label>
+                <button class="secondary-button" id="sendSms" type="button">發送驗證碼</button>
+              </div>
+              <p class="hint" id="smsHint">按下發送驗證碼後會產生 4 位數驗證碼。</p>
+              <button class="secondary-button" id="toggleTerms" type="button">展開使用條款、隱私權政策與免責聲明</button>
+              <div class="terms" id="termsBox">
+                歡迎使用「每日新聞」（以下簡稱「本服務」）。本 App 由創微科技有限公司（以下稱「本公司」）提供相關服務。<br><br>
+                以下是一套適合 每日新聞 App（支援 AI 摘要、新聞推薦、推播通知、收藏、搜尋、多語言翻譯等功能）的法律文件範本，可直接作為 App Store / Google Play 上架使用。<br><br>
+                注意：此為一般商業範本，若未來 App 提供訂閱、AI 投資建議、醫療或法律建議，建議再請律師審閱，以符合所在地法規及平台要求。隱私權政策應與 App 實際蒐集資料一致。<br><br>
+
+                <b>每日新聞 App 使用條款（Terms of Service）</b><br><br>
+                <b>一、條款接受</b><br>
+                歡迎使用「每日新聞」（以下簡稱「本服務」）。<br>
+                當您下載、安裝、註冊或使用本服務時，即表示您已閱讀、了解並同意遵守本使用條款及隱私權政策。<br>
+                若您不同意本條款，請立即停止使用本服務。<br><br>
+
+                <b>二、服務內容</b><br>
+                本服務提供但不限於：每日新聞摘要、即時新聞瀏覽、每日新聞推薦、新聞分類、關鍵字搜尋、收藏新聞、推播通知、多語言翻譯、AI整理重點、熱門新聞排行。<br>
+                本公司有權隨時新增、修改或停止部分功能，而無須事前通知。<br><br>
+
+                <b>三、會員帳號</b><br>
+                若本服務提供會員功能，使用者應提供正確資訊、妥善保管帳號密碼、不得冒用他人帳號、不得分享帳號供多人使用。<br>
+                若帳號遭盜用，請立即通知本公司。<br><br>
+
+                <b>四、智慧財產權</b><br>
+                本 App 之 UI 設計、AI 演算法、軟體程式、Logo、商標、圖示、排版皆屬本公司所有。<br>
+                新聞內容若引用第三方媒體，其著作權仍屬原媒體所有。<br>
+                使用者不得重製、修改、散布、商業使用或轉售，除依法或取得授權外。<br><br>
+
+                <b>五、禁止事項</b><br>
+                使用者不得破解本 App、散播惡意程式、自動爬蟲抓取內容、干擾系統運作、發布違法內容、冒充他人，或利用本服務從事非法活動。<br>
+                違反者，本公司得立即停止服務。<br><br>
+
+                <b>六、AI內容說明</b><br>
+                本服務部分內容由 AI 產生，包括摘要、標題、分類、翻譯、推薦與重點整理。<br>
+                AI 內容可能存在誤判、遺漏、翻譯誤差或時效差異，使用者仍應參考原始新聞內容。<br><br>
+
+                <b>七、第三方內容</b><br>
+                本 App 可能包含新聞來源、第三方網站、外部連結與廣告內容。<br>
+                本公司不保證第三方內容之正確性、完整性或安全性。<br><br>
+
+                <b>八、訂閱服務（若有）</b><br>
+                若提供 Premium，可能包含自動續訂、App Store 或 Google Play 收費，使用者可自行取消續訂。<br>
+                已付款項依平台規定辦理退款。<br><br>
+
+                <b>九、服務終止</b><br>
+                本公司可因系統維護、安全因素、法律要求或使用者違規，停止提供全部或部分服務。<br><br>
+
+                <b>十、條款修改</b><br>
+                本公司得隨時修改本條款。修改後公布於 App 內即生效，持續使用視為同意修改內容。<br><br>
+
+                <b>十一、準據法</b><br>
+                本條款依中華民國法律解釋。如有爭議，以臺灣法院為第一審管轄法院。<br><br>
+
+                <b>每日新聞 App 隱私權政策（Privacy Policy）</b><br><br>
+                <b>一、政策說明</b><br>
+                本公司重視您的隱私。本政策說明本服務如何蒐集、使用、保存及保護您的個人資料。<br><br>
+
+                <b>二、可能蒐集之資料</b><br>
+                本 App 可能蒐集帳號資訊、Email、使用者名稱、大頭貼（若登入）、裝置資訊、Device ID、OS 版本、App 版本、裝置型號、使用紀錄、閱讀新聞、點擊內容、搜尋紀錄、收藏新聞、AI 摘要使用紀錄、Crash Log、Error Log、Analytics、Push Token 與通知設定。<br><br>
+
+                <b>三、資料用途</b><br>
+                蒐集資料將用於提供服務、AI 推薦、個人化新聞、改善演算法、Bug 修正、防止詐欺、客服支援與系統分析。<br><br>
+
+                <b>四、Cookies</b><br>
+                本服務可能使用 Cookies、Local Storage、SDK 與 Analytics 工具，以改善使用體驗。<br><br>
+
+                <b>五、第三方服務</b><br>
+                本服務可能使用 Firebase、Google Analytics、Apple Analytics、Crashlytics、Google AdMob、Facebook SDK（若有）。第三方服務可能依其政策蒐集部分資訊。<br><br>
+
+                <b>六、資料保存</b><br>
+                個人資料僅保存於提供服務所需期間或法律要求期間，超過保存期限將刪除或匿名化。<br><br>
+
+                <b>七、資料安全</b><br>
+                本公司採用 HTTPS、加密傳輸、權限控管、防火牆與安全儲存，降低資料外洩風險。<br><br>
+
+                <b>八、使用者權利</b><br>
+                您可依法要求查詢、更正、刪除、匯出資料、停止蒐集或停止處理，請聯絡客服辦理。<br><br>
+
+                <b>九、未成年人</b><br>
+                本服務並非專供未滿十三歲兒童使用。若發現誤蒐集相關資料，將儘速刪除。<br><br>
+
+                <b>十、政策修改</b><br>
+                本政策可能更新，重大修改將於 App 公告。<br><br>
+
+                <b>十一、聯絡方式</b><br>
+                客服 Email：support@crovantix.com<br><br>
+
+                <b>每日新聞 App 免責聲明（Disclaimer）</b><br><br>
+                <b>一、新聞內容</b><br>
+                本 App 僅提供新聞整理及 AI 摘要服務。新聞版權屬原始新聞媒體所有。<br><br>
+
+                <b>二、AI摘要</b><br>
+                AI 生成內容可能不完整、不精確、存在理解偏差或未反映最新資訊。請仍以原始新聞為準。AI 生成新聞內容宜清楚標示並經適當人工審核，特別是在重大或敏感議題上。<br><br>
+
+                <b>三、非專業建議</b><br>
+                本 App 內容不構成投資建議、法律意見、醫療建議或財務建議，使用者應自行判斷。<br><br>
+
+                <b>四、投資風險</b><br>
+                涉及股票、ETF、加密貨幣、外匯皆具有市場風險。任何投資決策均由使用者自行承擔。<br><br>
+
+                <b>五、第三方網站</b><br>
+                本 App 可能連結新聞網站、YouTube、社群媒體或外部網站，本公司不負其內容責任。<br><br>
+
+                <b>六、服務可用性</b><br>
+                本公司不保證服務永不中斷、無錯誤、即時更新或完整性。<br><br>
+
+                <b>七、責任限制</b><br>
+                因使用本服務造成資料遺失、投資損失、商業損失或間接損害，本公司於法律允許範圍內不負賠償責任。<br><br>
+
+                <b>八、著作權聲明</b><br>
+                所有新聞內容之著作權均屬原始新聞媒體或合法授權人所有。本 App 僅提供 AI 整理、AI 摘要、AI 分類、新聞索引與原文連結（如適用），不得視為原始新聞之替代。
+              </div>
+              <label class="check-row"><input id="agreeTerms" type="checkbox">我已閱讀並同意使用條款、隱私權政策與免責聲明</label>
+              <button class="primary-button" id="finishRegister" type="button">完成註冊</button>
+            </section>
+          </section>
+
+          <section class="page" id="newsPage">
+            <section class="card">
+              <div class="label-row"><strong>新聞搜尋</strong><span id="daysLabel">3 天內</span></div>
+              <div class="grid-2">
+                <label>類別
+                  <select id="categorySelect">
+                    <option>全部</option>
+                    <option>政治</option>
+                    <option>國際</option>
+                    <option>財經</option>
+                    <option>科技</option>
+                    <option>生活</option>
+                    <option>娛樂</option>
+                    <option>體育</option>
+                  </select>
+                </label>
+                <label>國別
+                  <select id="countrySelect">
+                    <option>全部</option>
+                    <option selected>台灣</option>
+                    <option>美國</option>
+                    <option>日本</option>
+                    <option>中國</option>
+                    <option>全球</option>
+                  </select>
+                </label>
+                <label>搜尋天數
+                  <select id="daysSelect">
+                    <option value="1">1 天內</option>
+                    <option value="2">2 天內</option>
+                    <option value="3" selected>3 天內</option>
+                    <option value="4">4 天內</option>
+                    <option value="5">5 天內</option>
+                  </select>
+                </label>
+              </div>
+              <label>關鍵字<input id="keywordInput" placeholder="例如：AI、選舉、半導體"></label>
+              <label class="check-row" id="aiSummaryToggleWrap" style="display:none;">
+                <input id="aiSummaryToggle" type="checkbox">開啟 AI 整理每則新聞重點
+              </label>
+              <p class="hint" id="aiSummaryHint">升級「AI整理新聞重點」後，可開啟或關閉每則新聞重點整理。</p>
+              <button class="primary-button" id="searchNews" type="button">搜尋</button>
+              <div class="result" id="searchSummary"></div>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong>新聞列表</strong><span id="newsCount">尚未搜尋</span></div>
+              <div class="news-list" id="newsList"></div>
+            </section>
+          </section>
+
+          <section class="page" id="upgradePage">
+            <section class="card">
+              <div class="label-row"><strong>升級方案</strong><span id="planStatus">目前方案：免費</span></div>
+              <div class="case-list">
+                <button class="case-item" data-plan="AI整理新聞重點" data-points="0" data-price="NT$99/月" data-feature="aiSummary" type="button">
+                  <div class="label-row"><strong>AI整理每則新聞重點</strong><span class="tag">NT$99/月</span></div>
+                  <p class="hint">付費後每則新聞將提供AI重點整理摘要, 協助您挑選感興趣的新聞</p>
+                </button>
+                <button class="case-item" data-plan="搜尋結果擴充" data-points="0" data-price="NT$99/月" data-feature="newsLimit" type="button">
+                  <div class="label-row"><strong>搜尋結果擴充</strong><span class="tag">NT$99/月</span></div>
+                  <p class="hint">免費每次搜尋最多顯示 30 則新聞；升級後每次搜尋最多可顯示 200 則新聞。</p>
+                </button>
+              </div>
+            </section>
+          </section>
+
+          <section class="page" id="paymentPage">
+            <section class="card">
+              <div class="label-row"><strong>信用卡付費</strong><span id="paymentPlanLabel">尚未選擇</span></div>
+              <label>持卡人姓名<input id="cardName" value="Clay Tseng"></label>
+              <label>信用卡號<input id="cardNumber" value="4242 4242 4242 4242" inputmode="numeric"></label>
+              <div class="grid-2">
+                <label>有效期限<input id="cardExpiry" value="12/30"></label>
+                <label>安全碼<input id="cardCvc" value="123" inputmode="numeric"></label>
+              </div>
+              <button class="primary-button" id="confirmPayment" type="button">確認付款並升級</button>
+              <div class="result" id="paymentResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="reportPage">
+            <section class="card">
+              <div class="label-row"><strong>問題回報</strong><span id="reportStatus">尚未送出</span></div>
+              <label>回報者姓名<input id="reportName" value="Clay Tseng"></label>
+              <label>Email<input id="reportEmail" value="clay@example.com" inputmode="email"></label>
+              <label>問題類型<select id="reportType"><option>新聞來源問題</option><option>搜尋問題</option><option>帳號問題</option><option>付款問題</option><option>其他</option></select></label>
+              <label>問題內容<textarea id="reportText" maxlength="300" placeholder="請描述遇到的問題。"></textarea></label>
+              <button class="primary-button" id="submitReport" type="button">送出問題回報</button>
+              <div class="result" id="reportResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="requestPage">
+            <section class="card">
+              <div class="label-row"><strong>新需求</strong><span id="requestStatus">尚未送出</span></div>
+              <label>提出需求者姓名<input id="requestName" value="Clay Tseng"></label>
+              <label>Email<input id="requestEmail" value="clay@example.com" inputmode="email"></label>
+              <label>需求類型<select id="requestType"><option>新聞搜尋功能</option><option>AI 重點整理</option><option>新聞來源</option><option>收藏與推播</option><option>其他需求</option></select></label>
+              <label>需求內容<textarea id="requestText" maxlength="300" placeholder="請描述希望新增或修改的功能。"></textarea></label>
+              <button class="primary-button" id="submitRequest" type="button">送出新需求</button>
+              <div class="result" id="requestResult"></div>
+            </section>
+          </section>
+
+          <section class="page" id="settingsPage">
+            <section class="card">
+              <div class="label-row"><strong>設定</strong><span>偏好設定</span></div>
+              <label>App 背景
+                <select id="themeSelect">
+                  <option value="dark">深色</option>
+                  <option value="light">淺色</option>
+                  <option value="warm">暖色</option>
+                </select>
+              </label>
+              <label>字體大小
+                <select id="fontSelect">
+                  <option value="font-small">小</option>
+                  <option value="font-normal" selected>中</option>
+                  <option value="font-large">大</option>
+                </select>
+              </label>
+              <label>語言
+                <select id="languageSelect">
+                  <option>繁體中文</option>
+                  <option>English</option>
+                </select>
+              </label>
+            </section>
+            <section class="card">
+              <div class="label-row"><strong>聯繫客服</strong></div>
+              <p class="hint">問題回報、廣告投放、合作洽談皆可透過 Email 聯繫：support@crovantix.com<br>官網： www.crovantix.com</p>
+            </section>
+          </section>
+
+          <section class="page" id="profilePage">
+            <section class="card">
+              <div class="label-row"><strong>使用者資料</strong><span>可修改</span></div>
+              <div class="result show" id="profileSubscription">目前訂閱項目：免費方案</div>
+              <label>姓名<input id="profileName" value="Clay Tseng"></label>
+              <label>電話<input id="profilePhone" value="0912-345-678" inputmode="tel"></label>
+              <label>Email<input id="profileEmail" value="clay@example.com" inputmode="email"></label>
+              <label>生日<input id="profileBirthday" type="date" value="1990-01-01"></label>
+              <label>性別<select id="profileGender"><option>男</option><option>女</option><option>其他</option></select></label>
+              <div class="sms-row">
+                <label>修改驗證碼<input id="profileSmsCode" maxlength="4" placeholder="輸入 4 位數" inputmode="numeric"></label>
+                <button class="secondary-button" id="sendProfileSms" type="button">發送驗證碼</button>
+              </div>
+              <p class="hint" id="profileSmsHint">若修改電話或 Email，需先發送並輸入 4 位數驗證碼。</p>
+              <button class="primary-button" id="saveProfile" type="button">儲存個人資料</button>
+              <div class="result" id="profileResult"></div>
+            </section>
+          </section>
+        </main>
+      </section>
+      <nav class="tabbar" id="tabbar">
+        <button class="active" data-page="newsPage" type="button"><span class="nav-symbol">N</span><span>新聞</span></button>
+        <button data-page="upgradePage" type="button"><span class="nav-symbol">◇</span><span>升級</span></button>
+        <button data-page="reportPage" type="button"><span class="nav-symbol">!</span><span>問題回報</span></button>
+        <button data-page="requestPage" type="button"><span class="nav-symbol">＋</span><span>新需求</span></button>
+        <button data-page="settingsPage" type="button"><span class="nav-symbol">⚙</span><span>設定</span></button>
+      </nav>
+      <div class="toast" id="toast">請先完成註冊</div>
+    </div>
+  </div>
+
+  <script src="app-database.js"></script>
+  <script src="crovantix-product-promo.js"></script>
+  <script src="crovantix-launch-sound.js"></script>
+  <script>
+    const pages = document.querySelectorAll(".page");
+    const navButtons = document.querySelectorAll(".tabbar button");
+    const userButton = document.querySelector("#userButton");
+    const creditButton = document.querySelector("#creditButton");
+    const pageTitle = document.querySelector("#pageTitle");
+    const appStatus = document.querySelector("#appStatus");
+    const toast = document.querySelector("#toast");
+    const app = document.querySelector("#app");
+
+    const registerName = document.querySelector("#registerName");
+    const registerPhone = document.querySelector("#registerPhone");
+    const registerBirthday = document.querySelector("#registerBirthday");
+    const registerEmail = document.querySelector("#registerEmail");
+    const registerGender = document.querySelector("#registerGender");
+    const smsCode = document.querySelector("#smsCode");
+    const smsHint = document.querySelector("#smsHint");
+    const sendSms = document.querySelector("#sendSms");
+    const termsBox = document.querySelector("#termsBox");
+    const toggleTerms = document.querySelector("#toggleTerms");
+    const agreeTerms = document.querySelector("#agreeTerms");
+    const finishRegister = document.querySelector("#finishRegister");
+
+    const categorySelect = document.querySelector("#categorySelect");
+    const countrySelect = document.querySelector("#countrySelect");
+    const daysSelect = document.querySelector("#daysSelect");
+    const daysLabel = document.querySelector("#daysLabel");
+    const keywordInput = document.querySelector("#keywordInput");
+    const searchNews = document.querySelector("#searchNews");
+    const searchSummary = document.querySelector("#searchSummary");
+    const newsCount = document.querySelector("#newsCount");
+    const newsList = document.querySelector("#newsList");
+    const aiSummaryToggleWrap = document.querySelector("#aiSummaryToggleWrap");
+    const aiSummaryToggle = document.querySelector("#aiSummaryToggle");
+    const aiSummaryHint = document.querySelector("#aiSummaryHint");
+
+    const planStatus = document.querySelector("#planStatus");
+    const paymentPlanLabel = document.querySelector("#paymentPlanLabel");
+    const cardName = document.querySelector("#cardName");
+    const cardNumber = document.querySelector("#cardNumber");
+    const cardExpiry = document.querySelector("#cardExpiry");
+    const cardCvc = document.querySelector("#cardCvc");
+    const confirmPayment = document.querySelector("#confirmPayment");
+    const paymentResult = document.querySelector("#paymentResult");
+
+    const reportName = document.querySelector("#reportName");
+    const reportEmail = document.querySelector("#reportEmail");
+    const reportType = document.querySelector("#reportType");
+    const reportText = document.querySelector("#reportText");
+    const reportStatus = document.querySelector("#reportStatus");
+    const reportResult = document.querySelector("#reportResult");
+
+    const requestName = document.querySelector("#requestName");
+    const requestEmail = document.querySelector("#requestEmail");
+    const requestType = document.querySelector("#requestType");
+    const requestText = document.querySelector("#requestText");
+    const requestStatus = document.querySelector("#requestStatus");
+    const requestResult = document.querySelector("#requestResult");
+    const submitRequest = document.querySelector("#submitRequest");
+
+    const themeSelect = document.querySelector("#themeSelect");
+    const fontSelect = document.querySelector("#fontSelect");
+    const languageSelect = document.querySelector("#languageSelect");
+
+    const profileName = document.querySelector("#profileName");
+    const profilePhone = document.querySelector("#profilePhone");
+    const profileEmail = document.querySelector("#profileEmail");
+    const profileBirthday = document.querySelector("#profileBirthday");
+    const profileGender = document.querySelector("#profileGender");
+    const profileSmsCode = document.querySelector("#profileSmsCode");
+    const sendProfileSms = document.querySelector("#sendProfileSms");
+    const profileSmsHint = document.querySelector("#profileSmsHint");
+    const saveProfile = document.querySelector("#saveProfile");
+    const profileResult = document.querySelector("#profileResult");
+    const profileSubscription = document.querySelector("#profileSubscription");
+
+    let registered = false;
+    let generatedCode = "";
+    let profileGeneratedCode = "";
+    let currentPlan = "免費";
+    let selectedPlan = null;
+    let aiSummaryUnlocked = false;
+    let aiSummaryEnabled = false;
+    let newsLimitUnlocked = false;
+    let lastNewsItems = [];
+    let lastNewsContext = { category: "全部", country: "台灣" };
+    const newsReturnStorageKey = "ai-news-return-state";
+
+    const titleMap = {
+      registerPage: "每日新聞",
+      newsPage: "每日新聞",
+      upgradePage: "升級方案",
+      paymentPage: "信用卡付費",
+      reportPage: "問題回報",
+      requestPage: "新需求",
+      settingsPage: "設定",
+      profilePage: "使用者資料"
+    };
+
+    const statusMap = {
+      registerPage: "先完成註冊，即可搜尋 1 到 5 天內新聞。",
+      newsPage: "選擇新聞類別、國別與關鍵字後搜尋。",
+      upgradePage: "升級 AI 整理每則新聞重點功能。",
+      paymentPage: "輸入信用卡資料完成付費升級。",
+      reportPage: "回報 App 或新聞搜尋問題，內容會記錄到後台資料庫。",
+      requestPage: "提出希望新增或修改的功能，內容會記錄到後台資料庫。",
+      settingsPage: "調整 App 背景、字體大小與語言。",
+      profilePage: "修改姓名、電話、Email、生日與性別。"
+    };
+
+    function saveRecord(type, payload) {
+      if (window.AppDatabase) {
+        window.AppDatabase.save("ai-news-ios-app", type, payload);
+      }
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    function updateCredits() {
+      creditButton.textContent = aiSummaryUnlocked && newsLimitUnlocked ? "已升級" : "升級AI助手";
+      const unlockedFeatures = [
+        aiSummaryUnlocked ? "AI重點整理" : "",
+        newsLimitUnlocked ? "200則搜尋" : ""
+      ].filter(Boolean);
+      planStatus.textContent = `目前方案：${currentPlan}${unlockedFeatures.length ? `（${unlockedFeatures.join("、")}）` : ""}`;
+      profileSubscription.textContent = unlockedFeatures.length
+        ? `目前訂閱項目：${unlockedFeatures.join("、")}`
+        : "目前訂閱項目：免費方案";
+      aiSummaryToggleWrap.style.display = aiSummaryUnlocked ? "flex" : "none";
+      aiSummaryHint.textContent = aiSummaryUnlocked
+        ? "AI 重點整理已解鎖，可自由開啟或關閉。"
+        : `升級「AI整理新聞重點」後，可開啟或關閉每則新聞重點整理。免費搜尋最多 30 則，升級搜尋結果擴充後最多 200 則。`;
+      document.querySelectorAll("[data-plan]").forEach(button => {
+        const unlocked = (button.dataset.feature === "aiSummary" && aiSummaryUnlocked)
+          || (button.dataset.feature === "newsLimit" && newsLimitUnlocked);
+        button.classList.toggle("unlocked", unlocked);
+        button.disabled = unlocked;
+        const tag = button.querySelector(".tag");
+        if (tag) tag.textContent = unlocked ? "已升級" : button.dataset.price;
+        button.setAttribute("aria-disabled", unlocked ? "true" : "false");
+      });
+    }
+
+    function showPage(pageId) {
+      if (!registered && pageId !== "registerPage") {
+        showToast("請先完成註冊");
+        return;
+      }
+      pages.forEach(page => page.classList.toggle("active", page.id === pageId));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.page === pageId));
+      pageTitle.textContent = titleMap[pageId] || "每日新聞";
+      appStatus.textContent = statusMap[pageId] || statusMap.newsPage;
+    }
+
+    function syncUserFields() {
+      const name = registerName.value.trim() || "使用者";
+      const email = registerEmail.value.trim() || "user@example.com";
+      userButton.textContent = registered ? name : "尚未註冊";
+      reportName.value = name;
+      reportEmail.value = email;
+      requestName.value = name;
+      requestEmail.value = email;
+      profileName.value = name;
+      profilePhone.value = registerPhone.value.trim();
+      profileEmail.value = email;
+      profileBirthday.value = registerBirthday.value || "1990-01-01";
+      profileGender.value = registerGender.value;
+    }
+
+    function htmlEscape(value) {
+      return String(value || "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[character]);
+    }
+
+    function formatNewsTime(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value || "";
+      return date.toLocaleString("zh-TW", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function apiBaseUrl() {
+      if (location.protocol === "http:" || location.protocol === "https:") return "";
+      return "http://127.0.0.1:3000";
+    }
+
+    function apiCandidates() {
+      if (location.protocol === "http:" || location.protocol === "https:") return [""];
+      const saved = localStorage.getItem("aiNewsApiBaseUrl");
+      return [...new Set(["http://127.0.0.1:3000", saved, "http://127.0.0.1:8766", "http://127.0.0.1:8768"].filter(Boolean))];
+    }
+
+    async function apiJson(path, options = {}) {
+      let lastError = null;
+      for (const baseUrl of apiCandidates()) {
+        try {
+          const response = await fetch(`${baseUrl}${path}`, options);
+          const result = await response.json().catch(() => ({}));
+          if (response.ok && result.ok !== false) {
+            if (baseUrl) localStorage.setItem("aiNewsApiBaseUrl", baseUrl);
+            return result;
+          }
+          lastError = new Error(result.error || `API 回應錯誤：${response.status}`);
+          if (result.error !== "Unknown API route") throw lastError;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error("API 尚未連線");
+    }
+
+    function formatNewsSources(item) {
+      const sources = Array.isArray(item.sources) && item.sources.length ? item.sources : [item.source].filter(Boolean);
+      const label = sources.join("、") || "新聞來源";
+      return item.mergedCount > 1 ? `${label}（已整合 ${item.mergedCount} 個來源）` : label;
+    }
+
+    async function loadAiSummaries() {
+      if (!aiSummaryUnlocked || !aiSummaryEnabled || !lastNewsItems.length) return;
+      const cards = document.querySelectorAll("[data-ai-summary-index]");
+      cards.forEach(card => {
+        card.textContent = "AI 摘要生成中...";
+        card.closest(".ai-points")?.classList.add("show");
+      });
+      await Promise.all(lastNewsItems.map(async (item, index) => {
+        const target = document.querySelector(`[data-ai-summary-index="${index}"]`);
+        if (!target) return;
+        try {
+          const payload = {
+            title: item.title,
+            summary: item.summary,
+            link: item.link,
+            links: item.links,
+            source: item.source,
+            sources: item.sources,
+            category: lastNewsContext.category,
+            country: lastNewsContext.country
+          };
+          const result = location.protocol === "file:"
+            ? await apiJson(`/api/news/summarize?payload=${encodeURIComponent(JSON.stringify(payload))}`)
+            : await apiJson("/api/news/summarize", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+          target.textContent = result.summary;
+          item.aiSummary = result.summary;
+        } catch (error) {
+          const message = error.message === "Failed to fetch"
+            ? "AI 摘要連線失敗，請用 http://127.0.0.1:3000/ai-news-ios-app.html 開啟並確認後端 API 正在執行。"
+            : `AI 摘要無法生成：${error.message}`;
+          target.textContent = message;
+        }
+      }));
+    }
+
+    function saveNewsReturnState() {
+      const activePage = document.querySelector(".page.active")?.id || "newsPage";
+      sessionStorage.setItem(newsReturnStorageKey, JSON.stringify({
+        activePage,
+        registered,
+        user: {
+          name: registerName.value,
+          phone: registerPhone.value,
+          birthday: registerBirthday.value,
+          email: registerEmail.value,
+          gender: registerGender.value
+        },
+        search: {
+          category: categorySelect.value,
+          country: countrySelect.value,
+          days: daysSelect.value,
+          keyword: keywordInput.value,
+          summary: searchSummary.textContent,
+          summaryVisible: searchSummary.classList.contains("show"),
+          count: newsCount.textContent,
+          listHtml: newsList.innerHTML
+        },
+        aiSummaryUnlocked,
+        aiSummaryEnabled,
+        newsLimitUnlocked,
+        lastNewsItems,
+        lastNewsContext,
+        currentPlan
+      }));
+    }
+
+    function restoreNewsReturnState() {
+      const raw = sessionStorage.getItem(newsReturnStorageKey);
+      if (!raw) return false;
+      try {
+        const state = JSON.parse(raw);
+        if (!state || !state.search?.listHtml) return false;
+        registered = Boolean(state.registered);
+        if (state.user) {
+          registerName.value = state.user.name || registerName.value;
+          registerPhone.value = state.user.phone || registerPhone.value;
+          registerBirthday.value = state.user.birthday || registerBirthday.value;
+          registerEmail.value = state.user.email || registerEmail.value;
+          registerGender.value = state.user.gender || registerGender.value;
+        }
+        categorySelect.value = state.search.category || categorySelect.value;
+        countrySelect.value = state.search.country || countrySelect.value;
+        daysSelect.value = state.search.days || daysSelect.value;
+        daysLabel.textContent = `${daysSelect.value} 天內`;
+        keywordInput.value = state.search.keyword || "";
+        searchSummary.textContent = state.search.summary || "";
+        searchSummary.classList.toggle("show", Boolean(state.search.summaryVisible));
+        newsCount.textContent = state.search.count || "已還原";
+        newsList.innerHTML = state.search.listHtml;
+        aiSummaryUnlocked = Boolean(state.aiSummaryUnlocked);
+        aiSummaryEnabled = Boolean(state.aiSummaryEnabled);
+        newsLimitUnlocked = Boolean(state.newsLimitUnlocked);
+        lastNewsItems = Array.isArray(state.lastNewsItems) ? state.lastNewsItems : [];
+        lastNewsContext = state.lastNewsContext || lastNewsContext;
+        currentPlan = state.currentPlan || currentPlan;
+        aiSummaryToggle.checked = aiSummaryEnabled;
+        syncUserFields();
+        updateCredits();
+        showPage(state.activePage === "newsPage" ? "newsPage" : "newsPage");
+        loadAiSummaries();
+        return true;
+      } catch (error) {
+        sessionStorage.removeItem(newsReturnStorageKey);
+        return false;
+      }
+    }
+
+    async function renderNews() {
+      const category = categorySelect.value;
+      const country = countrySelect.value;
+      const days = daysSelect.value;
+      const limit = newsLimitUnlocked ? 200 : 30;
+      const keyword = keywordInput.value.trim().toLowerCase();
+      daysLabel.textContent = `${days} 天內`;
+      newsCount.textContent = "搜尋中";
+      newsList.innerHTML = `<article class="news-card"><h3>正在搜尋各大新聞網站...</h3><p>系統會透過新聞搜尋來源取得 ${days} 天內結果並依新到舊排序，這次最多顯示 ${limit} 則。</p></article>`;
+      searchSummary.textContent = `正在搜尋真實新聞來源。\n類別：${category}\n國別：${country}\n搜尋天數：${days} 天內\n顯示上限：${limit} 則\n關鍵字：${keywordInput.value.trim() || "未設定"}`;
+      searchSummary.classList.add("show");
+      try {
+        const params = new URLSearchParams({ category, country, days, limit, keyword: keywordInput.value.trim() });
+        const result = await apiJson(`/api/news/search?${params.toString()}`);
+        const items = result.items || [];
+        lastNewsItems = items;
+        lastNewsContext = { category, country };
+        newsCount.textContent = `${items.length} 則`;
+        searchSummary.textContent = `已搜尋真實新聞來源。\n資料來源：${result.source}\n查詢語句：${result.query}\n類別：${category}\n國別：${country}\n搜尋天數：${result.days || days} 天內\n顯示上限：${result.limit || limit} 則\n關鍵字：${keywordInput.value.trim() || "未設定"}\n排序：${result.days || days} 天內，新到舊`;
+        newsList.innerHTML = items.length ? items.map((item, index) => `
+          <article class="news-card">
+            <h3>${htmlEscape(item.title)}</h3>
+            <p>${htmlEscape(item.summary || "請開啟原始新聞查看完整內容。")}</p>
+            <div class="ai-points ${aiSummaryEnabled ? "show" : ""}">
+              <b>AI 新聞重點摘要</b>
+              <span data-ai-summary-index="${index}">${htmlEscape(item.aiSummary || "AI 摘要生成中...")}</span>
+            </div>
+            <div class="meta">
+              <span class="tag">${htmlEscape(category)}</span>
+              <span>${htmlEscape(country)}</span>
+              <span>${htmlEscape(formatNewsTime(item.publishedAt))}</span>
+              <span>出處：${htmlEscape(formatNewsSources(item))}</span>
+            </div>
+            <a class="original-news-link" href="${htmlEscape(item.link)}">開啟原始新聞</a>
+          </article>
+        `).join("") : `<article class="news-card"><h3>沒有符合條件的 ${days} 天內新聞</h3><p>請調整類別、國別、搜尋天數或關鍵字後再搜尋。</p></article>`;
+        loadAiSummaries();
+        saveRecord("questions", {
+          title: "新聞搜尋",
+          category,
+          country,
+          days,
+          keyword: keywordInput.value.trim(),
+          source: result.source,
+          query: result.query,
+          resultCount: items.length,
+          requester: registerName.value.trim(),
+          email: registerEmail.value.trim(),
+          createdAt: new Date().toISOString()
+        });
+      } catch (error) {
+        newsCount.textContent = "搜尋失敗";
+        searchSummary.textContent = `無法取得即時新聞：${error.message}\n請確認已啟動後端 API：在 outputs 資料夾執行 npm start，並用 http://127.0.0.1:3000/ai-news-ios-app.html 開啟。`;
+        newsList.innerHTML = `<article class="news-card"><h3>新聞 API 尚未連線</h3><p>真實新聞搜尋需要後端代理去抓新聞 RSS，避免瀏覽器 CORS 阻擋。</p></article>`;
+      }
+    }
+
+    navButtons.forEach(button => {
+      button.addEventListener("click", () => showPage(button.dataset.page));
+    });
+
+    userButton.addEventListener("click", () => {
+      showPage(registered ? "profilePage" : "registerPage");
+    });
+
+    creditButton.addEventListener("click", () => {
+      showPage("upgradePage");
+    });
+
+    toggleTerms.addEventListener("click", () => {
+      termsBox.classList.toggle("open");
+    });
+
+    sendSms.addEventListener("click", () => {
+      generatedCode = String(Math.floor(1000 + Math.random() * 9000));
+      smsHint.textContent = `已發送 4 位數簡訊驗證碼。原型示範碼：${generatedCode}`;
+    });
+
+    sendProfileSms.addEventListener("click", () => {
+      profileGeneratedCode = String(Math.floor(1000 + Math.random() * 9000));
+      profileSmsHint.textContent = `已發送 4 位數驗證碼。原型示範碼：${profileGeneratedCode}`;
+    });
+
+    finishRegister.addEventListener("click", () => {
+      if (!registerName.value.trim() || !registerPhone.value.trim() || !registerBirthday.value || !registerEmail.value.trim()) {
+        smsHint.textContent = "請先填寫姓名、電話、生日與 Email。";
+        return;
+      }
+      if (!registerEmail.value.includes("@")) {
+        smsHint.textContent = "Email 格式需包含 @。";
+        return;
+      }
+      if (!generatedCode) {
+        smsHint.textContent = "請先發送簡訊驗證碼。";
+        return;
+      }
+      if (smsCode.value.trim() !== generatedCode) {
+        smsHint.textContent = "簡訊驗證碼輸入錯誤。";
+        return;
+      }
+      if (!termsBox.classList.contains("open")) {
+        smsHint.textContent = "請先展開條文閱讀後再完成註冊。";
+        return;
+      }
+      if (!agreeTerms.checked) {
+        smsHint.textContent = "請勾選同意條文後再完成註冊。";
+        return;
+      }
+      registered = true;
+      syncUserFields();
+      appStatus.textContent = "註冊成功，可以開始搜尋新聞。";
+      saveRecord("users", {
+        name: registerName.value.trim(),
+        phone: registerPhone.value.trim(),
+        birthday: registerBirthday.value,
+        email: registerEmail.value.trim(),
+        gender: registerGender.value,
+        source: "完成註冊",
+        createdAt: new Date().toISOString()
+      });
+      showPage("newsPage");
+    });
+
+    searchNews.addEventListener("click", renderNews);
+
+    daysSelect.addEventListener("change", () => {
+      daysLabel.textContent = `${daysSelect.value} 天內`;
+    });
+
+    newsList.addEventListener("click", event => {
+      const link = event.target.closest(".original-news-link");
+      if (!link) return;
+      saveNewsReturnState();
+    });
+
+    document.querySelectorAll("[data-plan]").forEach(button => {
+      button.addEventListener("click", () => {
+        const alreadyUnlocked = (button.dataset.feature === "aiSummary" && aiSummaryUnlocked)
+          || (button.dataset.feature === "newsLimit" && newsLimitUnlocked);
+        if (alreadyUnlocked) {
+          showToast("此項目已升級");
+          return;
+        }
+        selectedPlan = {
+          name: button.dataset.plan,
+          points: Number(button.dataset.points),
+          price: button.dataset.price,
+          feature: button.dataset.feature || ""
+        };
+        paymentPlanLabel.textContent = selectedPlan.feature
+          ? `${selectedPlan.name} ${selectedPlan.price} / 功能解鎖`
+          : `${selectedPlan.name} ${selectedPlan.price} / ${selectedPlan.points} 次`;
+        paymentResult.textContent = "";
+        paymentResult.classList.remove("show");
+        showPage("paymentPage");
+      });
+    });
+
+    confirmPayment.addEventListener("click", () => {
+      if (!selectedPlan) {
+        paymentResult.textContent = "請先選擇升級方案。";
+        paymentResult.classList.add("show");
+        return;
+      }
+      if (!cardName.value.trim() || !cardNumber.value.trim() || !cardExpiry.value.trim() || !cardCvc.value.trim()) {
+        paymentResult.textContent = "請完整填寫信用卡資料。";
+        paymentResult.classList.add("show");
+        return;
+      }
+      currentPlan = selectedPlan.name;
+      if (selectedPlan.feature === "aiSummary") {
+        aiSummaryUnlocked = true;
+        aiSummaryEnabled = true;
+        aiSummaryToggle.checked = true;
+        document.querySelectorAll(".ai-points").forEach(item => item.classList.add("show"));
+      }
+      if (selectedPlan.feature === "newsLimit") {
+        newsLimitUnlocked = true;
+      }
+      updateCredits();
+      loadAiSummaries();
+      paymentResult.textContent = selectedPlan.feature === "aiSummary"
+        ? "付款成功，已解鎖 AI整理每則新聞重點功能，可在新聞搜尋頁開啟或關閉。"
+        : selectedPlan.feature === "newsLimit"
+          ? "付款成功，已解鎖搜尋結果擴充，每次搜尋最多可顯示 200 則新聞。"
+          : `付款成功，已升級 ${selectedPlan.name}，新增 ${selectedPlan.points} 次搜尋點數。`;
+      paymentResult.classList.add("show");
+      saveRecord("users", {
+        title: "升級方案",
+        plan: currentPlan,
+        points: selectedPlan.points,
+        feature: selectedPlan.feature,
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    aiSummaryToggle.addEventListener("change", () => {
+      aiSummaryEnabled = aiSummaryToggle.checked;
+      document.querySelectorAll(".ai-points").forEach(item => {
+        item.classList.toggle("show", aiSummaryEnabled);
+      });
+      loadAiSummaries();
+      saveRecord("users", {
+        title: "AI整理新聞重點開關",
+        enabled: aiSummaryEnabled,
+        email: registerEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    submitReport.addEventListener("click", () => {
+      const detail = reportText.value.trim();
+      if (!detail) {
+        reportResult.textContent = "請先輸入問題內容。";
+        reportResult.classList.add("show");
+        return;
+      }
+      reportStatus.textContent = "已送出";
+      reportResult.textContent = "感謝您的回報，已將問題提送至客服support@crovantix.com";
+      reportResult.classList.add("show");
+      saveRecord("messages", {
+        title: "問題回報",
+        type: reportType.value,
+        detail,
+        requester: reportName.value.trim(),
+        email: reportEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+      saveRecord("emails", {
+        to: "support@crovantix.com",
+        subject: `每日新聞 App 問題回報：${reportType.value}`,
+        body: detail,
+        requester: reportName.value.trim(),
+        email: reportEmail.value.trim(),
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    submitRequest.addEventListener("click", () => {
+      const detail = requestText.value.trim();
+      const email = requestEmail.value.trim();
+      if (!detail || !email) {
+        requestResult.textContent = "請先填寫 Email 與需求內容。";
+        requestResult.classList.add("show");
+        return;
+      }
+      if (!email.includes("@")) {
+        requestResult.textContent = "Email 格式需包含 @。";
+        requestResult.classList.add("show");
+        return;
+      }
+      requestStatus.textContent = "已送出";
+      requestResult.textContent = "感謝您的新需求，已送出並記錄到後台資料庫。";
+      requestResult.classList.add("show");
+      saveRecord("questions", {
+        title: "新需求",
+        type: requestType.value,
+        detail,
+        requester: requestName.value.trim(),
+        email,
+        createdAt: new Date().toISOString()
+      });
+      requestText.value = "";
+    });
+
+    themeSelect.addEventListener("change", () => {
+      document.body.dataset.theme = themeSelect.value === "dark" ? "" : themeSelect.value;
+    });
+
+    fontSelect.addEventListener("change", () => {
+      app.classList.remove("font-small", "font-normal", "font-large");
+      app.classList.add(fontSelect.value);
+    });
+
+    languageSelect.addEventListener("change", () => {
+      appStatus.textContent = languageSelect.value === "English" ? "English UI preview enabled for settings. News content remains localized by source." : statusMap[document.querySelector(".page.active")?.id || "newsPage"];
+    });
+
+    saveProfile.addEventListener("click", () => {
+      const nextPhone = profilePhone.value.trim() || registerPhone.value;
+      const nextEmail = profileEmail.value.trim() || registerEmail.value;
+      const contactChanged = nextPhone !== registerPhone.value.trim() || nextEmail !== registerEmail.value.trim();
+      if (!nextEmail.includes("@")) {
+        profileSmsHint.textContent = "Email 格式需包含 @。";
+        return;
+      }
+      if (contactChanged && !profileGeneratedCode) {
+        profileSmsHint.textContent = "修改電話或 Email 前，請先發送驗證碼。";
+        return;
+      }
+      if (contactChanged && profileSmsCode.value.trim() !== profileGeneratedCode) {
+        profileSmsHint.textContent = "修改驗證碼輸入錯誤。";
+        return;
+      }
+      registerName.value = profileName.value.trim() || registerName.value;
+      registerPhone.value = nextPhone;
+      registerEmail.value = nextEmail;
+      registerBirthday.value = profileBirthday.value || registerBirthday.value;
+      registerGender.value = profileGender.value;
+      syncUserFields();
+      requestName.value = registerName.value.trim();
+      requestEmail.value = registerEmail.value.trim();
+      profileSmsCode.value = "";
+      profileGeneratedCode = "";
+      profileSmsHint.textContent = "若修改電話或 Email，需先發送並輸入 4 位數驗證碼。";
+      profileResult.textContent = contactChanged ? "驗證成功，個人資料已更新。" : "個人資料已更新。";
+      profileResult.classList.add("show");
+      saveRecord("users", {
+        name: registerName.value.trim(),
+        phone: registerPhone.value.trim(),
+        email: registerEmail.value.trim(),
+        birthday: registerBirthday.value,
+        gender: registerGender.value,
+        source: "修改個人資料",
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    updateCredits();
+    syncUserFields();
+    if (!restoreNewsReturnState()) {
+      newsList.innerHTML = `<article class="news-card"><h3>請先完成註冊並按下搜尋</h3><p>搜尋後會顯示指定天數內的相關新聞，並依時間新到舊排序。</p></article>`;
+    }
+  </script>
+</body>
+</html>
