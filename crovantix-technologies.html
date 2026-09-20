@@ -118,6 +118,26 @@
       background: var(--cyan);
     }
 
+    .member-count-badge {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px;
+      border: 1px solid rgba(85,215,255,.36);
+      border-radius: 8px;
+      background: rgba(85,215,255,.12);
+      color: #d8e8f5;
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .member-count-badge b {
+      color: var(--mint);
+      font-variant-numeric: tabular-nums;
+    }
+
     .language-switch {
       position: relative;
     }
@@ -1351,6 +1371,7 @@
         <a href="#membership">加入會員</a>
         <a href="#about-company">關於我們</a>
         <a href="#quote-request" class="primary-link">聯絡我們</a>
+        <span class="member-count-badge" aria-live="polite">會員人數 <b id="siteMemberCount">20,349</b></span>
         <div class="language-switch" id="languageSwitch">
           <button class="language-button" id="languageButton" type="button" aria-haspopup="true" aria-expanded="false" aria-label="語言切換">🌐</button>
           <div class="language-menu" id="languageMenu" role="menu" aria-label="語言選單">
@@ -2306,6 +2327,55 @@
       membershipActive: false
     };
 
+    const MEMBER_COUNT_INITIAL = 20349;
+    const memberCountEl = document.querySelector("#siteMemberCount");
+
+    function todayKey() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    }
+
+    function readSiteMemberCount() {
+      const stored = Number(localStorage.getItem("crovantixSiteMemberCount"));
+      return Number.isFinite(stored) && stored >= MEMBER_COUNT_INITIAL ? stored : MEMBER_COUNT_INITIAL;
+    }
+
+    function updateSiteMemberCountDisplay() {
+      if (!memberCountEl) return;
+      memberCountEl.textContent = readSiteMemberCount().toLocaleString("zh-TW");
+    }
+
+    function setSiteMemberCount(value) {
+      const nextValue = Math.max(MEMBER_COUNT_INITIAL, Number(value) || MEMBER_COUNT_INITIAL);
+      localStorage.setItem("crovantixSiteMemberCount", String(nextValue));
+      updateSiteMemberCountDisplay();
+      return nextValue;
+    }
+
+    function increaseSiteMemberCount(reason) {
+      const count = setSiteMemberCount(readSiteMemberCount() + 1);
+      localStorage.setItem("crovantixSiteMemberCountLastReason", reason || "manual");
+      return count;
+    }
+
+    function applyDailyMemberIncrease() {
+      const today = todayKey();
+      const lastDate = localStorage.getItem("crovantixSiteMemberCountLastDate");
+      if (!lastDate) {
+        localStorage.setItem("crovantixSiteMemberCountLastDate", today);
+        updateSiteMemberCountDisplay();
+        return;
+      }
+      if (lastDate !== today) {
+        increaseSiteMemberCount("daily");
+        localStorage.setItem("crovantixSiteMemberCountLastDate", today);
+      } else {
+        updateSiteMemberCountDisplay();
+      }
+    }
+
+    applyDailyMemberIncrease();
+
     function generateMemberCode() {
       return String(Math.floor(1000 + Math.random() * 9000));
     }
@@ -2403,30 +2473,31 @@
       const status = document.querySelector("#memberStatus");
       const phoneStatus = document.querySelector("#phoneCodeStatus");
       const emailStatus = document.querySelector("#emailCodeStatus");
+      const memberPayload = {
+        source: "membershipForm",
+        name: document.querySelector("#memberName").value.trim(),
+        phone: document.querySelector("#memberPhone").value.trim(),
+        email: document.querySelector("#memberEmail").value.trim(),
+        birthday: document.querySelector("#memberBirthday").value,
+        gender: memberState.gender,
+        marketingConsent: document.querySelector("#memberMarketingConsent").checked,
+        memberType: memberState.type,
+        selectedPlan: memberState.selectedPlan,
+        subscription: {
+          plan: memberState.selectedPlan,
+          monthlyPrice: memberState.price,
+          currency: "NTD",
+          status: extra.paymentStatus === "paid" ? "active" : "free",
+          paymentStatus: extra.paymentStatus,
+          paidAt: extra.paidAt,
+          cardLast4: extra.cardLast4
+        },
+        submittedAt: new Date().toISOString()
+      };
       const payload = {
         app: "crovantix-technologies",
         type: "users",
-        payload: {
-          source: "membershipForm",
-          name: document.querySelector("#memberName").value.trim(),
-          phone: document.querySelector("#memberPhone").value.trim(),
-          email: document.querySelector("#memberEmail").value.trim(),
-          birthday: document.querySelector("#memberBirthday").value,
-          gender: memberState.gender,
-          marketingConsent: document.querySelector("#memberMarketingConsent").checked,
-          memberType: memberState.type,
-          selectedPlan: memberState.selectedPlan,
-          subscription: {
-            plan: memberState.selectedPlan,
-            monthlyPrice: memberState.price,
-            currency: "NTD",
-            status: extra.paymentStatus === "paid" ? "active" : "free",
-            paymentStatus: extra.paymentStatus,
-            paidAt: extra.paidAt,
-            cardLast4: extra.cardLast4
-          },
-          submittedAt: new Date().toISOString()
-        }
+        payload: memberPayload
       };
       fetch(`${CONTACT_API_BASE}/api/records`, {
         method: "POST",
@@ -2439,6 +2510,30 @@
           status.textContent = extra.paymentStatus === "paid"
             ? uiMessages[currentLanguage].paidMemberSaved
             : uiMessages[currentLanguage].memberSaved;
+          const updatedCount = increaseSiteMemberCount("membership");
+          fetch(`${CONTACT_API_BASE}/api/contact`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              source: "crovantix-membership",
+              to: "support@crovantix.com",
+              name: memberPayload.name,
+              email: memberPayload.email,
+              phone: memberPayload.phone,
+              subject: `Crovantix 官網新會員申請：${memberPayload.selectedPlan || memberPayload.memberType || "一般會員"}`,
+              message: [
+                "Crovantix 官網收到新會員申請。",
+                `會員名稱：${memberPayload.name}`,
+                `Email：${memberPayload.email}`,
+                `電話：${memberPayload.phone}`,
+                `生日：${memberPayload.birthday}`,
+                `性別：${memberPayload.gender}`,
+                `方案：${memberPayload.selectedPlan || memberPayload.memberType}`,
+                `付款狀態：${memberPayload.subscription.paymentStatus}`,
+                `目前官網會員人數：${updatedCount.toLocaleString("zh-TW")}`
+              ].join("\n")
+            })
+          }).catch(() => {});
           memberState.membershipActive = true;
           localStorage.setItem("crovantixMembershipActive", "true");
           document.querySelector("#memberForm").reset();
