@@ -1102,6 +1102,17 @@
       font-weight: 950;
     }
 
+    .payment-note {
+      margin: 0;
+      padding: 12px 14px;
+      border: 1px solid rgba(115,240,188,.28);
+      border-radius: 8px;
+      background: rgba(115,240,188,.08);
+      color: var(--muted);
+      font-weight: 850;
+      line-height: 1.65;
+    }
+
     .contact-layout {
       display: grid;
       grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
@@ -1731,6 +1742,7 @@
           <p class="form-status" id="memberStatus"></p>
           <div class="payment-panel" id="paymentPanel">
             <p class="payment-title" id="paymentTitle">信用卡付費頁面</p>
+            <p class="payment-note">信用卡付款完成後，款項將結算至指定帳戶：銀行代碼 808，帳號 0130940042016。付款成功後系統會立即寫入資料庫並開啟會員權限。</p>
             <div class="form-row">
               <label>信用卡號
                 <input id="cardNumber" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456">
@@ -2653,7 +2665,14 @@
           status: extra.paymentStatus === "paid" ? "active" : "free",
           paymentStatus: extra.paymentStatus,
           paidAt: extra.paidAt,
-          cardLast4: extra.cardLast4
+          cardLast4: extra.cardLast4,
+          billingCycle: extra.paymentStatus === "paid" ? "monthly" : "",
+          entitlementActive: extra.paymentStatus === "paid",
+          paymentMethod: extra.paymentStatus === "paid" ? "credit_card" : "",
+          settlementAccount: extra.paymentStatus === "paid" ? {
+            bankCode: "808",
+            accountNumber: "0130940042016"
+          } : null
         },
         submittedAt: new Date().toISOString()
       };
@@ -2693,12 +2712,17 @@
                 `性別：${memberPayload.gender}`,
                 `方案：${memberPayload.selectedPlan || memberPayload.memberType}`,
                 `付款狀態：${memberPayload.subscription.paymentStatus}`,
+                `刷卡款項結算帳戶：銀行代碼 808 / 帳號 0130940042016`,
                 `目前官網會員人數：${updatedCount.toLocaleString("zh-TW")}`
               ].join("\n")
             })
           }).catch(() => {});
           memberState.membershipActive = true;
           localStorage.setItem("crovantixMembershipActive", "true");
+          if (extra.paymentStatus === "paid") {
+            localStorage.setItem("crovantixPaidMembership", "true");
+            localStorage.setItem("crovantixMembershipPlan", memberPayload.selectedPlan || memberPayload.memberType || "");
+          }
           document.querySelector("#memberForm").reset();
           document.querySelector("#paymentPanel").classList.remove("open");
           memberState.phoneCode = "";
