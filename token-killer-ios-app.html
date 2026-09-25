@@ -925,8 +925,9 @@ Prompt 一定提升 AI 品質
               <div class="download-grid">
                 <article class="download-card">
                   <strong>個人版</strong>
-                  <p>先選擇 Windows 或 Mac 安裝環境，下載後依安裝 UI 同意授權並完成安裝。</p>
-                  <button class="download-link" id="personalInstallButton" type="button">下載個人版</button>
+                  <p>請至 Crovantix 官網下載 Token大師 PC版，依照網站中的 Windows 或 Mac 安裝說明完成安裝。</p>
+                  <p class="subline">下載網址：https://crovantix.com/crovantix-downloads.html</p>
+                  <a class="download-link" href="https://crovantix.com/crovantix-downloads.html" target="_blank" rel="noopener">前往官網下載</a>
                 </article>
                 <article class="download-card">
                   <strong>企業版</strong>
@@ -1128,7 +1129,6 @@ Prompt 一定提升 AI 品質
     const optimizeButton = document.querySelector("#optimizeButton");
     const optimizeStatus = document.querySelector("#optimizeStatus");
     const optimizeResult = document.querySelector("#optimizeResult");
-    const personalInstallButton = document.querySelector("#personalInstallButton");
     const closeInstallerChoice = document.querySelector("#closeInstallerChoice");
     const enterpriseInquiryButton = document.querySelector("#enterpriseInquiryButton");
     const enterpriseName = document.querySelector("#enterpriseName");
@@ -1685,10 +1685,6 @@ Prompt 一定提升 AI 品質
         email: registerEmail.value.trim(),
         updatedAt: new Date().toISOString()
       });
-    });
-
-    personalInstallButton.addEventListener("click", () => {
-      showPage("installerChoicePage");
     });
 
     closeInstallerChoice.addEventListener("click", () => {
