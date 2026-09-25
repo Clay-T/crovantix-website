@@ -1506,7 +1506,7 @@
           <a class="small-button" href="crovantix-portfolio.html">more&gt;&gt;</a>
         </div>
       </div>
-      <div class="portfolio-grid">
+      <div class="portfolio-grid" id="featuredPortfolioGrid">
         <article class="portfolio" style="--accent:#55d7ff">
           <div class="app-mark">法</div>
           <h3>法律助理 App</h3>
@@ -2163,6 +2163,167 @@
     const translatedPlaceholders = [];
     let currentLanguage = "zh";
 
+    const portfolioItems = [
+      {
+        mark: "法",
+        title: "法律助理 App",
+        description: "法律問題分類、AI 初步分析、專業律師聯繫、升級方案與免責條款。",
+        accent: "#55d7ff",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E6%B3%95%E5%BE%8B%E5%8A%A9%E7%90%86%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Flawyer"
+      },
+      {
+        mark: "股",
+        title: "公司股票分析 App",
+        description: "台股公司查詢、K 線圖、營收、EPS、收藏與投資資訊免責流程。",
+        accent: "#73f0bc",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E5%85%AC%E5%8F%B8%E8%82%A1%E7%A5%A8%E5%88%86%E6%9E%90%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fcompany-analysis"
+      },
+      {
+        mark: "數",
+        title: "數學題庫 App",
+        description: "數學選擇題、分數計算、詳解學習與補習班媒合流程。",
+        accent: "#ffd166",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E6%95%B8%E5%AD%B8%E9%A1%8C%E5%BA%AB%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fmath-tutor"
+      },
+      {
+        mark: "英",
+        title: "英文題庫 App",
+        description: "英文選擇題、單字句型練習、成績紀錄與詳解學習流程。",
+        accent: "#f59e0b",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E8%8B%B1%E6%96%87%E9%A1%8C%E5%BA%AB%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fenglish-bank"
+      },
+      {
+        mark: "文",
+        title: "國文題庫 App",
+        description: "國文選擇題、題目與選項配對、分數與詳解學習流程。",
+        accent: "#ef4444",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E5%9C%8B%E6%96%87%E9%A1%8C%E5%BA%AB%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fchinese-bank"
+      },
+      {
+        mark: "生",
+        title: "生物題庫 App",
+        description: "生物題庫練習、答題計分、補強複習與學習紀錄流程。",
+        accent: "#22c55e",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E7%94%9F%E7%89%A9%E9%A1%8C%E5%BA%AB%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fbiology-bank"
+      },
+      {
+        mark: "語",
+        title: "附近語音通話 App",
+        description: "附近搜尋、好友、群組、留言、封鎖、檢舉、註冊驗證與條款流程。",
+        accent: "#a78bfa",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E9%99%84%E8%BF%91%E8%AA%9E%E9%9F%B3%E9%80%9A%E8%A9%B1%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fvoice-call"
+      },
+      {
+        mark: "A",
+        title: "語音 Agent App",
+        description: "語音助理、即時對話、任務紀錄、AI 回覆與語音工作流程。",
+        accent: "#38bdf8",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E8%AA%9E%E9%9F%B3%20Agent%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fvoice-agent"
+      },
+      {
+        mark: "秘",
+        title: "個人秘書 App",
+        description: "語音聆聽、AI 對話、點數方案、新需求流程與註冊條款。",
+        accent: "#ff718b",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E5%80%8B%E4%BA%BA%E7%A7%98%E6%9B%B8%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fsecretary"
+      },
+      {
+        mark: "我",
+        title: "我的秘書 App",
+        description: "背景學習使用習慣、秘書工作清單、提醒建議與訂閱升級。",
+        accent: "#fb7185",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E6%88%91%E7%9A%84%E7%A7%98%E6%9B%B8%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fmy-secretary"
+      },
+      {
+        mark: "商",
+        title: "線上交易 App",
+        description: "會員驗證、商品刊登、留言、付款頁、個人頁與交易免責聲明。",
+        accent: "#7dd3fc",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E7%B7%9A%E4%B8%8A%E4%BA%A4%E6%98%93%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fonline-market"
+      },
+      {
+        mark: "媒",
+        title: "社群媒體助手 App",
+        description: "照片優化、文章生成、多平台發文、點綴圖像與訂閱升級。",
+        accent: "#34d399",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E7%A4%BE%E7%BE%A4%E5%AA%92%E9%AB%94%E5%8A%A9%E6%89%8B%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fsocial-media"
+      },
+      {
+        mark: "愛",
+        title: "愛情大師 App",
+        description: "感情問答、星座與互動建議、會員升級與免責聲明流程。",
+        accent: "#f472b6",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E6%84%9B%E6%83%85%E5%A4%A7%E5%B8%AB%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Flove-master"
+      },
+      {
+        mark: "命",
+        title: "命理 App",
+        description: "每日提醒、生日分析、運勢建議、幸運色與 Donate 連結。",
+        accent: "#c084fc",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E5%91%BD%E7%90%86%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Ffortune"
+      },
+      {
+        mark: "需",
+        title: "需求媒合 App",
+        description: "提需求、找店家、建立店家、接案聊天與點數升級流程。",
+        accent: "#60a5fa",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E9%9C%80%E6%B1%82%E5%AA%92%E5%90%88%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fservice-match"
+      },
+      {
+        mark: "股",
+        title: "股票 App",
+        description: "股票清單、收藏、AI 分析、價格資訊與投資風險提示。",
+        accent: "#4ade80",
+        appStoreUrl: "https://apps.apple.com/tw/search?term=Crovantix%20%E8%82%A1%E7%A5%A8%20App",
+        qrUrl: "https://api.qrserver.com/v1/create-qr-code/?size=176x176&data=https%3A%2F%2Fcrovantix.com%2Fapps%2Fstock"
+      }
+    ];
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function renderRandomPortfolioCards() {
+      const grid = document.querySelector("#featuredPortfolioGrid");
+      if (!grid) return;
+      const selectedItems = [...portfolioItems]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 6);
+      grid.innerHTML = selectedItems.map(item => `
+        <article class="portfolio" style="--accent:${escapeHtml(item.accent)}">
+          <div class="app-mark">${escapeHtml(item.mark)}</div>
+          <h3>${escapeHtml(item.title)}</h3>
+          <p>${escapeHtml(item.description)}</p>
+          <div class="portfolio-actions">
+            <a href="${escapeHtml(item.appStoreUrl)}" target="_blank" rel="noopener">開啟作品</a>
+            <div class="qr-download">
+              <img src="${escapeHtml(item.qrUrl)}" alt="${escapeHtml(item.title)} 下載 QR code">
+              <span>掃描下載 APP</span>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
     function collectTextNodes(root) {
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
         acceptNode(node) {
@@ -2213,6 +2374,7 @@
       });
     }
 
+    renderRandomPortfolioCards();
     collectTextNodes(document.body);
     languageButton.addEventListener("click", () => {
       const isOpen = languageSwitch.classList.toggle("open");
